@@ -1,26 +1,17 @@
 module Libm
 
-# package code goes here
 include("erf.jl")
 
 
+# Utils
 
+# Get the more significant 32 bit int from a double
 function GET_HIGH_WORD(d::Float64)
-    bd = bits(d)
-    hi = bd[1:32]
-    hi = parse(UInt32,hi,2)
-    return hi
+    u = reinterpret(UInt64, d)
+    (u >> 32) % UInt32
 end
 
-function SET_LOW_WORD(d::Float64,lo::UInt)
-    db = bits(d)
-    lo = convert(UInt32,lo)
-    lb = bits(lo)
-    d = db[1:32]*lb
-    d = parse(Int,d,2)
-    d = reinterpret(Float64,d)
-    return d
+# Set the less significant 32 bits of a double from an int
+SET_LOW_WORD(d::Float64, lo::UInt32) = reinterpret(Float64, reinterpret(UInt64, d) & 0xffffffff00000000 | lo)
+
 end
-
-
-end # module
