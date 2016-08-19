@@ -1,5 +1,10 @@
 module Libm
 
-# package code goes here
+using Base.Math.@horner
 
-end # module
+export erf, erfc
+
+include("utils.jl")
+include("erf.jl")
+
+end
