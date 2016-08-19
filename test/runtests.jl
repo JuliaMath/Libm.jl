@@ -2,4 +2,7 @@ using Libm
 using Base.Test
 
 # write your own tests here
-@test 1 == 2
+
+x = 2*rand(10000,1)-1
+@test Base.erf.(x) ≈ Libm.erf.(x)
+@test Base.erfc.(x) ≈ Libm.erfc.(x)
