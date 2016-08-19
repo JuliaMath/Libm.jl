@@ -73,7 +73,6 @@ function erfc1(x::Float64)
 end
 
 function erfc2(ix::UInt32, x::Float64)
-
 	if ix < 0x3ff40000  # |x| < 1.25
 		return erfc1(x)
 	end
@@ -144,6 +143,5 @@ function erfc(x::Float64)
 		return Bool(sign) ? 2 - erfc2(ix,x) : erfc2(ix,x)
 	end
 	return Bool(sign) ? 2 - 0x1p-1022 : 0x1p-1022*0x1p-1022;
-
 end
 
