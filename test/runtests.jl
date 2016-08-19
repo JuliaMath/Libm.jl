@@ -1,15 +1,34 @@
 using Libm
 using Base.Test
 
-# write your own tests here
+# erf
+@test isnan(Base.erf.(NaN))
+@test Libm.erf.(Inf) == 1.0
+@test Libm.erf.(-Inf) == -1.0
+s = linspace(-0.84375,0.84375,100)
+@test Base.erf.(s) == Libm.erf.(s)
+s = linspace(-2e-28,2e-28,100)
+@test Base.erf.(s) == Libm.erf.(s)
+s = linspace(-0.84375,0.84375,100)
+@test Base.erf.(s) == Libm.erf.(s)
+s = linspace(0.84375, 6, 100)
+@test Base.erf.(s) ==  Libm.erf.(s)
+s = linspace(-6,-0.84375, 100);
+@test Base.erf.(s) ==  Libm.erf.(s)
 
-x = 2*rand(10000,1)-1
-@test Base.erf.(x) ≈ Libm.erf.(x)
-@test isnan(Base.erf.(NaN)) 
-@test Base.erf.(Inf) == Libm.erf.(Inf)
-@test Base.erf.(-Inf) == Libm.erf.(-Inf)
 
-@test Base.erfc.(x) ≈ Libm.erfc.(x)
+
+# erfc
 @test isnan(Base.erfc.(NaN))
-@test Base.erfc.(Inf) == Libm.erfc.(Inf)
-@test Base.erfc.(-Inf) == Libm.erfc.(-Inf)
+@test Libm.erfc.(Inf) == 0.0
+@test Libm.erfc.(-Inf) == 2.0
+s = linspace(-0.84375,0.84375,100)
+@test Base.erfc.(s) == Libm.erfc.(s)
+s = linspace(-2e-56,2e-56,100)
+@test Base.erfc.(s) == Libm.erfc.(s)
+s = linspace(-0.25,0.25,100)
+@test Base.erfc.(s) == Libm.erfc.(s)
+s = linspace(0.84375, 28, 100)
+@test Base.erfc.(s) ==  Libm.erfc.(s)
+s = linspace(-28,-0.84375, 100);
+@test Base.erfc.(s) ==  Libm.erfc.(s)
