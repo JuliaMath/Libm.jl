@@ -20,3 +20,6 @@ The Libm.jl package is licensed under the MIT "Expat" License:
 > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 > SOFTWARE.
 > 
+Libm.jl includes code from the following projects, which have their own licenses:
+
+- [MUSL](http://git.musl-libc.org/cgit/musl/tree/COPYRIGHT) [MIT]
