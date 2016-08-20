@@ -26,30 +26,24 @@
  * SUCH DAMAGE.
 =#
 
-#include "cdefs-compat.h"
-//__FBSDID("$FreeBSD: src/lib/msun/src/s_exp2.c,v 1.7 2008/02/22 02:27:34 das Exp $");
+#__FBSDID("$FreeBSD: src/lib/msun/src/s_exp2.c,v 1.7 2008/02/22 02:27:34 das Exp $");
 
-#include <float.h>
-#include <openlibm_math.h>
 
-#include "math_private.h"
+const TBLBITS = 8
+const TBLSIZE = 1 << TBLBITS
 
-#define	TBLBITS	8
-#define	TBLSIZE	(1 << TBLBITS)
+const  huge      = 0x1p1000
+const  redux     = 0x1.8p52 / TBLSIZE
+const  P1	     = 0x1.62e42fefa39efp-1
+const  P2	     = 0x1.ebfbdff82c575p-3
+const  P3	     = 0x1.c6b08d704a0a6p-5
+const  P4	     = 0x1.3b2ab88f70400p-7
+const  P5	     = 0x1.5d88003875c74p-10
 
-static const double
-    huge     = 0x1p1000,
-    redux    = 0x1.8p52 / TBLSIZE,
-    P1	     = 0x1.62e42fefa39efp-1,
-    P2	     = 0x1.ebfbdff82c575p-3,
-    P3	     = 0x1.c6b08d704a0a6p-5,
-    P4	     = 0x1.3b2ab88f70400p-7,
-    P5	     = 0x1.5d88003875c74p-10;
+const twom1000 = 0x1p-1000
 
-static volatile double twom1000 = 0x1p-1000;
-
-static const double tbl[TBLSIZE * 2] = {
-/*	exp2(z + eps)		eps	*/
+const tbl = [
+#	exp2(z + eps)		eps
 	0x1.6a09e667f3d5dp-1,	 0x1.9880p-44,
 	0x1.6b052fa751744p-1,	 0x1.8000p-50,
 	0x1.6c012750bd9fep-1,	-0x1.8780p-45,
@@ -305,94 +299,100 @@ static const double tbl[TBLSIZE * 2] = {
 	0x1.6623882553397p+0,	 0x1.1fe0p-40,
 	0x1.671c1c708328ep+0,	-0x1.7200p-44,
 	0x1.68155d44ca97ep+0,	 0x1.6800p-49,
-	0x1.690f4b19e9471p+0,	-0x1.9780p-45,
-};
+	0x1.690f4b19e9471p+0,	-0x1.9780p-45
+]
 
-#=
- * exp2(x): compute the base 2 exponential of x
- *
- * Accuracy: Peak error < 0.503 ulp for normalized results.
- *
- * Method: (accurate tables)
- *
- *   Reduce x:
- *     x = 2**k + y, for integer k and |y| <= 1/2.
- *     Thus we have exp2(x) = 2**k * exp2(y).
- *
- *   Reduce y:
- *     y = i/TBLSIZE + z - eps[i] for integer i near y * TBLSIZE.
- *     Thus we have exp2(y) = exp2(i/TBLSIZE) * exp2(z - eps[i]),
- *     with |z - eps[i]| <= 2**-9 + 2**-39 for the table used.
- *
- *   We compute exp2(i/TBLSIZE) via table lookup and exp2(z - eps[i]) via
- *   a degree-5 minimax polynomial with maximum error under 1.3 * 2**-61.
- *   The values in exp2t[] and eps[] are chosen such that
- *   exp2t[i] = exp2(i/TBLSIZE + eps[i]), and eps[i] is a small offset such
- *   that exp2t[i] is accurate to 2**-64.
- *
- *   Note that the range of i is +-TBLSIZE/2, so we actually index the tables
- *   by i0 = i + TBLSIZE/2.  For cache efficiency, exp2t[] and eps[] are
- *   virtual tables, interleaved in the real table tbl[].
- *
- *   This method is due to Gal, with many details due to Gal and Bachelis:
- *
- *	Gal, S. and Bachelis, B.  An Accurate Elementary Mathematical Library
- *	for the IEEE Floating Point Standard.  TOMS 17(1), 26-46 (1991).
- =#
-OLM_DLLEXPORT double
-exp2(double x)
-{
-	double r, t, twopk, twopkp1000, z;
-	u_int32_t hx, ix, lx, i0;
-	int k;
+"""
+  exp2(x): compute the base 2 exponential of x
 
-	/* Filter out exceptional cases. */
-	GET_HIGH_WORD(hx,x);
-	ix = hx & 0x7fffffff;		/* high word of |x| */
-	if(ix >= 0x40900000) {			/* |x| >= 1024 */
-		if(ix >= 0x7ff00000) {
-			GET_LOW_WORD(lx,x);
-			if(((ix & 0xfffff) | lx) != 0 || (hx & 0x80000000) == 0)
-				return (x + x);	/* x is NaN or +Inf */
-			else 
-				return (0.0);	/* x is -Inf */
-		}
-		if(x >= 0x1.0p10)
-			return (huge * huge); /* overflow */
-		if(x <= -0x1.0ccp10)
-			return (twom1000 * twom1000); /* underflow */
-	} else if (ix < 0x3c900000) {		/* |x| < 0x1p-54 */
-		return (1.0 + x);
-	}
+ Accuracy: Peak error < 0.503 ulp for normalized results.
 
-	/* Reduce x, computing z, i0, and k. */
-	STRICT_ASSIGN(double, t, x + redux);
-	GET_LOW_WORD(i0, t);
-	i0 += TBLSIZE / 2;
-	k = (i0 >> TBLBITS) << 20;
-	i0 = (i0 & (TBLSIZE - 1)) << 1;
-	t -= redux;
-	z = x - t;
+ Method: (accurate tables)
 
-	/* Compute r = exp2(y) = exp2t[i0] * p(z - eps[i]). */
-	t = tbl[i0];		/* exp2t[i0] */
-	z -= tbl[i0 + 1];	/* eps[i0]   */
-	if (k >= -(1021 << 20))
-		INSERT_WORDS(twopk, 0x3ff00000 + k, 0);
+   Reduce x:
+     x = 2**k + y, for integer k and |y| <= 1/2.
+     Thus we have exp2(x) = 2**k * exp2(y).
+
+   Reduce y:
+     y = i/TBLSIZE + z - eps[i] for integer i near y * TBLSIZE.
+     Thus we have exp2(y) = exp2(i/TBLSIZE) * exp2(z - eps[i]),
+     with |z - eps[i]| <= 2**-9 + 2**-39 for the table used.
+
+   We compute exp2(i/TBLSIZE) via table lookup and exp2(z - eps[i]) via
+   a degree-5 minimax polynomial with maximum error under 1.3 * 2**-61.
+   The values in exp2t[] and eps[] are chosen such that
+   exp2t[i] = exp2(i/TBLSIZE + eps[i]), and eps[i] is a small offset such
+   that exp2t[i] is accurate to 2**-64.
+
+   Note that the range of i is +-TBLSIZE/2, so we actually index the tables
+   by i0 = i + TBLSIZE/2.  For cache efficiency, exp2t[] and eps[] are
+   virtual tables, interleaved in the real table tbl[].
+
+   This method is due to Gal, with many details due to Gal and Bachelis:
+
+	Gal, S. and Bachelis, B.  An Accurate Elementary Mathematical Library
+	for the IEEE Floating Point Standard.  TOMS 17(1), 26-46 (1991).
+"""
+function exp2(x::Float64)
+	# Filter out exceptional cases.
+	hx = highword(x)
+	@show hx
+	ix = hx & 0x7fff_ffff		# high word of |x|
+	@show ix
+	if ix >= 0x4090_0000 		# |x| >= 1024
+		if ix >= 0x7ff0_0000
+			lx=lowword(x)
+			if (ix & 0x000f_ffff | lx) != 0 || (hx & 0x8000_0000) == 0
+				return x + x # x is NaN or +Inf
+			else
+				return 0.0  # x is -Inf
+			end
+		end
+		if x >= 0x1.0p10
+			return huge * huge # overflow
+		end
+		if x <= -0x1.0ccp10
+			return twom1000 * twom1000 # underflow
+		end
+	elseif ix < 0x3c90_0000 # |x| < 0x1p-54
+		return (1.0 + x) # Denormal Number
+	end
+
+	# x is in normal allowed range (i.e. Non-exceptional cases)
+
+	# Reduce x, computing z, i0, and k.
+	t::Float64 = x + redux
+	@show t
+	i0::UInt32 = lowword(t)
+	@show i0
+	i0 += TBLSIZE >> 1
+	@show i0
+	k::UInt32 = (i0 >> TBLBITS) << 20
+	i0 = (i0 & (TBLSIZE - 1)) << 1
+	@show i0
+	t -= redux
+	z = x - t
+	@show z
+
+	# Compute r = exp2(y) = exp2t[i0] * p(z - eps[i]).
+	t = tbl[i0]		 # exp2t[i0]
+	z -= tbl[i0 + 1] # eps[i0]
+
+	if k >= -(1021 << 20)
+		twopk = combinewords(0x3ff0_0000 + k, 0x0000_0000)
 	else
-		INSERT_WORDS(twopkp1000, 0x3ff00000 + k + (1000 << 20), 0);
-	r = t + t * z * (P1 + z * (P2 + z * (P3 + z * (P4 + z * P5))));
-
-	/* Scale by 2**(k>>20). */
-	if(k >= -(1021 << 20)) {
+		twopkp1000::Float64 = combinewords(0x3ff00000 + k + (1000 << 20), 0x0000_000)
+	end
+	r = t + t * z * (P1 + z * (P2 + z * (P3 + z * (P4 + z * P5))))
+	
+	# Scale by 2**(k>>20).
+	if k >= -(1021 << 20)
 		if (k == 1024 << 20)
-			return (r * 2.0 * 0x1p1023);
-		return (r * twopk);
-	} else {
-		return (r * twopkp1000 * twom1000);
-	}
-}
+			return (r * 2.0 * 0x1p1023)
+		end
+		return (r * twopk)
+	else
+		return (r * twopkp1000 * twom1000)
+	end
+end
 
-#if (LDBL_MANT_DIG == 53)
-__weak_reference(exp2, exp2l);
-#endifsssssssss
