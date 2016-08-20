@@ -67,10 +67,8 @@ const sb7  = -2.24409524465858183362e+01 # 0xC03670E2, 0x42712D62
 
 function erfc1(x::Float64)
     s = abs(x) - 1
-    P = Base.Math.@horner s pa0 pa1 pa2 pa3 pa4 pa5 pa6
-    Q = Base.Math.@horner s 1.0 qa1 qa2 qa3 qa4 qa5 qa6
-    # P = pa0+s*(pa1+s*(pa2+s*(pa3+s*(pa4+s*(pa5+s*pa6)))))
-    # Q = 1+s*(qa1+s*(qa2+s*(qa3+s*(qa4+s*(qa5+s*qa6)))))
+    P = @horner s pa0 pa1 pa2 pa3 pa4 pa5 pa6
+    Q = @horner s 1.0 qa1 qa2 qa3 qa4 qa5 qa6
     return 1 - erx - P/Q
 end
 
@@ -78,19 +76,14 @@ function erfc2(ix::UInt32, x::Float64)
     if ix < 0x3ff40000  # |x| < 1.25
         return erfc1(x)
     end
-
     x = abs(x) 
     s = 1/(x*x)
     if ix < 0x4006db6d # |x| < 1/.35 ~ 2.85714
         R = @horner s ra0 ra1 ra2 ra3 ra4 ra5 ra6 ra7
         S = @horner s 1.0 sa1 sa2 sa3 sa4 sa5 sa6 sa7 sa8
-        # R = ra0+s*(ra1+s*(ra2+s*(ra3+s*(ra4+s*(ra5+s*(ra6+s*ra7))))))
-        # S = 1.0+s*(sa1+s*(sa2+s*(sa3+s*(sa4+s*(sa5+s*(sa6+s*(sa7+s*sa8)))))))
     else # |x| > 1/.35
         R = @horner s rb0 rb1 rb2 rb3 rb4 rb5 rb6
         S = @horner s 1.0 sb1 sb2 sb3 sb4 sb5 sb6 sb7
-        # R = rb0+s*(rb1+s*(rb2+s*(rb3+s*(rb4+s*(rb5+s*rb6)))))
-        # S = 1.0+s*(sb1+s*(sb2+s*(sb3+s*(sb4+s*(sb5+s*(sb6+s*sb7))))));
     end
     z = x
     z = set_low_word(z,UInt32(0))
@@ -101,20 +94,16 @@ function erf(x::Float64)
     ix = get_high_word(x)
     sign = ix>>31
     ix &= 0x7fffffff
-    if ix >= 0x7ff00000
-        # erf(nan)=nan, erf(+-inf)=+-1
-        return 1-2*sign + 1/x;
+    if ix >= 0x7ff00000 # erf(nan)=nan, erf(+-inf)=+-1
+        return 1-2*sign + 1/x
     end
     if ix < 0x3feb0000 # |x| < 0.84375
-        if ix < 0x3e300000 #|x| < 2**-28
-            # avoid underflow
+        if ix < 0x3e300000 #|x| < 2**-28  avoid underflow
             return 0.125*(8*x + efx8*x)
         end
         z = x*x
         r = @horner z pp0 pp1 pp2 pp3 pp4
         s = @horner z 1.0 qq1 qq2 qq3 qq4 qq5
-        # r = pp0+z*(pp1+z*(pp2+z*(pp3+z*pp4)))
-        # s = 1.0+z*(qq1+z*(qq2+z*(qq3+z*(qq4+z*qq5))))
         y = r/s
         return x + x*y
     end
@@ -123,15 +112,14 @@ function erf(x::Float64)
     else
         y = 1 - 0x1p-1022;
     end
-    return Bool(sign) ? -y : y;
+    return sign%Bool ? -y : y;
 end
 
 function erfc(x::Float64)
     ix = get_high_word(x)
     sign = ix>>31
     ix &= 0x7fffffff
-    if ix >= 0x7ff00000
-        # erfc(nan)=nan, erfc(+-inf)=0,2
+    if ix >= 0x7ff00000 # erfc(nan)=nan, erfc(+-inf)=0,2
         return 2*sign + 1/x
     end
     if ix < 0x3feb0000 # |x| < 0.84375
@@ -141,17 +129,15 @@ function erfc(x::Float64)
         z = x*x
         r = @horner z pp0 pp1 pp2 pp3 pp4
         s = @horner z 1.0 qq1 qq2 qq3 qq4 qq5
-        # r = pp0+z*(pp1+z*(pp2+z*(pp3+z*pp4)))
-        # s = 1.0+z*(qq1+z*(qq2+z*(qq3+z*(qq4+z*qq5))))
         y = r/s
-        if Bool(sign) || ix < 0x3fd00000 # x < 1/4 
+        if sign%Bool || ix < 0x3fd00000 # x < 1/4 
             return 1.0 - (x+x*y)
         end
         return 0.5 - (x - 0.5 + x*y)
     end
     if ix < 0x403c0000 # 0.84375 <= |x| < 28
-        return Bool(sign) ? 2 - erfc2(ix,x) : erfc2(ix,x)
+        return sign%Bool ? 2 - erfc2(ix,x) : erfc2(ix,x)
     end
-    return Bool(sign) ? 2 - 0x1p-1022 : 0x1p-1022*0x1p-1022;
+    return sign%Bool ? 2 - 0x1p-1022 : 0x1p-1022*0x1p-1022;
 end
 
