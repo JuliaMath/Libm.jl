@@ -92,7 +92,7 @@ end
 
 function erf(x::Float64)
     ix = get_high_word(x)
-    sign = ix>>31
+    sign = Int(ix>>31)
     ix &= 0x7fffffff
     if ix >= 0x7ff00000 # erf(nan)=nan, erf(+-inf)=+-1
         return 1-2*sign + 1/x
@@ -112,32 +112,32 @@ function erf(x::Float64)
     else
         y = 1 - 0x1p-1022
     end
-    return sign%Bool ? -y : y
+    return sign == 1 ? -y : y
 end
 
 function erfc(x::Float64)
     ix = get_high_word(x)
-    sign = ix>>31
+    sign = Int(ix>>31)
     ix &= 0x7fffffff
     if ix >= 0x7ff00000 # erfc(nan)=nan, erfc(+-inf)=0,2
         return 2*sign + 1/x
     end
     if ix < 0x3feb0000 # |x| < 0.84375
-        if (ix < 0x3c700000)  # |x| < 2**-56
+        if ix < 0x3c700000  # |x| < 2**-56
             return 1.0 - x
         end
         z = x*x
         r = @horner z pp0 pp1 pp2 pp3 pp4
         s = @horner z 1.0 qq1 qq2 qq3 qq4 qq5
         y = r/s
-        if sign%Bool || ix < 0x3fd00000 # x < 1/4 
+        if sign == 1 || ix < 0x3fd00000 # x < 1/4 
             return 1.0 - (x+x*y)
         end
         return 0.5 - (x - 0.5 + x*y)
     end
     if ix < 0x403c0000 # 0.84375 <= |x| < 28
-        return sign%Bool ? 2 - erfc2(ix,x) : erfc2(ix,x)
+        return sign == 1 ? 2 - erfc2(ix,x) : erfc2(ix,x)
     end
-    return sign%Bool ? 2 - 0x1p-1022 : 0x1p-1022*0x1p-1022
+    return sign == 1 ? 2 - 0x1p-1022 : 0x1p-1022*0x1p-1022
 end
 
