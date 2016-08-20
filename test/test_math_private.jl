@@ -1,6 +1,8 @@
 using Base.Test
 using Libm: highword, lowword, combinewords
 
+const fuzztest = true
+
 @testset "Word Splitting" begin
 	@test highword(0.0) == 0x0000_0000
 	@test lowword(0.0) == 0x0000_0000
@@ -23,11 +25,12 @@ using Libm: highword, lowword, combinewords
 	@test combinewords(0x3ff4_cccc, 0xcccc_cccd) == 1.3
 
 
-	srand(1)
-	for testround in 1:1000
-		x = rand(Float64)
-		@test combinewords(highword(x), lowword(x)) == x
+	if fuzztest
+		srand(1)
+		for testround in 1:1000
+			x = rand(Float64)
+			@test combinewords(highword(x), lowword(x)) == x
+		end
 	end
-
 
 end
