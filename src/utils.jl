@@ -6,7 +6,7 @@ end
 
 # Set the less significant 32 bits of a double from an int
 function set_low_word(d::Float64, lo::UInt32)
-    return reinterpret(Float64,reinterpret(UInt64, d) & 0xffffffff00000000 | lo)
+    return reinterpret(Float64, reinterpret(UInt64, d) & 0xffffffff00000000 | lo)
 end
 
 function scalbn(x::Float64, n::Int)
