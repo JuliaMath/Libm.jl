@@ -1,4 +1,5 @@
 #Relates to OpenLibm: src/math_private, however little of that code can be transfered as it uses C unions.
+using Base: @pure
 
 """Return the least significant word of d.
 Coresponds to OpenLibm GET_LOW_WORD(ret,d)"""

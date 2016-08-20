@@ -336,9 +336,9 @@ const tbl = [
 function exp2(x::Float64)
 	# Filter out exceptional cases.
 	hx = highword(x)
-	@show hx
+	#@show hx
 	ix = hx & 0x7fff_ffff		# high word of |x|
-	@show ix
+	#@show ix
 	if ix >= 0x4090_0000 		# |x| >= 1024
 		if ix >= 0x7ff0_0000
 			lx=lowword(x)
@@ -362,21 +362,24 @@ function exp2(x::Float64)
 
 	# Reduce x, computing z, i0, and k.
 	t::Float64 = x + redux
-	@show t
+	#@show t
 	i0::UInt32 = lowword(t)
-	@show i0
+	#@show i0
 	i0 += TBLSIZE >> 1
-	@show i0
+	#@show i0
 	k::UInt32 = (i0 >> TBLBITS) << 20
+	#@show k
 	i0 = (i0 & (TBLSIZE - 1)) << 1
-	@show i0
+	#@show i0
 	t -= redux
 	z = x - t
-	@show z
-
+	#@show z
+	i0+=0x0000_0001 # Julia indexes and 1 more than C indexes
 	# Compute r = exp2(y) = exp2t[i0] * p(z - eps[i]).
 	t = tbl[i0]		 # exp2t[i0]
-	z -= tbl[i0 + 1] # eps[i0]
+	#@show i0 + 1
+	z -= tbl[i0 + 0x0000_0001] # eps[i0]
+	#@show z
 
 	if k >= -(1021 << 20)
 		twopk = combinewords(0x3ff0_0000 + k, 0x0000_0000)
