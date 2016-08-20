@@ -110,9 +110,9 @@ function erf(x::Float64)
     if ix < 0x40180000 # 0.84375 <= |x| < 6
         y = 1 - erfc2(ix,x)
     else
-        y = 1 - 0x1p-1022;
+        y = 1 - 0x1p-1022
     end
-    return sign%Bool ? -y : y;
+    return sign%Bool ? -y : y
 end
 
 function erfc(x::Float64)
@@ -124,7 +124,7 @@ function erfc(x::Float64)
     end
     if ix < 0x3feb0000 # |x| < 0.84375
         if (ix < 0x3c700000)  # |x| < 2**-56
-            return 1.0 - x;
+            return 1.0 - x
         end
         z = x*x
         r = @horner z pp0 pp1 pp2 pp3 pp4
@@ -138,6 +138,6 @@ function erfc(x::Float64)
     if ix < 0x403c0000 # 0.84375 <= |x| < 28
         return sign%Bool ? 2 - erfc2(ix,x) : erfc2(ix,x)
     end
-    return sign%Bool ? 2 - 0x1p-1022 : 0x1p-1022*0x1p-1022;
+    return sign%Bool ? 2 - 0x1p-1022 : 0x1p-1022*0x1p-1022
 end
 
