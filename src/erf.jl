@@ -95,7 +95,7 @@ end
 
 function _erf(x::Float64)
     ix = get_high_word(x)
-    sign = ix>>31 % Int32
+    sign = ix>>31
     ix &= 0x7fffffff
     if ix >= 0x7ff00000 # erf(nan)=nan, erf(+-inf)=+-1
         return 1-2*sign + 1/x
@@ -120,7 +120,7 @@ end
 
 function _erfc(x::Float64)
     ix = get_high_word(x)
-    sign = ix>>31 % Int32
+    sign = ix>>31
     ix &= 0x7fffffff
     if ix >= 0x7ff00000 # erfc(nan)=nan, erfc(+-inf)=0,2
         return 2*sign + 1/x
