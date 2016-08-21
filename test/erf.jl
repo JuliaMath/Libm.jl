@@ -15,7 +15,7 @@
 end
 
 @testset "erfc tests" begin
-    @test isnan(erfc.(NaN))
+    @test isnan(erfc(NaN))
     @test _erfc(Inf) == 0
     @test _erfc(-Inf) == 2
     s = linspace(-0.84375,0.84375,100)
