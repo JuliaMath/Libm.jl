@@ -4,6 +4,7 @@ using Base.Test
 @testset "Libm tests" begin
 
 include("./erf.jl")
+include("./exp.jl")
 
 @testset "scalbn tests" begin
     @test Libm.scalbn(1.0,0) == 0x1p0

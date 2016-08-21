@@ -10,7 +10,7 @@ function set_low_word(d::Float64, lo::UInt32)
 end
 
 # Scale number x*2^n
-function scalbn(x::Float64, n::Int)
+function scalbn(x::Float64, n::Integer)
     if n > 1023
         x *= 0x1p1023
         n -= 1023;

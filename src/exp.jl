@@ -13,7 +13,7 @@ const P5     =  4.13813679705723846039e-08  #0x3E663769, 0x72BEA4D0
 
 function _exp(x::Float64)
     hx = get_high_word(x)
-    sign = hx>>31 % Int32
+    sign = (hx>>31) % Int32
     hx &= 0x7fffffff  # high word of |x|
 
     # special cases
@@ -21,13 +21,11 @@ function _exp(x::Float64)
         if isnan(x)
             return x
         end
-        if x > 709.782712893383973096
-            # overflow if x!=inf 
+        if x > 709.782712893383973096 # overflow if x!=inf 
             x *= 0x1p1023
             return x
         end
-        # underflow if x!=-inf
-        if x < -745.13321910194110842
+        if x < -745.13321910194110842 # underflow if x!=-inf
             return 0.0
         end
     end
@@ -37,13 +35,13 @@ function _exp(x::Float64)
         if hx >= 0x3ff0a2b2  # if |x| >= 1.5 ln2
             k = unsafe_trunc(Int32, invln2*x + half[sign+1])
         else
-            k = 1 - sign - sign
+            k = Int32(1) - sign - sign
         end
         hi = x - k*ln2hi  # k*ln2hi is exact here
         lo = k*ln2lo
         x = hi - lo
     elseif hx > 0x3e300000  # if |x| > 2**-28
-        k = 0
+        k = Int32(0)
         hi = x
         lo = 0
     else
@@ -55,7 +53,7 @@ function _exp(x::Float64)
     xx = x*x
     c = x - xx*(P1+xx*(P2+xx*(P3+xx*(P4+xx*P5)))) # try Horner
     y = 1 + (x*c/(2-c) - lo + hi)
-    if k == 0
+    if k == Int32(0)
         return y
     end
     return scalbn(y, k)

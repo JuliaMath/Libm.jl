@@ -1,7 +1,7 @@
 @testset "erf tests" begin
-    @test isnan(erf.(NaN))
-    @test _erf.(Inf) == 1.0
-    @test _erf.(-Inf) == -1.0
+    @test isnan(erf(NaN))
+    @test _erf(Inf) == 1
+    @test _erf(-Inf) == -1
     s = linspace(-0.84375,0.84375,100)
     @test erf.(s) == _erf.(s)
     s = linspace(-2e-28,2e-28,100)
@@ -15,9 +15,9 @@
 end
 
 @testset "erfc tests" begin
-    @test isnan(erfc.(NaN))
-    @test _erfc.(Inf) == 0.0
-    @test _erfc.(-Inf) == 2.0
+    @test isnan(erfc(NaN))
+    @test _erfc(Inf) == 0
+    @test _erfc(-Inf) == 2
     s = linspace(-0.84375,0.84375,100)
     @test erfc.(s) == _erfc.(s)
     s = linspace(-2e-56,2e-56,100)
