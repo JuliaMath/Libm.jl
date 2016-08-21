@@ -1,8 +1,9 @@
 using Libm
 using Base.Test
 
-include("./erf.jl")
+@testset "Libm tests" begin
 
+include("./erf.jl")
 
 @testset "scalbn tests" begin
     @test Libm.scalbn(1.0,0) == 0x1p0
@@ -27,4 +28,6 @@ include("./erf.jl")
     @test Libm.scalbn(1.0,-1023-1022) ==  0x0p0
     @test Libm.scalbn(1.0,-1023-1022-1022)== 0x0p0
     @test Libm.scalbn(1.0,-1023-1022-1022-1022)== 0x0p0
+end
+
 end

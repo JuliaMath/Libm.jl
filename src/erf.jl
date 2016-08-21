@@ -1,8 +1,8 @@
- # see http://git.musl-libc.org/cgit/musl/tree/src/math/erf.c for implementation details
+# musl port see http://git.musl-libc.org/cgit/musl/tree/src/math/erf.c for implementation details
 
-# let
-# global erf
-# global erfc
+let
+global erf
+global erfc
 
 const erx  = 8.45062911510467529297e-01 # 0x3FEB0AC1, 0x60000000
 
@@ -144,4 +144,4 @@ function erfc(x::Float64)
     return sign != 0 ? 2 - 0x1p-1022 : 0x1p-1022*0x1p-1022
 end
 
-# end
+end

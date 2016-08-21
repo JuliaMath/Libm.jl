@@ -1,3 +1,5 @@
+let
+global exp
 
 const half = [0.5,-0.5, 0.0]
 const ln2hi  =  6.93147180369123816490e-01  #0x3fe62e42, 0xfee00000 
@@ -61,4 +63,6 @@ function exp(x::Float64)
         return y
     end
     return scalbn(y, k)
+end
+
 end
