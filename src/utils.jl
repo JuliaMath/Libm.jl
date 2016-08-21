@@ -1,7 +1,7 @@
 # Get the more significant 32 bit int from a double
 function get_high_word(d::Float64)
     u = reinterpret(UInt64, d)
-    return (u>>32)%UInt32
+    return (u>>32) % UInt32
 end
 
 # Set the less significant 32 bits of a double from an int

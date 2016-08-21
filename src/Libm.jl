@@ -1,5 +1,4 @@
 module Libm
-__precompile__()
 
 using Base.Math.@horner
 
