@@ -39,29 +39,26 @@ println(t3,"\n")
 println(t4,"\n")
 
 # exp benchmarks
-xexp
-xexp = union(xerf1,xerf2,xerf3,xerf4,xerf5);
+x1 = linspace(708.4, 709.7, 10000)
+x2 = -linspace(708.4, 709.7, 10000)
+x3 = linspace(0.5*log(2),1.5*log(2), 10000)
+x4 = -linspace(0.5*log(2),1.5*log(2), 10000)
+x5 = linspace(1.5*log(2),10, 10000)
+x6 = -linspace(1.5*log(2),10, 10000)
+x7 = linspace(2.0^-28,2.0^-27, 10000)
+x8 = -linspace(2.0^-28,2.0^-27, 10000)
+x9 = linspace(1.0, 10.0, 1000)
+x10 = -linspace(1.0, 10.0, 1000)
 
-t1 = @benchmark Libm.erf.($xerf)
-t2 = @benchmark Base.erf.($xerf)
-t3 = @benchmark Libm.erfc.($xercf)
-t4 = @benchmark Base.erfc.($xercf)
+xexp = union(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10);
 
-println("***** Benchmark erf *****")
+t1 = @benchmark Libm._exp.($xexp)
+t2 = @benchmark Base.exp.($xexp)
+
+println("***** Benchmark exp *****")
 println()
 println(ratio(mean(t1),mean(t2)))
 println()
 println("Details\n")
 println(t1,"\n")
 println(t2,"\n")
-
-
-println("***** Benchmark erfc *****")
-println()
-println(ratio(mean(t3),mean(t4)))
-println()
-println("Details\n")
-println(t3,"\n")
-println(t4,"\n")
-
-

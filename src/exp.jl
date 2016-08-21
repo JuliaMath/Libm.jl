@@ -1,7 +1,6 @@
 let
 global _exp
 
-const half = [0.5,-0.5]
 const ln2hi  =  6.93147180369123816490e-01  #0x3fe62e42, 0xfee00000 
 const ln2lo  =  1.90821492927058770002e-10  #0x3dea39ef, 0x35793c76 
 const invln2 =  1.44269504088896338700e+00  #0x3ff71547, 0x652b82fe
@@ -13,7 +12,7 @@ const P5     =  4.13813679705723846039e-08  #0x3E663769, 0x72BEA4D0
 
 function _exp(x::Float64)
     hx = get_high_word(x)
-    sign = (hx>>31) % Int32
+    sign = hx>>31
     hx &= 0x7fffffff  # high word of |x|
 
     # special cases
@@ -33,7 +32,7 @@ function _exp(x::Float64)
     # argument reduction
     if hx > 0x3fd62e42 # if |x| > 0.5 ln2
         if hx >= 0x3ff0a2b2  # if |x| >= 1.5 ln2
-            k = unsafe_trunc(Int32, invln2*x + half[sign+1])
+            k = unsafe_trunc(Int32, invln2*x + 0.5 - sign)
         else
             k = Int32(1) - sign - sign
         end
