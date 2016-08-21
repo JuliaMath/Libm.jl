@@ -1,7 +1,7 @@
 let
 global _exp
 
-const half = [0.5,-0.5, 0.0]
+const half = [0.5,-0.5]
 const ln2hi  =  6.93147180369123816490e-01  #0x3fe62e42, 0xfee00000 
 const ln2lo  =  1.90821492927058770002e-10  #0x3dea39ef, 0x35793c76 
 const invln2 =  1.44269504088896338700e+00  #0x3ff71547, 0x652b82fe
@@ -11,9 +11,9 @@ const P3     =  6.61375632143793436117e-05  #0x3F11566A, 0xAF25DE2C
 const P4     = -1.65339022054652515390e-06  #0xBEBBBD41, 0xC5D26BF1 
 const P5     =  4.13813679705723846039e-08  #0x3E663769, 0x72BEA4D0 
 
-function exp(x::Float64)
+function _exp(x::Float64)
     hx = get_high_word(x)
-    sign = Int(hx>>31)
+    sign = hx>>31 % Int32
     hx &= 0x7fffffff  # high word of |x|
 
     # special cases
@@ -26,19 +26,16 @@ function exp(x::Float64)
             x *= 0x1p1023
             return x
         end
-        if x < -708.39641853226410622
-            # underflow if x!=-inf
-            x = -0x1p-149/x
-            if x < -745.13321910194110842
-                return 0.0
-            end
+        # underflow if x!=-inf
+        if x < -745.13321910194110842
+            return 0.0
         end
     end
 
     # argument reduction
     if hx > 0x3fd62e42 # if |x| > 0.5 ln2
         if hx >= 0x3ff0a2b2  # if |x| >= 1.5 ln2
-            k = round(Int, invln2*x + half[sign+1],RoundToZero)
+            k = unsafe_trunc(Int32, invln2*x + half[sign+1])
         else
             k = 1 - sign - sign
         end
@@ -51,7 +48,6 @@ function exp(x::Float64)
         lo = 0
     else
         # inexact if x!=0
-        x = 0x1p1023 + x
         return 1 + x
     end
 
