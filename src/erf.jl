@@ -1,4 +1,4 @@
- # see http://git.musl-libc.org/cgit/musl/tree/src/math/erf.c for implementation details
+# musl port, see http://git.musl-libc.org/cgit/musl/tree/src/math/erf.c for implementation details
 
 let
 global erf
