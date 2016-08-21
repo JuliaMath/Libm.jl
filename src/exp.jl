@@ -1,5 +1,5 @@
 let
-global exp
+global _exp
 
 const half = [0.5,-0.5, 0.0]
 const ln2hi  =  6.93147180369123816490e-01  #0x3fe62e42, 0xfee00000 

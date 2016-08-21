@@ -1,8 +1,8 @@
 # musl port, see http://git.musl-libc.org/cgit/musl/tree/src/math/erf.c for implementation details
 
 let
-global erf
-global erfc
+global _erf
+global _erfc
 
 const erx  = 8.45062911510467529297e-01 # 0x3FEB0AC1, 0x60000000
 
@@ -93,7 +93,7 @@ function erfc2(ix::UInt32, x::Float64)
     return exp(-z*z-0.5625)*exp((z-x)*(z+x)+R/S)/x
 end
 
-function erf(x::Float64)
+function _erf(x::Float64)
     ix = get_high_word(x)
     sign = Int32(ix>>31)
     ix &= 0x7fffffff
@@ -118,7 +118,7 @@ function erf(x::Float64)
     return sign != 0 ? -y : y
 end
 
-function erfc(x::Float64)
+function _erfc(x::Float64)
     ix = get_high_word(x)
     sign = Int32(ix>>31)
     ix &= 0x7fffffff
