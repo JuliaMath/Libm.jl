@@ -49,10 +49,10 @@ x7 = linspace(2.0^-28,2.0^-27, 10000)
 x8 = -linspace(2.0^-28,2.0^-27, 10000)
 x9 = linspace(1.0, 10.0, 1000)
 x10 = -linspace(1.0, 10.0, 1000)
+x11 = 2000*(rand(2000000)-0.5)
+xexp = union(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10)
 
-xexp = union(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10);
-
-t1 = @benchmark Libm._exp.($xexp)
+t1 = @benchmark Libm.exp.($xexp)
 t2 = @benchmark Base.exp.($xexp)
 
 println("***** Benchmark exp *****")

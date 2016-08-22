@@ -1,5 +1,9 @@
+# port form musl library, commit 9b0fcb441a44456c7b071c7cdaf90403f81ec05a
+# see http://git.musl-libc.org/cgit/musl/tree/src/math/exp.c for implementation details
+# origin: FreeBSD /usr/src/lib/msun/src/e_exp.c Copyright (c) 1993: Sun Microsystems, Inc.
+
 let
-global _exp
+global exp
 
 const ln2hi  =  6.93147180369123816490e-01  #0x3fe62e42, 0xfee00000 
 const ln2lo  =  1.90821492927058770002e-10  #0x3dea39ef, 0x35793c76 
@@ -10,9 +14,9 @@ const P3     =  6.61375632143793436117e-05  #0x3F11566A, 0xAF25DE2C
 const P4     = -1.65339022054652515390e-06  #0xBEBBBD41, 0xC5D26BF1 
 const P5     =  4.13813679705723846039e-08  #0x3E663769, 0x72BEA4D0 
 
-function _exp(x::Float64)
-    hx = get_high_word(x)
-    sign = hx>>31
+function exp(x::Float64)
+    hx = highword(x)
+    sign = (hx>>31) % Int32
     hx &= 0x7fffffff  # high word of |x|
 
     # special cases
@@ -34,13 +38,13 @@ function _exp(x::Float64)
         if hx >= 0x3ff0a2b2  # if |x| >= 1.5 ln2
             k = unsafe_trunc(Int32, invln2*x + 0.5 - sign)
         else
-            k = Int32(1) - sign - sign
+            k = 1 % Int32 - sign - sign
         end
         hi = x - k*ln2hi  # k*ln2hi is exact here
         lo = k*ln2lo
         x = hi - lo
     elseif hx > 0x3e300000  # if |x| > 2**-28
-        k = Int32(0)
+        k = 0 % Int32
         hi = x
         lo = 0
     else
@@ -50,12 +54,12 @@ function _exp(x::Float64)
 
     # x is now in primary range
     xx = x*x
-    c = x - xx*(P1+xx*(P2+xx*(P3+xx*(P4+xx*P5)))) # try Horner
-    y = 1 + (x*c/(2-c) - lo + hi)
-    if k == Int32(0)
-        return y
+    c = x - xx*(@horner xx P1 P2 P3 P4 P5)
+    x = 1 + (x*c/(2-c) - lo + hi)
+    if k == 0 % Int32
+        return x
     end
-    return scalbn(y, k)
+    return scalbn(x, k)
 end
 
 end

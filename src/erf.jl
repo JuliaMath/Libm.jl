@@ -91,15 +91,6 @@ function erfc2(ix::UInt32, x::Float64)
         S = @horner s 1.0 sb1 sb2 sb3 sb4 sb5 sb6 sb7
     end
     z = x
-<<<<<<< HEAD
-    z = set_low_word(z,UInt32(0))
-    return exp(-z*z-0.5625)*exp((z-x)*(z+x)+R/S)/x
-end
-
-function _erf(x::Float64)
-    ix = get_high_word(x)
-    sign = ix>>31
-=======
     z = lowword!(z,UInt32(0))
     return exp(-z*z-0.5625)*exp((z-x)*(z+x)+R/S)/x
 end
@@ -107,7 +98,6 @@ end
 function erf(x::Float64)
     ix = highword(x)
     sign = (ix>>31) % Int32
->>>>>>> master
     ix &= 0x7fffffff
     if ix >= 0x7ff00000 # erf(nan)=nan, erf(+-inf)=+-1
         return 1-2*sign + 1/x
@@ -130,15 +120,9 @@ function erf(x::Float64)
     return sign != 0 ? -y : y
 end
 
-<<<<<<< HEAD
-function _erfc(x::Float64)
-    ix = get_high_word(x)
-    sign = ix>>31
-=======
 function erfc(x::Float64)
     ix = highword(x)
     sign = (ix>>31) % Int32
->>>>>>> master
     ix &= 0x7fffffff
     if ix >= 0x7ff00000 # erfc(nan)=nan, erfc(+-inf)=0,2
         return 2*sign + 1/x

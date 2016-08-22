@@ -11,7 +11,7 @@ Corresponds to SET_LOW_WORD in musl
 lowword!(d::Float64, lo::UInt32) = reinterpret(Float64, reinterpret(UInt64, d) & 0xffffffff00000000 | lo)
 
 # Scale number x*2^n
-function scalbn(x::Float64, n::Integer)
+function scalbn(x::Float64, n::Int32)
     if n > 1023
         x *= 0x1p1023
         n -= 1023;
