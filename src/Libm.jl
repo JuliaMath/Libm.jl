@@ -1,5 +1,10 @@
 module Libm
 
-# package code goes here
+using Base.Math.@horner
 
-end # module
+export exp
+
+include("exp.jl")
+include("utils.jl")
+
+end
