@@ -5,6 +5,8 @@
         @test llog(T(0)) == -Inf
         s = logspace(T(-10),T(10),1000)
         @test Base.log.(s) ≈ llog.(s)
+        s = linspace(T(0),realmin(T),1000)
+        @test Base.log.(s) ≈ llog.(s)
         @test_throws DomainError llog(T(-1))
     end
 end
