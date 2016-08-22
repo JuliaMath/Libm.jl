@@ -1,6 +1,7 @@
 using Libm
 using Base.Test
 
+<<<<<<< HEAD
 @testset "Libm tests" begin
 
 include("./erf.jl")
@@ -30,5 +31,10 @@ include("./exp.jl")
     @test Libm.scalbn(1.0,-1023-1022-1022)== 0x0p0
     @test Libm.scalbn(1.0,-1023-1022-1022-1022)== 0x0p0
 end
+=======
+@testset "Libm" begin
+
+include("erf.jl")
+>>>>>>> master
 
 end
