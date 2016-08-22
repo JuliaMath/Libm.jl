@@ -12,7 +12,7 @@
 let
 global log_tang
 global log1p_tang
-    
+
 # Float64 lookup table.
 # to generate values:
   # N=39 # (can be up to N=42).
