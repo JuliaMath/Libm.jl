@@ -1,5 +1,9 @@
 using Libm
 using Base.Test
 
-# write your own tests here
-@test 1 == 2
+@testset "Libm" begin
+
+include("exp.jl")
+include("utils.jl")
+
+end
