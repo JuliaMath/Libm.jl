@@ -1,39 +1,61 @@
 using Libm
 using BenchmarkTools
 
-xerf1 = linspace(-0.84375,0.84375,10000)
-xerf2 = linspace(-2e-28,2e-28,10000)
-xerf3 = linspace(-0.84375,0.84375,10000)
-xerf4 = linspace(0.84375, 6,10000)
-xerf5 = linspace(-6,-0.84375,10000);
-xerf = union(xerf1,xerf2,xerf3,xerf4,xerf5);
+suite = BenchmarkGroup(["Libm"])
 
-xerfc1 = linspace(-0.84375,0.84375,10000)
-xerfc2 = linspace(-2e-56,2e-56,10000)
-xerfc3 = linspace(-0.25,0.25,10000)
-xerfc4 = linspace(0.84375, 28,10000)
-xerfc5 = linspace(-28,-0.84375,10000);
-xercf = union(xerfc1,xerfc2,xerfc3,xerfc4,xerfc5)
+srand(100)
 
-t1 = @benchmark Libm.erf.($xerf)
-t2 = @benchmark Base.erf.($xerf)
-t3 = @benchmark Libm.erfc.($xercf)
-t4 = @benchmark Base.erfc.($xercf)
+x1 = linspace(708.4, 709.7, 10000)
+x2 = -linspace(708.4, 709.7, 10000)
+x3 = linspace(0.5*log(2),1.5*log(2), 10000)
+x4 = -linspace(0.5*log(2),1.5*log(2), 10000)
+x5 = linspace(1.5*log(2),10, 10000)
+x6 = -linspace(1.5*log(2),10, 10000)
+x7 = linspace(2.0^-28,2.0^-27, 10000)
+x8 = -linspace(2.0^-28,2.0^-27, 10000)
+x9 = linspace(1.0, 10.0, 1000)
+x10 = -linspace(1.0, 10.0, 1000)
+x11 = 40000*(rand(2_000_000)-0.5)
+xx_exp = union(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11)
+xx_sm = logspace(-16,0,2_000_000)
+xx_log = 4000*rand(2_000_000)
+xx_trig = linspace(-100, 100, 50_000_000)
+xx_hyp = linspace(-15, 15, 50_000_000)
 
-println("***** Benchmark erf *****")
-println()
-println(ratio(mean(t1),mean(t2)))
-println()
-println("Details\n")
-println(t1,"\n")
-println(t2,"\n")
+const micros = Dict(
+    "exp"   => xx_exp,
+    "exp2"  => xx_exp,
+    "exp10" => xx_exp,
+    "expm1" => xx_sm,
+    "log"   => xx_log,
+    "log10" => xx_log,
+    "log1p" => xx_sm,
+    "sin"   => xx_trig,
+    "cos"   => xx_trig,
+    "tan"   => xx_trig,
+    "sinh"  => xx_hyp,
+    "cosh"  => xx_hyp,
+    "tanh"  => xx_hyp)
 
+for (f,v) in micros
+    suite[string(f)] = BenchmarkGroup([string(f)])
+    libmf = Symbol("x",f)
+    basef = Symbol(f)
+    suite[f]["Libm"] = @benchmarkable $libmf.($v)
+    suite[f]["Base"] = @benchmarkable $basef.($v)
+end
 
-println("***** Benchmark erfc *****")
-println()
-println(ratio(mean(t3),mean(t4)))
-println()
-println("Details\n")
-println(t3,"\n")
-println(t4,"\n")
+tune!(suite)
+results = run(suite)
 
+for f in sort(collect(keys(micros)))
+    println()
+    print_with_color(:magenta, string(f, " benchmark\n"))
+    print_with_color(:blue, "median ratio Libm/Base\n")
+    println(ratio(median(result[f]["Libm"]), median(result[f]["Base"])))
+    println()
+    # print_with_color(:blue, "details Libm/Base\n")
+    # println(result[f]["Libm"])
+    # println(result[f]["Base"])
+    # println()
+end
