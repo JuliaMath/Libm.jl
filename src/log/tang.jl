@@ -27,7 +27,7 @@ global log1p_tang
   #   j % 2 == 0 && print("\n    ")
   #   print("(",l_hi,",",l_lo,"),")
   # end
-const t_log_Float64 = [(0.0,0.0),(0.007782140442941454,-8.865052917267247e-13),
+const _log_tang_table_Float64 = [(0.0,0.0),(0.007782140442941454,-8.865052917267247e-13),
     (0.015504186536418274,-4.530198941364935e-13),(0.0231670592820592,-5.248209479295644e-13),
     (0.03077165866670839,4.529814257790929e-14),(0.0383188643027097,-5.730994833076631e-13),
     (0.04580953603181115,-5.16945692881222e-13),(0.053244514518155484,6.567993368985218e-13),
@@ -106,7 +106,7 @@ const t_log_Float64 = [(0.0,0.0),(0.007782140442941454,-8.865052917267247e-13),
   #   print(float64(Base.log(big(1.0+j*is7))),",")
   # end
 
-const t_log_Float32 = [0.0,0.007782140442054949,0.015504186535965254,0.02316705928153438,
+const _log_tang_table_Float32 = [0.0,0.007782140442054949,0.015504186535965254,0.02316705928153438,
     0.030771658666753687,0.0383188643021366,0.0458095360312942,0.053244514518812285,
     0.06062462181643484,0.06795066190850775,0.07522342123758753,0.08244366921107459,
     0.08961215868968714,0.09672962645855111,0.10379679368164356,0.11081436634029011,
@@ -148,9 +148,9 @@ end
 
 
 # Procedure 1
-@inline function log_proc1(y::Float64,mf::Float64,F::Float64,f::Float64,jp::Int)
+@inline function _log_tang_proc1(y::Float64,mf::Float64,F::Float64,f::Float64,jp::Int)
     ## Steps 1 and 2
-    @inbounds hi,lo = t_log_Float64[jp]
+    @inbounds hi,lo = _log_tang_table_Float64[jp]
     l_hi = mf* 0.6931471805601177 + hi
     l_lo = mf*-1.7239444525614835e-13 + lo
 
@@ -176,7 +176,7 @@ end
 end
 
 # Procedure 2
-@inline function log_proc2(f::Float64)
+@inline function _log_tang_proc2(f::Float64)
     ## Step 1
     g = 1/(2+f)
     u = 2*f*g
@@ -208,9 +208,9 @@ end
 end
 
 
-@inline function log_proc1(y::Float32,mf::Float32,F::Float32,f::Float32,jp::Int)
+@inline function _log_tang_proc1(y::Float32,mf::Float32,F::Float32,f::Float32,jp::Int)
     ## Steps 1 and 2
-    @inbounds hi = t_log_Float32[jp]
+    @inbounds hi = _log_tang_table_Float32[jp]
     l = mf*0.6931471805599453 + hi
 
     ## Step 3
@@ -228,7 +228,7 @@ end
     Float32(l + (u + q))
 end
 
-@inline function log_proc2(f::Float32)
+@inline function _log_tang_proc2(f::Float32)
     ## Step 1
     # compute in higher precision
     u64 = Float64(2*f)/(2+Float64(f))
@@ -255,7 +255,7 @@ function log_tang{T<:Union{Float32,Float64}}(x::T)
         # exp(-1/16) < x < exp(1/16)
         if T(0.9394130628134757) < x < T(1.0644944589178595)
             f = x-1
-            return log_proc2(f)
+            return _log_tang_proc2(f)
         end
 
         # Step 3
@@ -276,7 +276,7 @@ function log_tang{T<:Union{Float32,Float64}}(x::T)
         f = y-F
         jp = unsafe_trunc(Int, T(2)^7 * F) - 127
 
-        return log_proc1(y,mf,F,f,jp)
+        return _log_tang_proc1(y,mf,F,f,jp)
     elseif x == 0
         -T(Inf)
     elseif isnan(x)
@@ -297,7 +297,7 @@ function log1p_tang{T<:Union{Float32,Float64}}(x::T)
         # Step 2
         # expm1(-1/16) < x < expm1(1/16)
         if T(-0.06058693718652422) < x < T(0.06449445891785943)
-            return log_proc2(x)
+            return _log_tang_proc2(x)
         end
 
         # Step 3
@@ -315,7 +315,7 @@ function log1p_tang{T<:Union{Float32,Float64}}(x::T)
         f = (y - F) + c*s # F+f = (1+x)*2^-m = (z+c)**2^-m
         jp = unsafe_trunc(Int, T(2)^7 * F) - 127
 
-        log_proc1(y,mf,F,f,jp)
+        _log_tang_proc1(y,mf,F,f,jp)
     elseif x == -1
         -T(Inf)
     elseif isnan(x)
