@@ -165,7 +165,7 @@ end
     #                 -0x1.5_5576_6647_2e04p-3)
 
     ## Step 3' (alternative)
-    u = (2.0f)/(y+F)
+    u = (2*f)/(y+F)
     v = u*u
     q = u*v*@horner(v,
                     0.08333333333303913,
@@ -178,8 +178,8 @@ end
 # Procedure 2
 @inline function log_proc2(f::Float64)
     ## Step 1
-    g = 1.0/(2.0+f)
-    u = 2.0*f*g
+    g = 1/(2+f)
+    u = 2*f*g
     v = u*u
 
     ## Step 2
@@ -201,7 +201,7 @@ end
         u1 = truncbits(u) # round to 24 bits
         f1 = truncbits(f)
         f2 = f-f1
-        u2 = ((2.0*(f-u1)-u1*f1)-u1*f2)*g
+        u2 = ((2*(f-u1)-u1*f1)-u1*f2)*g
         ## Step 4
         return u1 + (u2 + q)
     end
@@ -220,7 +220,7 @@ end
     #                 Float32(0x1.55546cp-2))
 
     ## Step 3' (alternative)
-    u = (2f0f)/(y+F)
+    u = (2*f)/(y+F)
     v = u*u
     q = u*v*0.08333351f0
 
@@ -231,7 +231,7 @@ end
 @inline function log_proc2(f::Float32)
     ## Step 1
     # compute in higher precision
-    u64 = Float64(2f0*f)/(2.0+f)
+    u64 = Float64(2*f)/(2+Float64(f))
     u = Float32(u64)
     v = u*u
 
@@ -247,141 +247,79 @@ end
 end
 
 
-function log_tang(x::Float64)
-    if x > 0.0
-        x == Inf && return x
+function log_tang{T<:Union{Float32,Float64}}(x::T)
+    if x > 0
+        x == T(Inf) && return x
 
         # Step 2
-        if 0.9394130628134757 < x < 1.0644944589178595
-            f = x-1.0
+        # exp(-1/16) < x < exp(1/16)
+        if T(0.9394130628134757) < x < T(1.0644944589178595)
+            f = x-1
             return log_proc2(f)
         end
 
         # Step 3
-        xu = reinterpret(UInt64,x)
-        m = Int(xu >> 52) & 0x07ff
+        xu = reinterpret(Unsigned, x)
+        m = (xu >> significand_bits(T))%Int
         if m == 0 # x is subnormal
-            x *= 1.8014398509481984e16 # 0x1p54, normalise significand
-            xu = reinterpret(UInt64,x)
-            m = Int(xu >> 52) & 0x07ff - 54
+            x *= T(2)^significand_bits(T) # normalise significand
+            xu = reinterpret(Unsigned,x)
+            m = (xu >> significand_bits(T))%Int - significand_bits(T)
         end
-        m -= 1023
-        y = reinterpret(Float64,(xu & 0x000f_ffff_ffff_ffff) | 0x3ff0_0000_0000_0000)
+        m -= exponent_bias(T)
+        y = reinterpret(T,(xu & significand_mask(T)) | exponent_one(T))
 
-        mf = Float64(m)
-        F = (y + 3.5184372088832e13) - 3.5184372088832e13 # 0x1p-7*round(0x1p7*y)
+        mf = T(m)
+
+        k = T(2)^(significand_bits(T) - 7)
+        F = (y + k) - k # round(y,7,2)
         f = y-F
-        jp = unsafe_trunc(Int,128.0*F)-127
+        jp = unsafe_trunc(Int, T(2)^7 * F) - 127
 
         return log_proc1(y,mf,F,f,jp)
-    elseif x == 0.0
-        -Inf
+    elseif x == 0
+        -T(Inf)
     elseif isnan(x)
-        NaN
-    else
-        throw(DomainError())
-    end
-end
-
-function log_tang(x::Float32)
-    if x > 0f0
-        x == Inf32 && return x
-
-        # Step 2
-        if 0.939413f0 < x < 1.0644945f0
-            f = x-1f0
-            return log_proc2(f)
-        end
-
-        # Step 3
-        xu = reinterpret(UInt32,x)
-        m = Int(xu >> 23) & 0x00ff
-        if m == 0 # x is subnormal
-            x *= 3.3554432f7 # 0x1p25, normalise significand
-            xu = reinterpret(UInt32,x)
-            m = Int(xu >> 23) & 0x00ff - 25
-        end
-        m -= 127
-        y = reinterpret(Float32,(xu & 0x007f_ffff) | 0x3f80_0000)
-
-        mf = Float32(m)
-        F = (y + 65536.0f0) - 65536.0f0 # 0x1p-7*round(0x1p7*y)
-        f = y-F
-        jp = unsafe_trunc(Int,128.0f0*F)-127
-
-        log_proc1(y,mf,F,f,jp)
-    elseif x == 0f0
-        -Inf32
-    elseif isnan(x)
-        NaN32
+        T(NaN)
     else
         throw(DomainError())
     end
 end
 
 
-function log1p_tang(x::Float64)
-    if x > -1.0
+function log1p_tang{T<:Union{Float32,Float64}}(x::T)
+    if x > -1
         x == Inf && return x
-        if -1.1102230246251565e-16 < x < 1.1102230246251565e-16
+        if -eps(T)/2 < x < eps(T)/2
             return x # Inexact
-
+        end
+        
         # Step 2
-        elseif -0.06058693718652422 < x < 0.06449445891785943
+        # expm1(-1/16) < x < expm1(1/16)
+        if T(-0.06058693718652422) < x < T(0.06449445891785943)
             return log_proc2(x)
         end
 
         # Step 3
-        z = 1.0 + x
-        zu = reinterpret(UInt64,z)
-        s = reinterpret(Float64,0x7fe0_0000_0000_0000 - (zu & 0xfff0_0000_0000_0000)) # 2^-m
-        m = Int(zu >> 52) & 0x07ff - 1023 # z cannot be subnormal
-        c = m > 0 ? 1.0-(z-x) : x-(z-1.0) # 1+x = z+c exactly
-        y = reinterpret(Float64,(zu & 0x000f_ffff_ffff_ffff) | 0x3ff0_0000_0000_0000)
+        z = 1 + x # z > 0, and not subnormal
 
-        mf = Float64(m)
-        F = (y + 3.5184372088832e13) - 3.5184372088832e13 # 0x1p-7*round(0x1p7*y)
-        f = (y - F) + c*s #2^m(F+f) = 1+x = z+c
-        jp = unsafe_trunc(Int,128.0*F)-127
+        zu = reinterpret(Unsigned, z)
+        m = (zu >> significand_bits(T))%Int - exponent_bias(T)           # exponent(z)
+        s = reinterpret(T, (exponent_one(T)<<1) - (zu & exponent_mask(T))) # 2^-m (except for largest normal binade, where it gives 0, but that doesn't matter)
+        c = m > 0 ? 1-(z-x) : x-(z-1)                                    # 1+x = z+c exactly
+        y = reinterpret(T,(zu & significand_mask(T)) | exponent_one(T))  # y = 2 ∈ [1,2)
+        mf = T(m)
 
-        log_proc1(y,mf,F,f,jp)
-    elseif x == -1.0
-        -Inf
-    elseif isnan(x)
-        NaN
-    else
-        throw(DomainError())
-    end
-end
-
-function log1p_tang(x::Float32)
-    if x > -1f0
-        x == Inf32 && return x
-        if -5.9604645f-8 < x < 5.9604645f-8
-            return x # Inexact
-        # Step 2
-        elseif -0.06058694f0 < x < 0.06449446f0
-            return log_proc2(x)
-        end
-
-        # Step 3
-        z = 1f0 + x
-        zu = reinterpret(UInt32,z)
-        s = reinterpret(Float32,0x7f000000 - (zu & 0xff80_0000)) # 2^-m
-        m = Int(zu >> 23) & 0x00ff - 127 # z cannot be subnormal
-        c = m > 0 ? 1f0-(z-x) : x-(z-1f0) # 1+x = z+c
-        y = reinterpret(Float32,(zu & 0x007f_ffff) | 0x3f80_0000)
-
-        mf = Float32(m)
-        F = (y + 65536.0f0) - 65536.0f0 # 0x1p-7*round(0x1p7*y)
-        f = (y - F) + s*c #2^m(F+f) = 1+x = z+c
-        jp = unsafe_trunc(Int,128.0*F)-127
+        k = T(2)^(significand_bits(T) - 7)
+        F = (y + k) - k # round(y,7,2)
+        f = (y - F) + c*s # F+f = (1+x)*2^-m = (z+c)**2^-m
+        jp = unsafe_trunc(Int, T(2)^7 * F) - 127
 
         log_proc1(y,mf,F,f,jp)
-    elseif x == -1f0
-        -Inf32
+    elseif x == -1
+        -T(Inf)
     elseif isnan(x)
-        NaN32
+        T(NaN)
     else
         throw(DomainError())
     end

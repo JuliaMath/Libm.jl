@@ -8,6 +8,9 @@
         s = linspace(T(0),realmin(T),1000)
         @test Base.log.(s) ≈ llog.(s)
         @test_throws DomainError llog(T(-1))
+
+        @test Base.log(prevfloat(T(Inf))) == llog(prevfloat(T(Inf)))
+        @test Base.log(nextfloat(T(0))) == llog(nextfloat(T(0)))
     end
 end
 
@@ -22,5 +25,7 @@ end
         s = -logspace(T(-10),T(0),1000)
         @test Base.log1p.(s) ≈ llog1p.(s)
         @test_throws DomainError llog1p(T(-2))
+        @test Base.log1p(prevfloat(T(Inf))) == llog1p(prevfloat(T(Inf)))
+        @test Base.log1p(nextfloat(T(-1))) == llog1p(nextfloat(T(-1)))
     end
 end
