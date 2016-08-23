@@ -5,6 +5,7 @@
 double_to_raw_long_bits(d::Float64) = reinterpret(Int64, d)
 long_bits_to_double(i::Int64) = reinterpret(Float64, i)
 
+# mulsign(x::Float64, y::Float64) = long_bits_to_double(double_to_raw_long_bits(x) $ (double_to_raw_long_bits(y) & (1%Int64 << 63)))
 # this seems to emit better native code than Base.sign
 sign{T<:FTypes}(d::T) =  flipsign(one(T), d)
 
