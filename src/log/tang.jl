@@ -9,9 +9,10 @@
 
 
 
-let
-global log_tang
-global log1p_tang
+# nested methods inside let blocks cause problems (#18201)
+# let
+# global log_tang
+# global log1p_tang
 
 # Float64 lookup table.
 # to generate values:
@@ -324,4 +325,4 @@ function log1p_tang{T<:Union{Float32,Float64}}(x::T)
         throw(DomainError())
     end
 end
-end
+#end
