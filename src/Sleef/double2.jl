@@ -1,4 +1,3 @@
-typealias FTypes Union{Float32,Float64}
 
 immutable Double2{T<:FTypes}
     x::T

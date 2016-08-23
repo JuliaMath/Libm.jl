@@ -21,6 +21,9 @@ const R_LN2 = 1.4426950408889634073599246810018921374266459541529859341354494069
 const M_1_PI = 1/pi
 const M_PI = pi
 
+# alias for supported floating point types
+typealias FTypes Union{Float32,Float64}
+
 include("Sleef/double2.jl")
 include("Sleef/helper.jl")
 
