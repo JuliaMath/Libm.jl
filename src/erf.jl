@@ -91,7 +91,7 @@ function erfc2(ix::UInt32, x::Float64)
         S = @horner s 1.0 sb1 sb2 sb3 sb4 sb5 sb6 sb7
     end
     z = x
-    z = lowword!(z,UInt32(0))
+    z = setlowword(z,UInt32(0))
     return exp(-z*z-0.5625)*exp((z-x)*(z+x)+R/S)/x
 end
 
