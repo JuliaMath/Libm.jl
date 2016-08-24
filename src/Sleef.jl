@@ -8,7 +8,7 @@ export xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcos
 export xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xtan_u1, xcbrt_u1, xlog_u1
 
 # alias for supported floating point types
-typealias FTypes Union{Float32,Float64}
+typealias FloatTypes Union{Float32,Float64}
 
 const PI4_A = 0.78539816290140151978
 const PI4_B = 4.9604678871439933374e-10
@@ -70,6 +70,7 @@ function xcbrt(d::Float64) # max error 2 ulps
     q = flipsign(q, d)
     d = abs(d)
 
+    # todo horner,  sleef doesn't use mla here
     x = -0.640245898480692909870982
     x = x * d + 2.96155103020039511818595
     x = x * d + -5.73353060922947843636166
@@ -97,7 +98,8 @@ function xcbrt_u1(d::Float64)
 
     q3 = Double2(flipsign(q2.x, d), flipsign(q2.y, d))
     d = abs(d)
-
+    
+    # todo horner,  sleef doesn't use mla here
     x = -0.640245898480692909870982
     x = x * d + 2.96155103020039511818595
     x = x * d + -5.73353060922947843636166
