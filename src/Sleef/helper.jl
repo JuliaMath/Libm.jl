@@ -27,7 +27,7 @@ function ldexpk(x::Float64, q::Int32)
     m = m > Int32(0x7ff) ? Int32(0x7ff) : m
     u = long_bits_to_double(Int64(m) << 52)
     x = x * u * u * u * u
-    u = long_bits_to_double(Int64(q + Int32(0x3ff)) << 52)
+    u = long_bits_to_double(Int64(q + 0x3ff) << 52)
     return x * u
 end
 
