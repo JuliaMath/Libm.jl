@@ -7,7 +7,7 @@ long_bits_to_double(i::Int64) = reinterpret(Float64, i)
 
 # mulsign(x::Float64, y::Float64) = long_bits_to_double(double_to_raw_long_bits(x) $ (double_to_raw_long_bits(y) & (1%Int64 << 63)))
 # this seems to emit better native code than Base.sign
-sign{T<:FTypes}(d::T) =  flipsign(one(T), d)
+sign{T<:FloatTypes}(d::T) =  flipsign(one(T), d)
 
 mla(x::Number, y::Number, z::Number) = muladd(x, y, z)
 
@@ -72,7 +72,7 @@ function atan2k(y::Float64, x::Float64)
     end
     s = y/x
     t = s*s
-    # sleef does not use mla here
+    # sleef does not use mla here!
     u = @horner t c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19
     t = u*t*s + s
     t = q*(M_PI/2) + t
