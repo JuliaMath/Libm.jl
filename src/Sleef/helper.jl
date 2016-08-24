@@ -13,7 +13,7 @@ mla(x::Number, y::Number, z::Number) = muladd(x, y, z)
 
 xrint(x::Float64) = unsafe_trunc(Int32, round(x)) # in sleef, but this is a limited way to truncate since Int32 (fix)
 
-pow2i(q::Int32) = long_bits_to_double(((q + Int32(0x3ff)) % Int64) << 52)
+pow2i(q::Int32) = long_bits_to_double(Int64(q + Int32(0x3ff)) << 52)
 
 
 # private math functions
@@ -24,10 +24,10 @@ function ldexpk(x::Float64, q::Int32)
     q = q - (m << 2)
     m += Int32(0x3ff)
     m = m < 0 ? Int32(0) : m
-    m = m > 0x7ff ? Int32(0x7ff) : m
-    u = long_bits_to_double((m % Int64) << 52)
+    m = m > Int32(0x7ff) ? Int32(0x7ff) : m
+    u = long_bits_to_double(Int64(m) << 52)
     x = x * u * u * u * u
-    u = long_bits_to_double(((q + Int32(0x3ff)) % Int64) << 52)
+    u = long_bits_to_double(Int64(q + Int32(0x3ff)) << 52)
     return x * u
 end
 
@@ -36,7 +36,7 @@ function ilogbp1(d::Float64)
     d = m ? 2.037035976334486e90 * d : d
     q = ((double_to_raw_long_bits(d) >> 52) & 0x7ff) 
     q = m ? q - (300 + 0x03fe) : q - 0x03fe
-    return q % Int32
+    return Int32(q)
 end
 
 let

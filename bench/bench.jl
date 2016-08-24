@@ -35,7 +35,8 @@ const micros = Dict(
     "tan"   => xx_trig,
     "sinh"  => xx_hyp,
     "cosh"  => xx_hyp,
-    "tanh"  => xx_hyp)
+    "tanh"  => xx_hyp
+    )
 
 for (f,v) in micros
     suite[string(f)] = BenchmarkGroup([string(f)])
