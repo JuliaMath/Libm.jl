@@ -49,7 +49,7 @@ function xasinh(x::Float64)
 end
 
 function xacosh(x::Float64)
-    d = logk2(ddadd2_d2_d2_d(ddsqrt_d2_d2(ddadd2_d2_d2_d(ddmul_d2_d_d(x, x), -1)), x))
+    d = logk2(ddadd2_d2_d2_d(ddsqrt_d2_d2(ddadd2_d2_d2_d(ddmul_d2_d_d(x, x), -1.0)), x))
     y = d.x + d.y
 
     y = isinf(x) || isnan(y) ? Inf : y
