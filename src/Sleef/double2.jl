@@ -12,8 +12,8 @@ end
 #     end
 # end
 
-upper(d::Float64) = reinterpret(Float64, reinterpret(UInt64, d) & 0xfffffffff8000000)
-upper(d::Float32) = reinterpret(Float32, reinterpret(UInt32, d) & 0xfffff000)
+@inline upper(d::Float64) = reinterpret(Float64, reinterpret(UInt64, d) & 0xfffffffff8000000)
+@inline upper(d::Float32) = reinterpret(Float32, reinterpret(UInt32, d) & 0xfffff000)
 
 function ddnormalize_d2_d2(t::Double2)
     sx = t.x + t.y
