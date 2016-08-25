@@ -13,7 +13,7 @@ mla(x::Number, y::Number, z::Number) = muladd(x, y, z)
 
 xrint(x::Float64) = unsafe_trunc(Int32, round(x)) # in sleef, but this is a limited way to truncate since Int32 (fix)
 
-pow2i(q::Int32) = long_bits_to_double(Int64(q + Int32(0x3ff)) << 52)
+pow2i(q::Int32) = long_bits_to_double(Int64(q + 0x3ff) << 52)
 
 
 # private math functions

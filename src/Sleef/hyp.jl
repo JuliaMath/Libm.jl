@@ -38,7 +38,7 @@ function xtanh(x::Float64)
 end
 
 function xasinh(x::Float64)
-    y = abs(x);
+    y = abs(x)
     d = logk2(ddadd_d2_d2_d(ddsqrt_d2_d2(ddadd2_d2_d2_d(ddmul_d2_d_d(y, y),  1.0)), y))
     y = d.x + d.y
 
