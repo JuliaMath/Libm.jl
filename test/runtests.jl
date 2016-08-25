@@ -3,7 +3,6 @@ using Base.Test
 
 isnzero{T<:AbstractFloat}(x::T) = signbit(x)
 ispzero{T<:AbstractFloat}(x::T) = !signbit(x)
-
 function cmpdenorm{Tx<:AbstractFloat, Ty<:AbstractFloat}(x::Tx, y::Ty)
     sizeof(Tx) < sizeof(Ty) ? y = Tx(y) : x = Ty(x) # cast larger type to smaller type
     (isnan(x) && isnan(y)) && return true
@@ -20,17 +19,53 @@ function cmpdenorm{Tx<:AbstractFloat, Ty<:AbstractFloat}(x::Tx, y::Ty)
     return false
 end
 
-DBL_MIN = reinterpret(Float64,0x0000_0000_0000_0001)
-function ulp(x)
+# generalize this and the following method
+function ulp(x::Float64)
   x = abs(x)
   if x == 0
-    return DBL_MIN
+    return nextfloat(0.0)
   else
     exp = exponent(x)
   end
-  return max(ldexp(1.0, exp-53), DBL_MIN)
+  return max(ldexp(1.0, exp-53), nextfloat(0.0))
+end
+function ulp(x::Float32)
+  x = abs(x)
+  if x == 0
+    return nextfloat(0.0)
+  else
+    exp = exponent(x)
+  end
+  return max(ldexp(1.0, exp-24), nextfloat(0.0))
 end
 
+# the following compares x with y
+FloatTypes = Union{Float32,Float64}
+countulp{FT<:FloatTypes}(x::FT, y::BigFloat) = countulp(FT, promote(x, y)...)
+function countulp(T, x::BigFloat, y::BigFloat) # wrt to y
+    fx = T(x)
+    fy = T(y)
+    (isnan(fx) && isnan(fy)) && return 0
+    (isnan(fx) || isnan(fy)) && return 10000
+    if isinf(fx)
+        if sign(fx) == sign(fy) && abs(fy) > 1e+300
+            return 0 #Relaxed infinity handling
+        end
+        return 10001
+    end
+    (fx ===  Inf && fy ===  Inf) && return 0
+    (fx === -Inf && fy === -Inf) && return 0
+    if fy == 0
+        if fx == 0
+            return 0
+        end
+    return 10002
+    end
+    if !isnan(fx) && !isnan(fy) && !isinf(fx) && !isinf(fy)
+        return abs((x - y) / ulp(T(y)))
+    end
+    return 10003
+end
 
 # overide domain checking that base adheres to
 using Base.MPFR.ROUNDING_MODE
@@ -45,8 +80,9 @@ for f in (:sin,:cos,:tan,:asin,:acos,:tanh,:log,:asinh,:acosh,:atanh,:log10,:log
     end
 end
 
+
 @testset "sleef" begin
-for T in (Float64,)
+for T in (Float64,) # for now only guarantee for Float64
 
     @testset "denormal/nonnumber" begin
         @testset "denormal/nonnumber atan2" begin
@@ -480,16 +516,45 @@ for T in (Float64,)
         @testset "denormal/nonnumber ldexp" begin
             let
                 for i = -10000:10000
-                    a = xldexp(1.0,Int32(i))
+                    a = xldexp(T(1.0),Int32(i))
                     b = ldexp(BigFloat(1.0), i)
                     @test (isfinite(b) && a == b || cmpdenorm(a,b))
                 end
             end
         end
+
     end #denormal/nonnumber
 
+    @testset "accuracy (max error in ulp)" begin
+        @testset "accuracy sin" begin
+            rmax = 0
+            xa = vcat((-10:0.0002:10, -10000000:200.1:10000000)...)
+            for x in xa
+                # @show x
+                q = xsin(x)
+                c = sin(BigFloat(x))
+                u = countulp(q, c)
+                rmax = max(rmax, u)
+                if rmax > 1000
+                    @printf("q = %.20g\nc = %.20g\nd = %.20g\nulp = %g\n", q, T(c), x, T(ulp(c)))
+                end
+            end
+            for i = 1:10000
+                s = reinterpret(Float64, reinterpret(Int64, pi/4 * i) - 20)
+                e = reinterpret(Float64, reinterpret(Int64, pi/4 * i) - 20)
+                d = reinterpret(Float64, reinterpret(Int64, pi/4 * i) + 1)
+                for x in s:d:e
+                    q = xsin(x)
+                    c = sin(BigFloat(x))
+                    u = countulp(q, c)
+                    rmax = max(rmax, u)
+                end
+            end
+            @printf("sin : %f ... \n", rmax)
+            @test rmax < 5
+        end
+
+    end #accuracy 
 
 end #TYPES
 end #SLEEF
-
-

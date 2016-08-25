@@ -1,8 +1,9 @@
 
 # utility functions
 
+# emits the same native code as Base.sign
 # mulsign(x::Float64, y::Float64) = reinterpret(Float64, reinterpret(Int64,x) $ (reinterpret(Int64,y) & (1%Int64 << 63)))
-# this seems to emit better native code than Base.sign
+# emits better native code than Base.sign
 sign{T<:FloatTypes}(d::T) =  flipsign(one(T), d)
 
 mla(x::Number, y::Number, z::Number) = muladd(x,y,z)
@@ -27,6 +28,7 @@ function ldexpk(x::Float64, q::Int32)
     return x * u
 end
 
+# change to return Int64 in Float64 case and Int32 in Float32 case
 function ilogbp1(d::Float64)
     m = d < 4.9090934652977266e-91
     d = m ? 2.037035976334486e90 * d : d

@@ -1,4 +1,5 @@
 module Sleef
+
 using Base.Math.@horner
 
 export xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcosh, xtanh,
@@ -33,6 +34,9 @@ include("Sleef/exp.jl")
 include("Sleef/log.jl")
 include("Sleef/trig.jl")
 include("Sleef/hyp.jl")
+
+# sqrt without the domain checks which we don't need
+sqrt_fast{T<:FloatTypes}(x::T) = Base.box(T, Base.sqrt_llvm_fast(Base.unbox(T,x)))
 
 function xpow(x::Float64, y::Float64)
     yint = unsafe_trunc(Int32,y)
