@@ -1,19 +1,15 @@
 
 # utility functions
 
-# remove and just use reinterpret instead of the two function below (todo)
-double_to_raw_long_bits(d::Float64) = reinterpret(Int64, d)
-long_bits_to_double(i::Int64) = reinterpret(Float64, i)
-
-# mulsign(x::Float64, y::Float64) = long_bits_to_double(double_to_raw_long_bits(x) $ (double_to_raw_long_bits(y) & (1%Int64 << 63)))
+# mulsign(x::Float64, y::Float64) = reinterpret(Float64, reinterpret(Int64,x) $ (reinterpret(Int64,y) & (1%Int64 << 63)))
 # this seems to emit better native code than Base.sign
 sign{T<:FloatTypes}(d::T) =  flipsign(one(T), d)
 
-mla(x::Number, y::Number, z::Number) = muladd(x, y, z)
+mla(x::Number, y::Number, z::Number) = muladd(x,y,z)
 
 xrint(x::Float64) = unsafe_trunc(Int32, round(x)) # in sleef, but this is a limited way to truncate since Int32 (fix)
 
-pow2i(q::Int32) = long_bits_to_double(Int64(q + 0x3ff) << 52)
+pow2i(q::Int32) = reinterpret(Float64, Int64(q + 0x3ff) << 52)
 
 
 # private math functions
@@ -25,16 +21,16 @@ function ldexpk(x::Float64, q::Int32)
     m += Int32(0x3ff)
     m = m < 0 ? Int32(0) : m
     m = m > Int32(0x7ff) ? Int32(0x7ff) : m
-    u = long_bits_to_double(Int64(m) << 52)
+    u = reinterpret(Float64, Int64(m) << 52)
     x = x * u * u * u * u
-    u = long_bits_to_double(Int64(q + 0x3ff) << 52)
+    u = reinterpret(Float64, Int64(q + 0x3ff) << 52)
     return x * u
 end
 
 function ilogbp1(d::Float64)
     m = d < 4.9090934652977266e-91
     d = m ? 2.037035976334486e90 * d : d
-    q = ((double_to_raw_long_bits(d) >> 52) & 0x7ff) 
+    q = ((reinterpret(Int64, d) >> 52) & 0x7ff) 
     q = m ? q - (300 + 0x03fe) : q - 0x03fe
     return Int32(q)
 end

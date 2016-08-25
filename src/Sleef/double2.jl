@@ -22,9 +22,7 @@ function ddnormalize_d2_d2(t::Double2)
 end
 
 function ddscale_d2_d2_d{T<:FloatTypes}(d::Double2{T}, s::T)
-    rx = d.x * s
-    ry = d.y * s
-    return Double2(rx,ry)
+    return Double2(d.x * s, d.y * s)
 end
 
 function ddneg_d2_d2(d::Double2)
