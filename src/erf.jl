@@ -70,80 +70,83 @@ const sb5  =  2.55305040643316442583e+03 # 0x40A3F219, 0xCEDF3BE6
 const sb6  =  4.74528541206955367215e+02 # 0x407DA874, 0xE79FE763
 const sb7  = -2.24409524465858183362e+01 # 0xC03670E2, 0x42712D62
 
-function erfc1(x::Float64)
+function erfc1{T<:Union{Float32,Float64}}(x::T)
     s = abs(x) - 1
-    P = @horner s pa0 pa1 pa2 pa3 pa4 pa5 pa6
-    Q = @horner s 1.0 qa1 qa2 qa3 qa4 qa5 qa6
-    return 1 - erx - P/Q
+    P = @horner s T(pa0) T(pa1) T(pa2) T(pa3) T(pa4) T(pa5) T(pa6)
+    Q = @horner s 1 T(qa1) T(qa2) T(qa3) T(qa4) T(qa5) T(qa6)
+    return 1 - T(erx) - P/Q
 end
 
-function erfc2(ix::UInt32, x::Float64)
-    if ix < 0x3ff40000  # |x| < 1.25
+function erfc2{T<:Union{Float32,Float64}}(ix::UInt32, x::T)
+    if ix < highword(T(1.25))
+        # 0.84375 <= |x| < 1.25
         return erfc1(x)
     end
-    x = abs(x) 
+    # 1.25 <= |x| < 28
+    x = abs(x)
     s = 1/(x*x)
-    if ix < 0x4006db6d # |x| < 1/.35 ~ 2.85714
-        R = @horner s ra0 ra1 ra2 ra3 ra4 ra5 ra6 ra7
-        S = @horner s 1.0 sa1 sa2 sa3 sa4 sa5 sa6 sa7 sa8
-    else # |x| > 1/.35
-        R = @horner s rb0 rb1 rb2 rb3 rb4 rb5 rb6
-        S = @horner s 1.0 sb1 sb2 sb3 sb4 sb5 sb6 sb7
+    if ix < highword(T(1/0.35000001))
+        # 1.25 <= |x| < 1/.35 ~ 2.85714
+        R = @horner s T(ra0) T(ra1) T(ra2) T(ra3) T(ra4) T(ra5) T(ra6) T(ra7)
+        S = @horner s 1 T(sa1) T(sa2) T(sa3) T(sa4) T(sa5) T(sa6) T(sa7) T(sa8)
+    else
+        # 1/.35 <= |x| < 28
+        R = @horner s T(rb0) T(rb1) T(rb2) T(rb3) T(rb4) T(rb5) T(rb6)
+        S = @horner s 1 T(sb1) T(sb2) T(sb3) T(sb4) T(sb5) T(sb6) T(sb7)
     end
-    z = x
-    z = setlowword(z,UInt32(0))
-    return exp(-z*z-0.5625)*exp((z-x)*(z+x)+R/S)/x
+    z = trunclo(x)
+    return exp(-z*z-T(0.5625))*exp((z-x)*(z+x)+R/S)/x
 end
 
-function erf(x::Float64)
+function erf{T<:Union{Float32,Float64}}(x::T)
     ix = highword(x)
-    sign = (ix>>31) % Int32
+    sign = (ix>>31) % Bool
     ix &= 0x7fffffff
-    if ix >= 0x7ff00000 # erf(nan)=nan, erf(+-inf)=+-1
+    if ix >= highword(T(Inf)) # erf(nan)=nan, erf(+-inf)=+-1
         return 1-2*sign + 1/x
     end
-    if ix < 0x3feb0000 # |x| < 0.84375
-        if ix < 0x3e300000 #|x| < 2**-28  avoid underflow
-            return 0.125*(8*x + efx8*x)
+    if ix < highword(T(0.84375)) # |x| < 0.84375
+        if ix < highword(T(2)^-28) #|x| < 2**-28  avoid underflow
+            return (8*x +T(efx8)*x)/8
         end
         z = x*x
-        r = @horner z pp0 pp1 pp2 pp3 pp4
-        s = @horner z 1.0 qq1 qq2 qq3 qq4 qq5
+        r = @horner z T(pp0) T(pp1) T(pp2) T(pp3) T(pp4)
+        s = @horner z 1 T(qq1) T(qq2) T(qq3) T(qq4) T(qq5)
         y = r/s
         return x + x*y
     end
-    if ix < 0x40180000 # 0.84375 <= |x| < 6
+    if ix < highword(T(6)) # 0.84375 <= |x| < 6
         y = 1 - erfc2(ix,x)
     else
-        y = 1 - 0x1p-1022
+        y = 1 - realmin(T)
     end
-    return sign != 0 ? -y : y
+    return sign ? -y : y
 end
 
-function erfc(x::Float64)
+function erfc{T<:Union{Float32,Float64}}(x::T)
     ix = highword(x)
-    sign = (ix>>31) % Int32
+    sign = (ix>>31) % Bool
     ix &= 0x7fffffff
-    if ix >= 0x7ff00000 # erfc(nan)=nan, erfc(+-inf)=0,2
+    if ix >= highword(T(Inf)) # erfc(nan)=nan, erfc(+-inf)=0,2
         return 2*sign + 1/x
     end
-    if ix < 0x3feb0000 # |x| < 0.84375
-        if ix < 0x3c700000  # |x| < 2**-56
-            return 1.0 - x
+    if ix < highword(T(0.84375)) # |x| < 0.84375
+        if ix < highword(T(2)^-56)  # |x| < 2**-56
+            return 1 - x
         end
         z = x*x
-        r = @horner z pp0 pp1 pp2 pp3 pp4
-        s = @horner z 1.0 qq1 qq2 qq3 qq4 qq5
+        r = @horner z T(pp0) T(pp1) T(pp2) T(pp3) T(pp4)
+        s = @horner z 1 T(qq1) T(qq2) T(qq3) T(qq4) T(qq5)
         y = r/s
-        if sign != 0 || ix < 0x3fd00000 # x < 1/4 
-            return 1.0 - (x+x*y)
+        if sign || ix < highword(T(0.25)) # x < 1/4 
+            return 1 - (x+x*y)
         end
-        return 0.5 - (x - 0.5 + x*y)
+        return T(0.5) - (x - T(0.5) + x*y)
     end
-    if ix < 0x403c0000 # 0.84375 <= |x| < 28
-        return sign != 0 ? 2 - erfc2(ix,x) : erfc2(ix,x)
+    if ix < highword(T(28)) # 0.84375 <= |x| < 28
+        return sign ? 2 - erfc2(ix,x) : erfc2(ix,x)
     end
-    return sign != 0 ? 2 - 0x1p-1022 : 0x1p-1022*0x1p-1022
+    return sign ? 2 - realmin(T) : realmin(T)*realmin(T)
 end
 
 end
