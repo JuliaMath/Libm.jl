@@ -1,6 +1,7 @@
 module Sleef
 
 using Base.Math.@horner
+using Base: significand_bits, exponent_bits, exponent_bias
 
 export xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcosh, xtanh,
     xasinh, xacosh, xatanh, xcbrt, xlog, xexp, xexp2, xexp10, xexpm1, xlog10, xlog1p, xilogb, xldexp

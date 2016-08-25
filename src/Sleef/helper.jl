@@ -1,16 +1,16 @@
-
 # utility functions
 
-# emits the same native code as Base.sign
-# mulsign(x::Float64, y::Float64) = reinterpret(Float64, reinterpret(Int64,x) $ (reinterpret(Int64,y) & (1%Int64 << 63)))
+# emits more compact native code
+# copysign(x::Float64, y::Float64) = reinterpret(Float64, reinterpret(Int64,x) $ (reinterpret(Int64,y) & (Int64(1) << 63)))
+
 # emits better native code than Base.sign
-sign{T<:FloatTypes}(d::T) =  flipsign(one(T), d)
+@inline sign{T<:FloatTypes}(d::T) =  copysign(one(T), d)
 
-mla(x::Number, y::Number, z::Number) = muladd(x,y,z)
+@inline mla(x::Number, y::Number, z::Number) = muladd(x,y,z)
 
-xrint(x::Float64) = unsafe_trunc(Int32, round(x)) # in sleef, but this is a limited way to truncate since Int32 (fix)
+@inline xrint(x::Float64) = unsafe_trunc(Int32, round(x)) # in sleef, but this is a limited way to truncate since Int32 (fix)
 
-pow2i(q::Int32) = reinterpret(Float64, Int64(q + 0x3ff) << 52)
+@inline pow2i(q::Int32) = reinterpret(Float64, Int64(q + exponent_bias(Float64)) << significand_bits(Float64))
 
 
 # private math functions
