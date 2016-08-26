@@ -29,7 +29,7 @@ function ldexpk(x::Float64, q::Int32)
 end
 
 # change to return Int64 in Float64 case and Int32 in Float32 case
-function ilogbp1(d::Float64)
+@inline function ilogbp1(d::Float64)
     m = d < 4.9090934652977266e-91
     d = m ? 2.037035976334486e90 * d : d
     q = ((reinterpret(Int64, d) >> 52) & 0x7ff) 

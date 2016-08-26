@@ -1,82 +1,99 @@
 using Libm
 using JLD
 using BenchmarkTools
-
-const bench = ("Base","Libm")
 RETUNE = false
-VERBOSE = false
+VERBOSE = true
+DETAILS = false
 
+const bench = ("Base","Sleef","Sleef_u1")
 const suite = BenchmarkGroup()
 for n in bench
     suite[n] = BenchmarkGroup([n])
 end
-srand(100)
 
-x1 = linspace(708.4, 709.7, 10000)
-x2 = -linspace(708.4, 709.7, 10000)
-x3 = linspace(0.5*log(2),1.5*log(2), 10000)
-x4 = -linspace(0.5*log(2),1.5*log(2), 10000)
-x5 = linspace(1.5*log(2),10, 10000)
-x6 = -linspace(1.5*log(2),10, 10000)
-x7 = linspace(2.0^-28,2.0^-27, 10000)
-x8 = -linspace(2.0^-28,2.0^-27, 10000)
-x9 = linspace(1.0, 10.0, 1000)
-x10 = -linspace(1.0, 10.0, 1000)
-x11 = 40000*(rand(2_000_000)-0.5)
-xx_exp = union(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11)
-xx_sm = logspace(-16,0,2_000_000)
-xx_log = 4000*rand(2_000_000)
-xx_trig =  vcat((-40:0.00005:40, -40_000_000:25.0125:40_000_000, 1:0.125:40000)...)
+xx_sml = logspace(-16,0,2_000_000)
+xx_exp = vcat(-20:0.00005:20, -1000:0.1:1000)
+xx_log = vcat(0.00001:0.00001:20, 0.0001:0.1:20_000, 2.0.^(-1000:1000))
+xx_trig =  vcat(-10:0.0000125:10, -40:0.00005:40, -40_000_000:25.0125:40_000_000)
 xx_hyp = linspace(-15, 15, 50_000_000)
+xx_cbrt = vcat(-10000:0.2:10000, 2.1.^(-1000:1000))
 
 const micros = Dict(
-    "exp"   => xx_exp,
-    "exp2"  => xx_exp,
-    "exp10" => xx_exp,
-    "expm1" => xx_sm,
+    # "exp"   => xx_exp,
+    # "exp2"  => xx_exp,
+    # "exp10" => xx_exp,
+    # "expm1" => xx_sml,
     "log"   => xx_log,
-    "log10" => xx_log,
-    "log1p" => xx_sm,
+    # "log10" => xx_log,
+    # "log1p" => xx_sml,
     "sin"   => xx_trig,
     "cos"   => xx_trig,
     "tan"   => xx_trig,
-    "sinh"  => xx_hyp,
-    "cosh"  => xx_hyp,
-    "tanh"  => xx_hyp
+    "cbrt"  => xx_cbrt
+    # "sinh"  => xx_hyp,
+    # "cosh"  => xx_hyp,
+    # "tanh"  => xx_hyp
     )
 
+const micros_u1 = Dict(
+    "log"   => xx_log,
+    "sin"   => xx_trig,
+    "cos"   => xx_trig,
+    "tan"   => xx_trig,
+    "cbrt"  => xx_cbrt
+    )
 
-for n in keys(suite)
+for n in ("Base","Sleef")
     for (f,v) in micros
         suite[n][f] = BenchmarkGroup([f])
-        n == "Libm" ? fun = Symbol("x",f) : fun = Symbol(f)
+        n == "Sleef" ? fun = Symbol("x",f) : fun = Symbol(f)
         suite[n][f] = @benchmarkable $fun.($v)
     end
 end
+for (f,v) in micros_u1
+    suite["Sleef_u1"][f] = BenchmarkGroup([f])
+    fun = Symbol("x",f,"_u1")
+    suite["Sleef_u1"][f] = @benchmarkable $fun.($v)
+end
+
 paramf = joinpath("./", "bench", "params.jld") #fixme
 if !isfile(paramf) || RETUNE
-    tune!(suite, verbose=true)
+    tune!(suite, verbose=VERBOSE)
     save(paramf, "suite", params(suite))
     println("Saving tuned parameters.")
 else
     println("Loading pretuned parameters.")
     loadparams!(suite, load(paramf, "suite"), :evals, :samples)
 end
+
 println("Warming up...")
 warmup(suite)
 println("Running micro benchmarks...")
-results = run(suite, verbose=true)
+results = run(suite, verbose=VERBOSE)
 
 for f in sort(collect(keys(micros)))
     println()
     print_with_color(:magenta, string(f, " benchmark\n"))
-    print_with_color(:blue, "median ratio Libm/Base\n")
-    println(ratio(median(results["Libm"][f]), median(results["Base"][f])))
+    print_with_color(:blue, "median ratio Sleef/Base\n")
+    println(ratio(median(results["Sleef"][f]), median(results["Base"][f])))
     println()
-    if VERBOSE
-    print_with_color(:blue, "details Libm/Base\n")
-    println(results["Libm"][f])
-    println(results["Base"][f])
+    if DETAILS
+        print_with_color(:blue, "details Sleef/Base\n")
+        println(results["Sleef"][f])
+        println(results["Base"][f])
+        println()
+    end
+end
+for f in sort(collect(keys(micros_u1)))
     println()
+    print_with_color(:magenta, string(f, " benchmark\n"))
+    print_with_color(:blue, "median ratio Sleef_u1/Base\n")
+    println(ratio(median(results["Sleef_u1"][f]), median(results["Base"][f])))
+    println()
+    if DETAILS
+        print_with_color(:blue, "details Sleef_u1/Base\n")
+        println(results["Sleef_u1"][f])
+        println(results["Base"][f])
+        println()
     end
 end
