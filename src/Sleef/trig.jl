@@ -250,9 +250,9 @@ function xatan2(y::Float64, x::Float64)
     return isnan(x) || isnan(y) ? NaN : flipsign(r, y)
 end
 
-xasin(d::Float64) = flipsign(atan2k(abs(d), sqrt_fast((1+d)*(1-d))), d)
+xasin(d::Float64) = flipsign(atan2k(abs(d), _sqrt((1+d)*(1-d))), d)
 
-xacos(d::Float64) = flipsign(atan2k(sqrt_fast((1+d)*(1-d)), abs(d)), d) + (d < 0 ? M_PI/1 : 0.0)
+xacos(d::Float64) = flipsign(atan2k(_sqrt((1+d)*(1-d)), abs(d)), d) + (d < 0 ? M_PI/1 : 0.0)
 
 let
 global xatan

@@ -173,6 +173,6 @@ function ddrec_d2_d2{T<:FloatTypes}(d::Double2{T})
 end
 
 function ddsqrt_d2_d2{T<:FloatTypes}(d::Double2{T})
-    t = sqrt_fast(d.x + d.y)
+    t = _sqrt(d.x + d.y)
     return ddscale_d2_d2_d(ddmul_d2_d2_d2(ddadd2_d2_d2_d2(d, ddmul_d2_d_d(t, t)), ddrec_d2_d(t)), T(0.5))
 end
