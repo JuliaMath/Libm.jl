@@ -46,7 +46,6 @@ function xsin_u1(d::Float64)
     x = ddadd_d2_d_d2(1.0, ddmul_d2_d2_d2(ddadd_d2_d_d(-0.166666666666666657414808, u * s.x), s))
     x = ddmul_d2_d2_d2(t, x)
     u = x.x + x.y
-
     (q & 1) != 0 && (u = -u)
     return u
 end
@@ -66,7 +65,6 @@ const c1 = -0.166666666666666657414808
 
 function xcos(d::Float64)
     q = 1 + 2*xrint(d * M_1_PI - 0.5)
-
     d = mla(q, -PI4_A*2, d)
     d = mla(q, -PI4_B*2, d)
     d = mla(q, -PI4_C*2, d)
@@ -236,7 +234,6 @@ end
 
 function xatan2(y::Float64, x::Float64)
     r = atan2k(abs(y), x)
-
     r = flipsign(r, x)
     if isinf(x) || x == 0
         r = M_PI/2 - (isinf(x) ? (sign(x) * (M_PI/2)) : 0.0)
@@ -287,8 +284,25 @@ function xatan(s::Float64)
         q |= 1
     end
     t = s*s
-    # sleef does not use mla here
-    u = @horner t c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c18 c19
+    u = c19
+    u = u * t + c18
+    u = u * t + c17
+    u = u * t + c16
+    u = u * t + c15
+    u = u * t + c14
+    u = u * t + c13
+    u = u * t + c12
+    u = u * t + c11
+    u = u * t + c10
+    u = u * t + c9
+    u = u * t + c8
+    u = u * t + c7
+    u = u * t + c6
+    u = u * t + c5
+    u = u * t + c4
+    u = u * t + c3
+    u = u * t + c2
+    u = u * t + c1
     t = s + s*(t*u)
     (q & 1) != 0 && (t = 1.570796326794896557998982 - t)
     (q & 2) != 0 && (t = -t)

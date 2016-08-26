@@ -24,6 +24,7 @@ const L2L = .28235290563031577122588448175013436025525412068e-12
 const R_LN2 = 1.442695040888963407359924681001892137426645954152985934135449406931
 
 const M_1_PI = 1/pi
+const M_2_PI = 2/pi
 const M_PI = pi
 
 include("Sleef/double2.jl")
@@ -70,12 +71,11 @@ function xcbrt(d::Float64) # max error 2 ulps
     r = (e + 6144) % 3
     q = (r == 1) ? 1.2599210498948731647672106 : q
     q = (r == 2) ? 1.5874010519681994747517056 : q
-    q = ldexpk(q, unsafe_trunc(Int32, (e + 6144)/3 - 2048))
+    q = ldexpk(q, Int32((e + 6144)÷3 - 2048))
 
     q = flipsign(q, d)
     d = abs(d)
 
-    # todo horner,  sleef doesn't use mla here
     x = -0.640245898480692909870982
     x = x * d + 2.96155103020039511818595
     x = x * d + -5.73353060922947843636166
@@ -104,7 +104,6 @@ function xcbrt_u1(d::Float64)
     q3 = Double2(flipsign(q2.x, d), flipsign(q2.y, d))
     d = abs(d)
     
-    # todo horner,  sleef doesn't use mla here
     x = -0.640245898480692909870982
     x = x * d + 2.96155103020039511818595
     x = x * d + -5.73353060922947843636166
@@ -128,7 +127,7 @@ function xcbrt_u1(d::Float64)
     v = ddadd2_d2_d2_d(ddmul_d2_d_d(z, z), y)
     v = ddmul_d2_d2_d(v, d)
     v = ddmul_d2_d2_d2(v, q3)
-    z = ldexp(v.x + v.y, unsafe_trunc(Int32, (e + 6144)/3 - 2048))
+    z = ldexp(v.x + v.y, Int32((e + 6144)÷3 - 2048))
 
     isinf(d) && (z = flipsign(Inf, q3.x))
     d == 0 && (z = flipsign(0.0, q3.x))

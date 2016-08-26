@@ -9,7 +9,7 @@ end
 
 function xexp10(a::Float64)
     u = expk(ddmul_d2_d2_d(Double2(2.3025850929940459011, -2.1707562233822493508e-16), a))
-    a > 308   && (u = Inf)
+    a > 308    && (u = Inf)
     a === -Inf && (u = 0.0)
     return u
 end
