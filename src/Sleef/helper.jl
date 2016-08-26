@@ -8,7 +8,7 @@
 
 @inline mla(x::Number, y::Number, z::Number) = muladd(x,y,z)
 
-@inline xrint(x::Float64) = unsafe_trunc(Int32, round(x)) # in sleef, but this is a limited way to truncate since Int32 (fix)
+@inline xrint(x::Float64) = x < 0 ? unsafe_trunc(Int32, x - 0.5) : unsafe_trunc(Int32, x + 0.5)
 
 @inline pow2i(q::Int32) = reinterpret(Float64, Int64(q + exponent_bias(Float64)) << significand_bits(Float64))
 

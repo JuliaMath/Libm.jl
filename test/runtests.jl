@@ -42,7 +42,7 @@ end
 # the following compares x with y
 FloatTypes = Union{Float32,Float64}
 countulp{FT<:FloatTypes}(x::FT, y::BigFloat) = countulp(FT, promote(x, y)...)
-function countulp(T, x::BigFloat, y::BigFloat) # wrt to y
+function countulp(T, x::BigFloat, y::BigFloat)::T # wrt to y
     fx = T(x)
     fy = T(y)
     (isnan(fx) && isnan(fy)) && return 0
@@ -53,8 +53,8 @@ function countulp(T, x::BigFloat, y::BigFloat) # wrt to y
         end
         return 10001
     end
-    (fx ===  Inf && fy ===  Inf) && return 0
-    (fx === -Inf && fy === -Inf) && return 0
+    (fx ==  Inf && fy ==  Inf) && return 0
+    (fx == -Inf && fy == -Inf) && return 0
     if fy == 0
         if fx == 0
             return 0
@@ -80,7 +80,7 @@ for f in (:sin,:cos,:tan,:asin,:acos,:tanh,:log,:asinh,:acosh,:atanh,:log10,:log
     end
 end
 
-
+function runtests()
 @testset "sleef" begin
 for T in (Float64,) # for now only guarantee for Float64
 
@@ -526,35 +526,42 @@ for T in (Float64,) # for now only guarantee for Float64
     end #denormal/nonnumber
 
     @testset "accuracy (max error in ulp)" begin
-        @testset "accuracy sin" begin
-            rmax = 0
-            xa = vcat((-10:0.0002:10, -10000000:200.1:10000000)...)
-            for x in xa
-                # @show x
-                q = xsin(x)
-                c = sin(BigFloat(x))
-                u = countulp(q, c)
-                rmax = max(rmax, u)
-                if rmax > 1000
-                    @printf("q = %.20g\nc = %.20g\nd = %.20g\nulp = %g\n", q, T(c), x, T(ulp(c)))
-                end
-            end
-            for i = 1:10000
-                s = reinterpret(Float64, reinterpret(Int64, pi/4 * i) - 20)
-                e = reinterpret(Float64, reinterpret(Int64, pi/4 * i) - 20)
-                d = reinterpret(Float64, reinterpret(Int64, pi/4 * i) + 1)
-                for x in s:d:e
-                    q = xsin(x)
-                    c = sin(BigFloat(x))
+        
+        for fun in (:sin, :cos)
+            xfun = Symbol(:x,fun)
+
+            @testset "accuracy $fun" begin
+                rmax = 0.0
+                xa = vcat(-10:0.0002:10, -10000000:200.1:10000000)
+                for x in xa
+                    q = @eval $xfun($x)
+                    c = @eval $fun(BigFloat($x))
                     u = countulp(q, c)
                     rmax = max(rmax, u)
+                    if rmax > 1000
+                        @printf("%s = %.20g\n%s  = %.20g\nx = %.20g\nulp = %g\n", string(xfun), q, string(fun), T(c), x, ulp(T(c)))
+                    end
                 end
+                for i = 1:10000
+                    s = reinterpret(Float64, reinterpret(Int64, pi/4 * i) - 20)
+                    e = reinterpret(Float64, reinterpret(Int64, pi/4 * i) - 20)
+                    d = reinterpret(Float64, reinterpret(Int64, pi/4 * i) + 1)
+                    for x in s:d:e
+                        q = @eval $xfun($x)
+                        c = @eval $fun(BigFloat($x))
+                        u = countulp(q, c)
+                        rmax = max(rmax, u)
+                    end
+                end
+                @printf("%s : %f\n", string(fun), rmax)
+                @test rmax < 5
             end
-            @printf("sin : %f ... \n", rmax)
-            @test rmax < 5
         end
 
     end #accuracy 
 
 end #TYPES
-end #SLEEF
+end
+end #test
+
+runtests()
