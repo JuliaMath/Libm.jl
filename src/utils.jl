@@ -66,16 +66,6 @@ will give an incorrect result for the case `x = y = 0x1.800000e000001p+0`.
     reinterpret(Float32, reinterpret(UInt32,x) & 0xffff_f000)
 
 
-
-"""
-    setlowword(d::Float64, lo::UInt32)
-
-Returns the least significant 32 bits of `d` to `lo`.
-Corresponds to `SET_LOW_WORD` in musl
-"""
-@inline setlowword(d::Float64, lo::UInt32) = reinterpret(Float64, reinterpret(UInt64, d) & 0xffff_ffff_0000_0000 | lo)
-
-
 # determine if hardware FMA is available
 # should probably check with LLVM, see #9855.
 """
