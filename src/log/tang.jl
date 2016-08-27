@@ -141,12 +141,6 @@ const _log_tang_table_Float32 = [0.0,0.007782140442054949,0.015504186535965254,0
     0.6773988235918061,0.6813592248079031,0.6853040030989194,0.689233281238809,
     0.6931471805599453]
 
-# truncate lower order bits (up to 26)
-# ideally, this should be able to use ANDPD instructions, see #9868.
-@inline function truncbits(x::Float64)
-    reinterpret(Float64, reinterpret(UInt64,x) & 0xffff_ffff_f800_0000)
-end
-
 
 # Procedure 1
 @inline function _log_tang_proc1(y::Float64,mf::Float64,F::Float64,f::Float64,jp::Int)
@@ -199,8 +193,8 @@ end
     if is_fma_fast(Float64)
         return u + fma(fma(-u,f,2(f-u)), g, q)
     else
-        u1 = truncbits(u) # round to 24 bits
-        f1 = truncbits(f)
+        u1 = trunclo(u)
+        f1 = trunclo(f)
         f2 = f-f1
         u2 = ((2*(f-u1)-u1*f1)-u1*f2)*g
         ## Step 4
