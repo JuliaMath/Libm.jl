@@ -69,15 +69,15 @@ const sb4  =  3.19985821950859553908e+03 # 0x40A8FFB7, 0x688C246A
 const sb5  =  2.55305040643316442583e+03 # 0x40A3F219, 0xCEDF3BE6
 const sb6  =  4.74528541206955367215e+02 # 0x407DA874, 0xE79FE763
 const sb7  = -2.24409524465858183362e+01 # 0xC03670E2, 0x42712D62
-
-function erfc1{T<:Union{Float32,Float64}}(x::T)
+    
+function erfc1{T<:FloatTypes}(x::T)
     s = abs(x) - 1
-    P = @horner s T(pa0) T(pa1) T(pa2) T(pa3) T(pa4) T(pa5) T(pa6)
-    Q = @horner s 1 T(qa1) T(qa2) T(qa3) T(qa4) T(qa5) T(qa6)
+    P = @horner_oftype s pa0 pa1 pa2 pa3 pa4 pa5 pa6
+    Q = @horner_oftype s 1.0 qa1 qa2 qa3 qa4 qa5 qa6
     return 1 - T(erx) - P/Q
 end
 
-function erfc2{T<:Union{Float32,Float64}}(ix::UInt32, x::T)
+function erfc2{T<:FloatTypes}(ix::UInt32, x::T)
     if ix < highword(T(1.25))
         # 0.84375 <= |x| < 1.25
         return erfc1(x)
@@ -87,18 +87,18 @@ function erfc2{T<:Union{Float32,Float64}}(ix::UInt32, x::T)
     s = 1/(x*x)
     if ix < highword(T(1/0.35000001))
         # 1.25 <= |x| < 1/.35 ~ 2.85714
-        R = @horner s T(ra0) T(ra1) T(ra2) T(ra3) T(ra4) T(ra5) T(ra6) T(ra7)
-        S = @horner s 1 T(sa1) T(sa2) T(sa3) T(sa4) T(sa5) T(sa6) T(sa7) T(sa8)
+        R = @horner_oftype s ra0 ra1 ra2 ra3 ra4 ra5 ra6 ra7
+        S = @horner_oftype s 1.0 sa1 sa2 sa3 sa4 sa5 sa6 sa7 sa8
     else
         # 1/.35 <= |x| < 28
-        R = @horner s T(rb0) T(rb1) T(rb2) T(rb3) T(rb4) T(rb5) T(rb6)
-        S = @horner s 1 T(sb1) T(sb2) T(sb3) T(sb4) T(sb5) T(sb6) T(sb7)
+        R = @horner_oftype s rb0 rb1 rb2 rb3 rb4 rb5 rb6
+        S = @horner_oftype s 1.0 sb1 sb2 sb3 sb4 sb5 sb6 sb7
     end
     z = trunclo(x)
     return exp(-z*z-T(0.5625))*exp((z-x)*(z+x)+R/S)/x
 end
 
-function erf{T<:Union{Float32,Float64}}(x::T)
+function erf{T<:FloatTypes}(x::T)
     ix = highword(x)
     sign = (ix>>31) % Bool
     ix &= 0x7fffffff
@@ -110,8 +110,8 @@ function erf{T<:Union{Float32,Float64}}(x::T)
             return (8*x +T(efx8)*x)/8
         end
         z = x*x
-        r = @horner z T(pp0) T(pp1) T(pp2) T(pp3) T(pp4)
-        s = @horner z 1 T(qq1) T(qq2) T(qq3) T(qq4) T(qq5)
+        r = @horner_oftype z pp0 pp1 pp2 pp3 pp4
+        s = @horner_oftype z 1 qq1 qq2 qq3 qq4 qq5
         y = r/s
         return x + x*y
     end
@@ -123,7 +123,7 @@ function erf{T<:Union{Float32,Float64}}(x::T)
     return sign ? -y : y
 end
 
-function erfc{T<:Union{Float32,Float64}}(x::T)
+function erfc{T<:FloatTypes}(x::T)
     ix = highword(x)
     sign = (ix>>31) % Bool
     ix &= 0x7fffffff
@@ -135,8 +135,8 @@ function erfc{T<:Union{Float32,Float64}}(x::T)
             return 1 - x
         end
         z = x*x
-        r = @horner z T(pp0) T(pp1) T(pp2) T(pp3) T(pp4)
-        s = @horner z 1 T(qq1) T(qq2) T(qq3) T(qq4) T(qq5)
+        r = @horner_oftype z pp0 pp1 pp2 pp3 pp4
+        s = @horner_oftype z 1 qq1 qq2 qq3 qq4 qq5
         y = r/s
         if sign || ix < highword(T(0.25)) # x < 1/4 
             return 1 - (x+x*y)
