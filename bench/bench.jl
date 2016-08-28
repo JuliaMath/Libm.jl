@@ -1,8 +1,8 @@
 using Libm
 using JLD
 using BenchmarkTools
-RETUNE = false
-VERBOSE = true
+RETUNE = true
+VERBOSE = false
 DETAILS = false
 
 const bench = ("Base","Sleef","Sleef_u1")
@@ -24,11 +24,11 @@ const micros = Dict(
     # "exp10" => xx_exp,
     # "expm1" => xx_sml,
     "log"   => xx_log,
-    # "log10" => xx_log,
-    # "log1p" => xx_sml,
-    "sin"   => xx_trig,
-    "cos"   => xx_trig,
-    "tan"   => xx_trig,
+    "log10" => xx_log,
+    "log1p" => xx_sml,
+    # "sin"   => xx_trig,
+    # "cos"   => xx_trig,
+    # "tan"   => xx_trig,
     "cbrt"  => xx_cbrt
     # "sinh"  => xx_hyp,
     # "cosh"  => xx_hyp,
@@ -37,9 +37,9 @@ const micros = Dict(
 
 const micros_u1 = Dict(
     "log"   => xx_log,
-    "sin"   => xx_trig,
-    "cos"   => xx_trig,
-    "tan"   => xx_trig,
+    # "sin"   => xx_trig,
+    # "cos"   => xx_trig,
+    # "tan"   => xx_trig,
     "cbrt"  => xx_cbrt
     )
 
@@ -58,7 +58,7 @@ end
 
 paramf = joinpath("./", "bench", "params.jld") #fixme
 if !isfile(paramf) || RETUNE
-    tune!(suite, verbose=VERBOSE)
+    tune!(suite; verbose=VERBOSE)
     save(paramf, "suite", params(suite))
     println("Saving tuned parameters.")
 else
@@ -69,7 +69,7 @@ end
 println("Warming up...")
 warmup(suite)
 println("Running micro benchmarks...")
-results = run(suite, verbose=VERBOSE)
+results = run(suite; verbose=VERBOSE)
 
 for f in sort(collect(keys(micros)))
     println()

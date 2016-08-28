@@ -1,4 +1,6 @@
 # utility functions
+using Base: significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
+
 
 # emits more compact native code
 # copysign(x::Float64, y::Float64) = reinterpret(Float64, reinterpret(Int64,x) $ (reinterpret(Int64,y) & (Int64(1) << 63)))
@@ -8,23 +10,41 @@
 
 @inline mla(x::Number, y::Number, z::Number) = muladd(x,y,z)
 
-@inline xrint(x::Float64) = x < 0 ? unsafe_trunc(Int32, x - 0.5) : unsafe_trunc(Int32, x + 0.5)
+@inline xrint(x::Float64) = x < 0 ? unsafe_trunc(Int, x - 0.5) : unsafe_trunc(Int, x + 0.5)
 
-@inline pow2i(q::Int32) = reinterpret(Float64, Int64(q + exponent_bias(Float64)) << significand_bits(Float64))
+@inline pow2i(q::Integer) = reinterpret(Float64, Int64(q + exponent_bias(Float64)) << significand_bits(Float64))
 
+@pure exponent_max{T<:AbstractFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
 # private math functions
 
-function ldexpk(x::Float64, q::Int32)
+# function ldexpk(x::Float64, q::Int32)
+#     m = q >> 31
+#     m = (((m + q) >> 9) - m) << 7
+#     q = q - (m << 2)
+#     m += Int32(0x3ff)
+#     m = m < 0 ? Int32(0) : m
+#     m = m > Int32(0x7ff) ? Int32(0x7ff) : m
+#     u = reinterpret(Float64, Int64(m) << 52)
+#     x = x * u * u * u * u
+#     u = reinterpret(Float64, Int64(q + 0x3ff) << 52)
+#     return x * u
+# end
+
+# todo: check type inference on 32 bit systems
+function ldexpk(x::Float64, q::Integer)
+    bias= exponent_bias(Float64)
+    expmax = exponent_max(Float64)
+    shift = significand_bits(Float64)
     m = q >> 31
     m = (((m + q) >> 9) - m) << 7
     q = q - (m << 2)
-    m += Int32(0x3ff)
-    m = m < 0 ? Int32(0) : m
-    m = m > Int32(0x7ff) ? Int32(0x7ff) : m
-    u = reinterpret(Float64, Int64(m) << 52)
+    m += bias
+    m = m < 0 ? 0 : m
+    m = m > expmax ? expmax : m
+    u = reinterpret(Float64, Int64(m) << shift)
     x = x * u * u * u * u
-    u = reinterpret(Float64, Int64(q + 0x3ff) << 52)
+    u = reinterpret(Float64, Int64(q + bias) << shift)
     return x * u
 end
 
@@ -34,7 +54,7 @@ end
     d = m ? 2.037035976334486e90 * d : d
     q = ((reinterpret(Int64, d) >> 52) & 0x7ff) 
     q = m ? q - (300 + 0x03fe) : q - 0x03fe
-    return Int32(q)
+    return q
 end
 
 let
@@ -73,7 +93,7 @@ function atan2k(y::Float64, x::Float64)
     # sleef does not use mla here!
     u = @horner t c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19
     t = u*t*s + s
-    t = q*(M_PI/2) + t
+    t = q*(MPI/2) + t
     return t
 end
 end
@@ -160,9 +180,9 @@ const c2 = 0.166666666666666740681535
 const c1 = 0.500000000000000999200722
 
 function expk(d::Double2)
-    q = xrint((d.x + d.y) * R_LN2)
-    s = ddadd2_d2_d2_d(d, q*-L2U)
-    s = ddadd2_d2_d2_d(s, q*-L2L)
+    q = xrint((d.x + d.y)*LOG2E)
+    s = ddadd2_d2_d2_d(d, q*-LN2U)
+    s = ddadd2_d2_d2_d(s, q*-LN2L)
     s = ddnormalize_d2_d2(s)
     u = @horner s.x c1 c2 c3 c4 c5 c6 c7 c8 c9 c10
     t = ddadd_d2_d2_d2(s, ddmul_d2_d2_d(ddsqu_d2_d2(s), u))
@@ -185,9 +205,9 @@ const c2 = 0.166666666666666740681535
 const c1 = 0.500000000000000999200722
 
 function expk2(d::Double2)
-    q = xrint((d.x + d.y)*R_LN2)
-    s = ddadd2_d2_d2_d(d, q*-L2U)
-    s = ddadd2_d2_d2_d(s, q*-L2L)
+    q = xrint((d.x + d.y)*LOG2E)
+    s = ddadd2_d2_d2_d(d, q*-LN2U)
+    s = ddadd2_d2_d2_d(s, q*-LN2L)
     u = @horner s.x c1 c2 c3 c4 c5 c6 c7 c8 c9 c10
     t = ddadd_d2_d2_d2(s, ddmul_d2_d2_d(ddsqu_d2_d2(s), u))
     t = ddadd_d2_d_d2(1.0, t)

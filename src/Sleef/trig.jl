@@ -11,11 +11,11 @@ const c2 =  0.00833333333333332974823815
 const c1 = -0.166666666666666657414808
 
 function xsin(d::Float64)
-    q = xrint(d*M_1_PI)
-    d = mla(q, -PI4_A*4, d)
-    d = mla(q, -PI4_B*4, d)
-    d = mla(q, -PI4_C*4, d)
-    d = mla(q, -PI4_D*4, d)
+    q = xrint(d*M1PI)
+    d = mla(q, -PI4A*4, d)
+    d = mla(q, -PI4B*4, d)
+    d = mla(q, -PI4C*4, d)
+    d = mla(q, -PI4D*4, d)
     s = d*d
     (q & 1) != 0 && (d = -d)
     u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9
@@ -35,11 +35,11 @@ const c2 = -0.000198412698412046454654947
 const c1 =  0.00833333333333318056201922   
 
 function xsin_u1(d::Float64)
-    q = xrint(d*M_1_PI)
-    s = ddadd2_d2_d_d(d, q * (-PI4_A*4))
-    s = ddadd2_d2_d2_d(s, q * (-PI4_B*4))
-    s = ddadd2_d2_d2_d(s, q * (-PI4_C*4))
-    s = ddadd2_d2_d2_d(s, q * (-PI4_D*4))
+    q = xrint(d*M1PI)
+    s = ddadd2_d2_d_d(d, q * (-PI4A*4))
+    s = ddadd2_d2_d2_d(s, q * (-PI4B*4))
+    s = ddadd2_d2_d2_d(s, q * (-PI4C*4))
+    s = ddadd2_d2_d2_d(s, q * (-PI4D*4))
     t = s
     s = ddsqu_d2_d2(s)
     u = @horner s.x c1 c2 c3 c4 c5 c6 c7
@@ -64,11 +64,11 @@ const c2 =  0.00833333333333332974823815
 const c1 = -0.166666666666666657414808   
 
 function xcos(d::Float64)
-    q = 1 + 2*xrint(d * M_1_PI - 0.5)
-    d = mla(q, -PI4_A*2, d)
-    d = mla(q, -PI4_B*2, d)
-    d = mla(q, -PI4_C*2, d)
-    d = mla(q, -PI4_D*2, d)
+    q = 1 + 2*xrint(d*M1PI - 0.5)
+    d = mla(q, -PI4A*2, d)
+    d = mla(q, -PI4B*2, d)
+    d = mla(q, -PI4C*2, d)
+    d = mla(q, -PI4D*2, d)
     s = d*d
     (q & 2) == 0 && (d = -d)
     u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9
@@ -89,11 +89,11 @@ const c1 =  0.00833333333333318056201922
 
 function xcos_u1(d::Float64)
     d = abs(d)
-    q = mla(2, xrint(d * M_1_PI - 0.5), 1)
-    s = ddadd2_d2_d_d(d, q * (-PI4_A*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4_B*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4_C*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4_D*2))
+    q = mla(2, xrint(d * M1PI - 0.5), 1)
+    s = ddadd2_d2_d_d(d, q * (-PI4A*2))
+    s = ddadd2_d2_d2_d(s, q * (-PI4B*2))
+    s = ddadd2_d2_d2_d(s, q * (-PI4C*2))
+    s = ddadd2_d2_d2_d(s, q * (-PI4D*2))
     t = s
     s = ddsqu_d2_d2(s)
     u = @horner s.x c1 c2 c3 c4 c5 c6 c7
@@ -125,13 +125,13 @@ const b2 =  0.0416666666666665519592062
 const b1 = -0.5     
 
 function xsincos(d::Float64)
-    q = xrint(d*(2*M_1_PI))
+    q = xrint(d*(2*M1PI))
     s = d
 
-    s = mla(-q, PI4_A*2, s)
-    s = mla(-q, PI4_B*2, s)
-    s = mla(-q, PI4_C*2, s)
-    s = mla(-q, PI4_D*2, s)
+    s = mla(-q, PI4A*2, s)
+    s = mla(-q, PI4B*2, s)
+    s = mla(-q, PI4C*2, s)
+    s = mla(-q, PI4D*2, s)
 
     t = s
     s = s*s
@@ -151,12 +151,12 @@ function xsincos(d::Float64)
 end
 
 function xsincos_u1(d::Float64)
-    q = xrint(d*(2*M_1_PI))
+    q = xrint(d*(2*M1PI))
 
-    s = ddadd2_d2_d_d(d, q * (-PI4_A*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4_B*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4_C*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4_D*2))
+    s = ddadd2_d2_d_d(d, q * (-PI4A*2))
+    s = ddadd2_d2_d2_d(s, q * (-PI4B*2))
+    s = ddadd2_d2_d2_d(s, q * (-PI4C*2))
+    s = ddadd2_d2_d2_d(s, q * (-PI4D*2))
 
     t = s
     s = ddsqu_d2_d2(s)
@@ -200,11 +200,11 @@ const c2  =  0.133333333333125941821962
 const c1  =  0.333333333333334980164153    
 
 function xtan(d::Float64)
-    q = xrint(d * (2 * M_1_PI))
-    x = mla(q, -PI4_A*2, d)
-    x = mla(q, -PI4_B*2, x)
-    x = mla(q, -PI4_C*2, x)
-    x = mla(q, -PI4_D*2, x)
+    q = xrint(d * (2*M1PI))
+    x = mla(q, -PI4A*2, d)
+    x = mla(q, -PI4B*2, x)
+    x = mla(q, -PI4C*2, x)
+    x = mla(q, -PI4D*2, x)
     s = x*x
     (q & 1) != 0 && (x = -x)
     u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15
@@ -215,11 +215,11 @@ function xtan(d::Float64)
 end
 
 function xtan_u1(d::Float64)
-    q = xrint(d * M_2_PI)
-    s = ddadd2_d2_d_d(d, q*(-PI4_A*2))
-    s = ddadd2_d2_d2_d(s, q*(-PI4_B*2))
-    s = ddadd2_d2_d2_d(s, q*(-PI4_C*2))
-    s = ddadd2_d2_d2_d(s, q*(-PI4_D*2))
+    q = xrint(d*M2PI)
+    s = ddadd2_d2_d_d(d, q*(-PI4A*2))
+    s = ddadd2_d2_d2_d(s, q*(-PI4B*2))
+    s = ddadd2_d2_d2_d(s, q*(-PI4C*2))
+    s = ddadd2_d2_d2_d(s, q*(-PI4D*2))
     (q & 1) != 0 && (s = ddneg_d2_d2(s))
     t = s
     s = ddsqu_d2_d2(s)
@@ -236,20 +236,20 @@ function xatan2(y::Float64, x::Float64)
     r = atan2k(abs(y), x)
     r = flipsign(r, x)
     if isinf(x) || x == 0
-        r = M_PI/2 - (isinf(x) ? (sign(x) * (M_PI/2)) : 0.0)
+        r = MPI/2 - (isinf(x) ? (sign(x) * (MPI/2)) : 0.0)
     end
     if isinf(y)
-        r = M_PI/2 - (isinf(x) ? (sign(x) * (M_PI/4)) : 0.0)
+        r = MPI/2 - (isinf(x) ? (sign(x) * (MPI/4)) : 0.0)
     end
     if y == 0
-        r = (sign(x) == -1 ? M_PI/1 : 0.0)
+        r = (sign(x) == -1 ? MPI/1 : 0.0)
     end
     return isnan(x) || isnan(y) ? NaN : flipsign(r, y)
 end
 
 xasin(d::Float64) = flipsign(atan2k(abs(d), _sqrt((1+d)*(1-d))), d)
 
-xacos(d::Float64) = flipsign(atan2k(_sqrt((1+d)*(1-d)), abs(d)), d) + (d < 0 ? M_PI/1 : 0.0)
+xacos(d::Float64) = flipsign(atan2k(_sqrt((1+d)*(1-d)), abs(d)), d) + (d < 0 ? MPI/1 : 0.0)
 
 let
 global xatan
@@ -316,13 +316,13 @@ function xatan2_u1(y::Float64, x::Float64)
 
     r = flipsign(r, x)
     if isinf(x) || x == 0
-        r = M_PI/2 - (isinf(x) ? (sign(x) * (M_PI/2)) : 0.0)
+        r = MPI/2 - (isinf(x) ? (sign(x) * (MPI/2)) : 0.0)
     end
     if isinf(y)
-        r = M_PI/2 - (isinf(x) ? (sign(x) * (M_PI/4)) : 0.0)
+        r = MPI/2 - (isinf(x) ? (sign(x) * (MPI/4)) : 0.0)
     end
     if y == 0
-        r = sign(x) == -1 ? M_PI/1 : 0.0
+        r = sign(x) == -1 ? MPI/1 : 0.0
     end
     return isnan(x) || isnan(y) ? NaN : flipsign(r, y)
 end
