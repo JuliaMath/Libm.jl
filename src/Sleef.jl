@@ -1,7 +1,6 @@
 module Sleef
 
 using Base.Math.@horner
-using Base: significand_bits, exponent_bits, exponent_bias
 
 export xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcosh, xtanh,
     xasinh, xacosh, xatanh, xcbrt, xlog, xexp, xexp2, xexp10, xexpm1, xlog10, xlog1p, xilogb, xldexp
@@ -12,20 +11,21 @@ export xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xt
 # alias for supported floating point types
 typealias FloatTypes Union{Float32,Float64}
 
-const PI4_A = 0.78539816290140151978
-const PI4_B = 4.9604678871439933374e-10
-const PI4_C = 1.1258708853173288931e-18
-const PI4_D = 1.7607799325916000908e-27
+# 4/pi split into four parts
+const PI4A = 0.78539816290140151978
+const PI4B = 4.9604678871439933374e-10
+const PI4C = 1.1258708853173288931e-18
+const PI4D = 1.7607799325916000908e-27
+const M4PI = 1.273239544735162542821171882678754627704620361328125 # 4/pi with round down
 
-const M_4_PI = 1.273239544735162542821171882678754627704620361328125
+# split log(2) into upper and lower
+const LN2U = 0.69314718055966295651160180568695068359375 # log(2) upper
+const LN2L = 0.28235290563031577122588448175013436025525412068e-12 # log(2) lower
+const LOG2E = 1.442695040888963407359924681001892137426645954152985934135449406931 # log2(e)
 
-const L2U = .69314718055966295651160180568695068359375
-const L2L = .28235290563031577122588448175013436025525412068e-12
-const R_LN2 = 1.442695040888963407359924681001892137426645954152985934135449406931
-
-const M_1_PI = 1/pi
-const M_2_PI = 2/pi
-const M_PI = pi
+const M1PI = 0.318309886183790671538 # 1/pi
+const M2PI = 0.636619772367581343076 # 2/pi
+const MPI  = 3.14159265358979323846 # pi
 
 include("Sleef/double2.jl")
 # private math functions
@@ -71,7 +71,7 @@ function xcbrt(d::Float64) # max error 2 ulps
     r = (e + 6144) % 3
     q = (r == 1) ? 1.2599210498948731647672106 : q
     q = (r == 2) ? 1.5874010519681994747517056 : q
-    q = ldexpk(q, Int32((e + 6144)÷3 - 2048))
+    q = ldexpk(q, (e + 6144)÷3 - 2048)
 
     q = flipsign(q, d)
     d = abs(d)
@@ -127,7 +127,7 @@ function xcbrt_u1(d::Float64)
     v = ddadd2_d2_d2_d(ddmul_d2_d_d(z, z), y)
     v = ddmul_d2_d2_d(v, d)
     v = ddmul_d2_d2_d2(v, q3)
-    z = ldexp(v.x + v.y, Int32((e + 6144)÷3 - 2048))
+    z = ldexp(v.x + v.y, (e + 6144)÷3 - 2048)
 
     isinf(d) && (z = flipsign(Inf, q3.x))
     d == 0 && (z = flipsign(0.0, q3.x))

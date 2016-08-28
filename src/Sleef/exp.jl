@@ -1,4 +1,4 @@
-xldexp(x::Float64, q::Int32) = ldexpk(x, q)
+xldexp(x::Float64, q::Integer) = ldexpk(x, q)
 
 function xexp2(a::Float64)
     u = expk(ddmul_d2_d2_d(Double2(0.69314718055994528623, 2.3190468138462995584e-17), a))
@@ -37,9 +37,9 @@ const c2  = 0.166666666666666851703837
 const c1  = 0.5
 
 function xexp(d::Float64)
-    q = xrint(d*R_LN2)
-    s = mla(q,-L2U, d)
-    s = mla(q,-L2L, s)
+    q = xrint(d*LOG2E)
+    s = mla(q,-LN2U, d)
+    s = mla(q,-LN2L, s)
     u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11
     u = s * s * u + s + 1
     u = ldexpk(u, q)

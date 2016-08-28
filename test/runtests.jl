@@ -90,10 +90,12 @@ for f in (:sin, :cos, :tan, :asin, :acos, :atan, :asinh, :acosh, :atanh, :log, :
 end
 
 strip_module_name(f::Function) = split(string(f), '.')[end] # strip module name from function f
-# test the accuracy of a function where fun_table is a Dict mapping the function you want
-# to test to a reference function
-# xx is an array of values (which may be tuples for multiple arugment functions)
-# tol is the acceptable tolerance to test against
+"""
+test the accuracy of a function where fun_table is a Dict mapping the function you want
+to test to a reference function
+xx is an array of values (which may be tuples for multiple arugment functions)
+tol is the acceptable tolerance to test against
+"""
 function test_acc(T, fun_table, xx, tol; debug=false, tol_debug=5)
     @testset "accuracy $(strip_module_name(xfun))" for (xfun, fun) in fun_table
         rmax = 0.0
@@ -116,6 +118,7 @@ const pow = ^
 function runtests()
     include("dnml_nan.jl")
     include("accuracy.jl")
+    # include("accuracy_base.jl") # uncomment to benchmark base
 end
 
 runtests()
