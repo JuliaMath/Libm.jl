@@ -1,15 +1,11 @@
 module Sleef
 
-using Base.Math.@horner
-
 export xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcosh, xtanh,
     xasinh, xacosh, xatanh, xcbrt, xlog, xexp, xexp2, xexp10, xexpm1, xlog10, xlog1p, xilogb, xldexp
 
 # higher accuracy functions
 export xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xtan_u1, xcbrt_u1, xlog_u1
 
-# alias for supported floating point types
-typealias FloatTypes Union{Float32,Float64}
 
 # 4/pi split into four parts
 const PI4A = 0.78539816290140151978
@@ -26,6 +22,21 @@ const LOG2E = 1.4426950408889634073599246810018921374266459541529859341354494069
 const M1PI = 0.318309886183790671538 # 1/pi
 const M2PI = 0.636619772367581343076 # 2/pi
 const MPI  = 3.14159265358979323846 # pi
+
+# alias for supported floating point types
+typealias FloatTypes Union{Float32,Float64}
+
+using Base.Math: @horner
+
+# similar to @horner, but converts coefficients to same type as x
+macro horner_oftype(x, p...)
+    ex = :(oftype($x,$(esc(p[end]))))
+    for i = length(p)-1:-1:1
+        ex = :(muladd(t, $ex, oftype($x,$(esc(p[i])))))
+    end
+    Expr(:block, :(t = $(esc(x))), ex)
+end
+
 
 include("Sleef/double2.jl")
 # private math functions

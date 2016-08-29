@@ -11,15 +11,15 @@ const c2 =  0.00833333333333332974823815
 const c1 = -0.166666666666666657414808
 
 function xsin(d::Float64)
-    q = xrint(d*M1PI)
-    d = mla(q, -PI4A*4, d)
-    d = mla(q, -PI4B*4, d)
-    d = mla(q, -PI4C*4, d)
-    d = mla(q, -PI4D*4, d)
+    q = xrint(d * M1PI)
+    d = muladd(q, -PI4A*4, d)
+    d = muladd(q, -PI4B*4, d)
+    d = muladd(q, -PI4C*4, d)
+    d = muladd(q, -PI4D*4, d)
     s = d*d
     (q & 1) != 0 && (d = -d)
     u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9
-    u = mla(s, u*d, d)
+    u = muladd(s, u*d, d)
     return u
 end
 end
@@ -64,15 +64,15 @@ const c2 =  0.00833333333333332974823815
 const c1 = -0.166666666666666657414808   
 
 function xcos(d::Float64)
-    q = 1 + 2*xrint(d*M1PI - 0.5)
-    d = mla(q, -PI4A*2, d)
-    d = mla(q, -PI4B*2, d)
-    d = mla(q, -PI4C*2, d)
-    d = mla(q, -PI4D*2, d)
+    q = muladd(2, xrint(d*M1PI - 0.5), 1)
+    d = muladd(q, -PI4A*2, d)
+    d = muladd(q, -PI4B*2, d)
+    d = muladd(q, -PI4C*2, d)
+    d = muladd(q, -PI4D*2, d)
     s = d*d
     (q & 2) == 0 && (d = -d)
     u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9
-    u = mla(s, u * d, d)
+    u = muladd(s, u * d, d)
     return u
 end
 end
@@ -89,7 +89,7 @@ const c1 =  0.00833333333333318056201922
 
 function xcos_u1(d::Float64)
     d = abs(d)
-    q = mla(2, xrint(d * M1PI - 0.5), 1)
+    q = muladd(2, xrint(d * M1PI - 0.5), 1)
     s = ddadd2_d2_d_d(d, q * (-PI4A*2))
     s = ddadd2_d2_d2_d(s, q * (-PI4B*2))
     s = ddadd2_d2_d2_d(s, q * (-PI4C*2))
@@ -128,10 +128,10 @@ function xsincos(d::Float64)
     q = xrint(d*(2*M1PI))
     s = d
 
-    s = mla(-q, PI4A*2, s)
-    s = mla(-q, PI4B*2, s)
-    s = mla(-q, PI4C*2, s)
-    s = mla(-q, PI4D*2, s)
+    s = muladd(-q, PI4A*2, s)
+    s = muladd(-q, PI4B*2, s)
+    s = muladd(-q, PI4C*2, s)
+    s = muladd(-q, PI4D*2, s)
 
     t = s
     s = s*s
@@ -201,14 +201,14 @@ const c1  =  0.333333333333334980164153
 
 function xtan(d::Float64)
     q = xrint(d * (2*M1PI))
-    x = mla(q, -PI4A*2, d)
-    x = mla(q, -PI4B*2, x)
-    x = mla(q, -PI4C*2, x)
-    x = mla(q, -PI4D*2, x)
+    x = muladd(q, -PI4A*2, d)
+    x = muladd(q, -PI4B*2, x)
+    x = muladd(q, -PI4C*2, x)
+    x = muladd(q, -PI4D*2, x)
     s = x*x
     (q & 1) != 0 && (x = -x)
     u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15
-    u = mla(s, u * x, x)
+    u = muladd(s, u * x, x)
     (q & 1) != 0 && (u = 1.0/u)
     isinf(d) && (u = NaN)
     return u

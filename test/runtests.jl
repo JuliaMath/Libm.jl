@@ -20,21 +20,8 @@ function cmpdenorm{Tx<:AbstractFloat, Ty<:AbstractFloat}(x::Tx, y::Ty)
     return false
 end
 
-ulp{T<:Float64}(::Type{T}, x::Union{Float64, BigFloat}) = _ulp(T, x)
-ulp{T<:Float32}(::Type{T}, x::Union{Float32, Float64, BigFloat}) = _ulp(T, x)
-using Base.significand_bits 
-function _ulp{T<:AbstractFloat}(::Type{T}, x::AbstractFloat)
-    MIN = nextfloat(T(0.0))
-    x = abs(x)
-    if x == 0
-      return MIN
-    else
-      (_, exp) = frexp(x)
-    end
-    max(ldexp(T(1.0), exp-significand_bits(T)-1), MIN)
-end
-
 # the following compares x with y first it promotes them to the larger of the two types x,y
+# todo update eps to ulp from reference article
 countulp{T<:Float64}(x::T, y::BigFloat) = _countulp(T, promote(x, y)...)
 countulp{T<:Float32}(x::T, y::Union{Float64, BigFloat})  = _countulp(T, promote(x, y)...)
 function _countulp(T, x::AbstractFloat, y::AbstractFloat)::T
@@ -58,7 +45,7 @@ function _countulp(T, x::AbstractFloat, y::AbstractFloat)::T
     return 10002
     end
     if !isnan(fx) && !isnan(fy) && !isinf(fx) && !isinf(fy)
-        return T(abs( (x - y) / ulp(T,y) ))
+        return T(abs( (x - y) / eps(T(y)) ))
     end
     return 10003
 end
@@ -122,3 +109,4 @@ function runtests()
 end
 
 runtests()
+

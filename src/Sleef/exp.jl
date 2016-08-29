@@ -38,8 +38,8 @@ const c1  = 0.5
 
 function xexp(d::Float64)
     q = xrint(d*LOG2E)
-    s = mla(q,-LN2U, d)
-    s = mla(q,-LN2L, s)
+    s = muladd(q,-LN2U, d)
+    s = muladd(q,-LN2L, s)
     u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11
     u = s * s * u + s + 1
     u = ldexpk(u, q)
