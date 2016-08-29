@@ -8,13 +8,12 @@ using Base: significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
 # emits better native code than Base.sign
 @inline sign{T<:FloatTypes}(d::T) =  copysign(one(T), d)
 
-@inline mla(x::Number, y::Number, z::Number) = muladd(x,y,z)
-
-@inline xrint(x::Float64) = x < 0 ? unsafe_trunc(Int, x - 0.5) : unsafe_trunc(Int, x + 0.5)
+@inline xrint{T<:FloatTypes}(x::T) = x < 0 ? unsafe_trunc(Int, x - T(0.5)) : unsafe_trunc(Int, x + T(0.5))
 
 @inline pow2i(q::Integer) = reinterpret(Float64, Int64(q + exponent_bias(Float64)) << significand_bits(Float64))
 
 @pure exponent_max{T<:AbstractFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
+
 
 # private math functions
 
@@ -31,28 +30,27 @@ using Base: significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
 #     return x * u
 # end
 
-# todo: check type inference on 32 bit systems
-function ldexpk(x::Float64, q::Integer)
-    bias= exponent_bias(Float64)
-    expmax = exponent_max(Float64)
+# todo: check perf / type inference on 32 bit systems
+@inline function ldexpk(x::Float64, q::Integer)
+    bias = exponent_bias(Float64)
+    emax = exponent_max(Float64)
     shift = significand_bits(Float64)
     m = q >> 31
     m = (((m + q) >> 9) - m) << 7
     q = q - (m << 2)
     m += bias
     m = m < 0 ? 0 : m
-    m = m > expmax ? expmax : m
+    m = m > emax ? emax : m
     u = reinterpret(Float64, Int64(m) << shift)
     x = x * u * u * u * u
     u = reinterpret(Float64, Int64(q + bias) << shift)
     return x * u
 end
 
-# change to return Int64 in Float64 case and Int32 in Float32 case
 @inline function ilogbp1(d::Float64)
-    m = d < 4.9090934652977266e-91
-    d = m ? 2.037035976334486e90 * d : d
-    q = ((reinterpret(Int64, d) >> 52) & 0x7ff) 
+    m = d < 4.9090934652977266e-91 #2.0^-300
+    d = m ? 2.037035976334486e90 * d : d  #2.0^300
+    q = (reinterpret(Int64, d) >> significand_bits(Float64)) & exponent_max(Float64)
     q = m ? q - (300 + 0x03fe) : q - 0x03fe
     return q
 end
@@ -79,7 +77,7 @@ const c3  = -0.14285714266771329383765
 const c2  =  0.199999999996591265594148
 const c1  = -0.333333333333311110369124
 
-function atan2k(y::Float64, x::Float64)
+@inline function atan2k(y::Float64, x::Float64)
     q = 0
     if x < 0
         x = -x; q = -2
@@ -90,8 +88,25 @@ function atan2k(y::Float64, x::Float64)
     end
     s = y/x
     t = s*s
-    # sleef does not use mla here!
-    u = @horner t c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19
+    u = c19
+    u = u * t + c18
+    u = u * t + c17
+    u = u * t + c16
+    u = u * t + c15
+    u = u * t + c14
+    u = u * t + c13
+    u = u * t + c12
+    u = u * t + c11
+    u = u * t + c10
+    u = u * t + c9
+    u = u * t + c8
+    u = u * t + c7
+    u = u * t + c6
+    u = u * t + c5
+    u = u * t + c4
+    u = u * t + c3
+    u = u * t + c2
+    u = u * t + c1
     t = u*t*s + s
     t = q*(MPI/2) + t
     return t
@@ -121,7 +136,7 @@ const c3  = -0.142857142756268568062339
 const c2  =  0.199999999997977351284817
 const c1  = -0.333333333333317605173818
 
-function atan2k_u1(y::Double2, x::Double2)
+@inline function atan2k_u1(y::Double2, x::Double2)
     q = 0
     if x.x < 0
         x = Double2(-x.x,-x.y)
@@ -154,10 +169,9 @@ const c3 = 0.285714285651261412873718
 const c2 = 0.400000000000222439910458
 const c1 = 0.666666666666666371239645
 
-function logk(d::Float64)
+@inline function logk(d::Float64)
     e = ilogbp1(d*0.7071)
     m = ldexpk(d,-e)
-
     x = dddiv_d2_d2_d2(ddadd2_d2_d_d(-1.0, m), ddadd2_d2_d_d(1.0, m))
     x2 = ddsqu_d2_d2(x)
     t = @horner x2.x c1 c2 c3 c4 c5 c6 c7 c8
@@ -179,7 +193,7 @@ const c3 = 0.0416666666665409524128449
 const c2 = 0.166666666666666740681535
 const c1 = 0.500000000000000999200722
 
-function expk(d::Double2)
+@inline function expk(d::Double2)
     q = xrint((d.x + d.y)*LOG2E)
     s = ddadd2_d2_d2_d(d, q*-LN2U)
     s = ddadd2_d2_d2_d(s, q*-LN2L)
@@ -204,7 +218,7 @@ const c3 = 0.0416666666665409524128449
 const c2 = 0.166666666666666740681535
 const c1 = 0.500000000000000999200722
 
-function expk2(d::Double2)
+@inline function expk2(d::Double2)
     q = xrint((d.x + d.y)*LOG2E)
     s = ddadd2_d2_d2_d(d, q*-LN2U)
     s = ddadd2_d2_d2_d(s, q*-LN2L)
@@ -226,7 +240,7 @@ const c3 = 0.285714285651261412873718
 const c2 = 0.400000000000222439910458
 const c1 = 0.666666666666666371239645
 
-function logk2(d::Double2)
+@inline function logk2(d::Double2)
     e = ilogbp1(d.x * 0.7071)
     m = ddscale_d2_d2_d(d, pow2i(-e))
     x = dddiv_d2_d2_d2(ddadd2_d2_d2_d(m, -1.0), ddadd2_d2_d2_d(m, 1.0))

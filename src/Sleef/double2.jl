@@ -15,21 +15,21 @@ end
 @inline upper(d::Float64) = reinterpret(Float64, reinterpret(UInt64, d) & 0xfffffffff8000000)
 @inline upper(d::Float32) = reinterpret(Float32, reinterpret(UInt32, d) & 0xfffff000)
 
-function ddnormalize_d2_d2(t::Double2)
+@inline function ddnormalize_d2_d2(t::Double2)
     sx = t.x + t.y
     sy = t.x - sx + t.y
     return Double2(sx,sy)
 end
 
-function ddscale_d2_d2_d{T<:FloatTypes}(d::Double2{T}, s::T)
+@inline function ddscale_d2_d2_d{T<:FloatTypes}(d::Double2{T}, s::T)
     return Double2(d.x * s, d.y * s)
 end
 
-function ddneg_d2_d2(d::Double2)
+@inline function ddneg_d2_d2(d::Double2)
     return Double2(-d.x,-d.y)
 end
 
-function ddadd_d2_d_d{T<:FloatTypes}(x::T, y::T)
+@inline function ddadd_d2_d_d{T<:FloatTypes}(x::T, y::T)
     # |x| >= |y|
     # if NDEBUG
     #     !(checkfp(x) || checkfp(y) || abs(x) >= abs(y)) && error(@sprintf "[ddadd_d2_d_d : %g, %g]" x y)
@@ -39,14 +39,14 @@ function ddadd_d2_d_d{T<:FloatTypes}(x::T, y::T)
   return Double2(rx,ry)
 end
 
-function ddadd2_d2_d_d{T<:FloatTypes}(x::T, y::T)
+@inline function ddadd2_d2_d_d{T<:FloatTypes}(x::T, y::T)
     rx = x + y
     v = rx - x
     ry = (x - (rx - v)) + (y - v)
     return Double2(rx,ry)
 end
 
-function ddadd_d2_d2_d{T<:FloatTypes}(x::Double2{T}, y::T)
+@inline function ddadd_d2_d2_d{T<:FloatTypes}(x::Double2{T}, y::T)
     # |x| >= |y|
     # if NDEBUG
     #     !(checkfp(x.x) || checkfp(y) || abs(x.x) >= abs(y)) && error(@sprintf "[ddadd_d2_d2_d : %g %g]" x.x y)
@@ -56,7 +56,7 @@ function ddadd_d2_d2_d{T<:FloatTypes}(x::Double2{T}, y::T)
     return Double2(rx,ry)
 end
 
-function ddadd2_d2_d2_d{T<:FloatTypes}(x::Double2{T}, y::T)
+@inline function ddadd2_d2_d2_d{T<:FloatTypes}(x::Double2{T}, y::T)
     # |x| >= |y|
     rx  = x.x + y;
     v = rx - x.x;
@@ -65,7 +65,7 @@ function ddadd2_d2_d2_d{T<:FloatTypes}(x::Double2{T}, y::T)
     return Double2(rx,ry)
 end
 
-function ddadd_d2_d_d2{T<:FloatTypes}(x::T, y::Double2{T})
+@inline function ddadd_d2_d_d2{T<:FloatTypes}(x::T, y::Double2{T})
     # |x| >= |y|
     # if NDEBUG
     #     !(checkfp(x) || checkfp(y.x) || abs(x) >= abs(y.x)) && error(@sprintf "[ddadd_d2_d_d2 : %g %g]" x y.x)
@@ -75,14 +75,14 @@ function ddadd_d2_d_d2{T<:FloatTypes}(x::T, y::Double2{T})
     return Double2(rx,ry)
 end
 
-function ddadd2_d2_d_d2{T<:FloatTypes}(x::T, y::Double2{T})
+@inline function ddadd2_d2_d_d2{T<:FloatTypes}(x::T, y::Double2{T})
     rx  = x + y.x
     v = rx - x
     ry = (x - (rx - v)) + (y.x - v) + y.y
     return Double2(rx,ry)
 end
 
-function ddadd_d2_d2_d2(x::Double2, y::Double2)
+@inline function ddadd_d2_d2_d2(x::Double2, y::Double2)
     # |x| >= |y|
     # if NDEBUG
     #     !(checkfp(x.x) || checkfp(y.x) || abs(x.x) >= abs(y.x)) && error(@sprintf "[ddadd_d2_d2_d2 : %g %g]" x.x y.x)
@@ -92,7 +92,7 @@ function ddadd_d2_d2_d2(x::Double2, y::Double2)
   return Double2(rx,ry)
 end
 
-function ddadd2_d2_d2_d2(x::Double2, y::Double2)
+@inline function ddadd2_d2_d2_d2(x::Double2, y::Double2)
     rx  = x.x + y.x
     v = rx - x.x
     ry = (x.x - (rx - v)) + (y.x - v)
@@ -100,7 +100,7 @@ function ddadd2_d2_d2_d2(x::Double2, y::Double2)
     return Double2(rx,ry)
 end
 
-function ddsub_d2_d2_d2(x::Double2, y::Double2)
+@inline function ddsub_d2_d2_d2(x::Double2, y::Double2)
     # |x| >= |y|
     # if NDEBUG
     #     !(checkfp(x.x) || checkfp(y.x) || abs(x.x) >= abs(y.x)) && error(@sprintf "[ddsub_d2_d2_d2 : %g %g]" x.x y.x)
@@ -110,7 +110,7 @@ function ddsub_d2_d2_d2(x::Double2, y::Double2)
     return Double2(rx,ry)
 end
 
-function dddiv_d2_d2_d2{T<:FloatTypes}(n::Double2{T}, d::Double2{T})
+@inline function dddiv_d2_d2_d2{T<:FloatTypes}(n::Double2{T}, d::Double2{T})
     t = one(T)/d.x
     dh  = upper(d.x); dl  = d.x - dh
     th  = upper(t);   tl  = t   - th
@@ -123,7 +123,7 @@ function dddiv_d2_d2_d2{T<:FloatTypes}(n::Double2{T}, d::Double2{T})
 end
 
 
-function ddmul_d2_d_d{T<:FloatTypes}(x::T, y::T)
+@inline function ddmul_d2_d_d{T<:FloatTypes}(x::T, y::T)
     xh = upper(x); xl = x - xh
     yh = upper(y); yl = y - yh
     rx = x * y
@@ -131,7 +131,7 @@ function ddmul_d2_d_d{T<:FloatTypes}(x::T, y::T)
     return Double2(rx,ry)
 end
 
-function ddmul_d2_d2_d{T<:FloatTypes}(x::Double2{T}, y::T)
+@inline function ddmul_d2_d2_d{T<:FloatTypes}(x::Double2{T}, y::T)
     xh = upper(x.x); xl = x.x - xh
     yh = upper(y);   yl = y   - yh
     rx = x.x * y
@@ -139,7 +139,7 @@ function ddmul_d2_d2_d{T<:FloatTypes}(x::Double2{T}, y::T)
     return Double2(rx,ry)
 end
 
-function ddmul_d2_d2_d2(x::Double2, y::Double2)
+@inline function ddmul_d2_d2_d2(x::Double2, y::Double2)
     xh = upper(x.x); xl = x.x - xh
     yh = upper(y.x); yl = y.x - yh
     rx = x.x * y.x
@@ -147,14 +147,14 @@ function ddmul_d2_d2_d2(x::Double2, y::Double2)
     return Double2(rx,ry)
 end
 
-function ddsqu_d2_d2(x::Double2)
+@inline function ddsqu_d2_d2(x::Double2)
     xh = upper(x.x); xl = x.x - xh
     rx = x.x * x.x
     ry = xh * xh - rx + (xh + xh) * xl + xl * xl + x.x * (x.y + x.y)
     return Double2(rx,ry)
 end
 
-function ddrec_d2_d{T<:FloatTypes}(d::T)
+@inline function ddrec_d2_d{T<:FloatTypes}(d::T)
     t = one(T)/d
     dh = upper(d); dl = d - dh
     th = upper(t); tl = t - th
@@ -163,7 +163,7 @@ function ddrec_d2_d{T<:FloatTypes}(d::T)
     return Double2(qx,qy)
 end
 
-function ddrec_d2_d2{T<:FloatTypes}(d::Double2{T})
+@inline function ddrec_d2_d2{T<:FloatTypes}(d::Double2{T})
     t = one(T)/d.x
     dh = upper(d.x); dl = d.x - dh
     th = upper(t);   tl = t   - th
@@ -172,7 +172,7 @@ function ddrec_d2_d2{T<:FloatTypes}(d::Double2{T})
     return Double2(qx,qy)
 end
 
-function ddsqrt_d2_d2{T<:FloatTypes}(d::Double2{T})
+@inline function ddsqrt_d2_d2{T<:FloatTypes}(d::Double2{T})
     t = _sqrt(d.x + d.y)
     return ddscale_d2_d2_d(ddmul_d2_d2_d2(ddadd2_d2_d2_d2(d, ddmul_d2_d_d(t, t)), ddrec_d2_d(t)), T(0.5))
 end
