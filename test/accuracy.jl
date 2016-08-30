@@ -150,4 +150,12 @@ println("Accuracy (max error in ulp) for $T")
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
+    @testset "xilogb at arbitrary values" begin
+        xd = Dict{T,Int}(T(1e-30) => -100, T(2.31e-11) => -36, T(-1.0) => 0, T(1.0) => 0, 
+                    T(2.31e11) => 37,  T(1e30) => 99)
+        for (i,j) in xd
+            @test xilogb(i)  === j
+        end
+    end
+    
 end #accuracy 

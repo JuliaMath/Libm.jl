@@ -6,6 +6,9 @@ export xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcos
 # higher accuracy functions
 export xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xtan_u1, xcbrt_u1, xlog_u1
 
+# alias for supported floating point types
+typealias FloatTypes Union{Float32,Float64}
+
 
 # 4/pi split into four parts (each is 26 bits)
 const PI4A = 0.78539816290140151978 
@@ -15,18 +18,17 @@ const PI4D = 1.7607799325916000908e-27
 const M4PI = 1.273239544735162542821171882678754627704620361328125 # 4/pi with round down
 
 # split log(2) into upper and lower
-const LN2U = 0.69314718055966295651160180568695068359375 # log(2) upper
-const LN2L = 0.28235290563031577122588448175013436025525412068e-12 # log(2) lower
+const LN2U = 0.69314718055966295651160180568695068359375
+const LN2L = 0.28235290563031577122588448175013436025525412068e-12
+
 const LOG2E = 1.442695040888963407359924681001892137426645954152985934135449406931 # log2(e)
 
 const M1PI = 0.318309886183790671538 # 1/pi
 const M2PI = 0.636619772367581343076 # 2/pi
 const MPI  = 3.14159265358979323846 # pi
 
-# alias for supported floating point types
-typealias FloatTypes Union{Float32,Float64}
 
-using Base.Math: @horner
+using Base.Math.@horner
 
 # similar to @horner, but converts coefficients to same type as x
 macro horner_oftype(x, p...)
@@ -48,7 +50,7 @@ include("Sleef/log.jl")
 include("Sleef/trig.jl")
 include("Sleef/hyp.jl")
 
-# sqrt without the domain checks which we don't need
+# sqrt without the domain checks which we don't need since we handle the checks ourselves
 _sqrt{T<:FloatTypes}(x::T) = Base.box(T, Base.sqrt_llvm_fast(Base.unbox(T,x)))
 
 function xpow(x::Float64, y::Float64)
