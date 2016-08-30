@@ -14,37 +14,49 @@ using Base: significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
 
 @pure exponent_max{T<:AbstractFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
+@inline integer2float(::Type{Float64}, m::Integer) = reinterpret(Float64, (m % Int64) << significand_bits(Float64))
+@inline integer2float(::Type{Float32}, m::Integer) = reinterpret(Float32, (m % Int32) << significand_bits(Float32))
 
 # private math functions
 
-# function ldexpk(x::Float64, q::Int32)
-#     m = q >> 31
-#     m = (((m + q) >> 9) - m) << 7
-#     q = q - (m << 2)
-#     m += Int32(0x3ff)
-#     m = m < 0 ? Int32(0) : m
-#     m = m > Int32(0x7ff) ? Int32(0x7ff) : m
-#     u = reinterpret(Float64, Int64(m) << 52)
-#     x = x * u * u * u * u
-#     u = reinterpret(Float64, Int64(q + 0x3ff) << 52)
-#     return x * u
-# end
+"""
+`split_exponent` is a helper function for `ldexpk`
 
-# todo: check perf / type inference on 32 bit systems
-@inline function ldexpk(x::Float64, q::Integer)
-    bias = exponent_bias(Float64)
-    emax = exponent_max(Float64)
-    shift = significand_bits(Float64)
-    m = q >> 31
-    m = (((m + q) >> 9) - m) << 7
-    q = q - (m << 2)
+First note that `r = (q >> n) << n` clears the lowest n bits of q, i.e. returns 2^n where n is the
+largest integer such that q >= 2^n
+
+For numbers q less than 2^m the following code does the same as the above snippet
+    `r = ( (q>>m + q) >> n - q>>m ) << n`
+For numbers larger than or equal to 2^m this subtracts 2^n from q for q>>n times.
+
+The function returns q(input) := q(output) + offset*m
+
+In the code for ldexpk we actually use
+    `m = ( (m>>n + m) >> n -  m>>m ) << (n-2)`.
+So that x has to be multplied by u four times `x = x*u*u*u*u` to put the value  of the offset
+exponent amount back in.
+"""
+@inline split_exponent(::Type{Float64}, q::Int) = _split_exponent(q, 9, 31, 2)
+@inline split_exponent(::Type{Float32}, q::Int) = _split_exponent(q, 6, 31, 2)
+@inline function _split_exponent(q, n, m, offset)
+    r = q >> m
+    r = (((r + q) >> n) - r) << (n-offset)
+    q = q - (r << offset)
+    return r, q
+end
+
+@inline function ldexpk{T<:FloatTypes}(x::T, q::Int)
+    bias = exponent_bias(T)
+    emax = exponent_max(T)
+    m, q = split_exponent(T,q)
     m += bias
     m = m < 0 ? 0 : m
     m = m > emax ? emax : m
-    u = reinterpret(Float64, Int64(m) << shift)
-    x = x * u * u * u * u
-    u = reinterpret(Float64, Int64(q + bias) << shift)
-    return x * u
+    q += bias
+    u = integer2float(T, m)
+    x = x*u*u*u*u
+    u = integer2float(T, q)
+    return x*u
 end
 
 @inline function ilogbp1(d::Float64)

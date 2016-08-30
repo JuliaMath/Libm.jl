@@ -1,5 +1,7 @@
 let
 global xsin
+global xcos
+
 const c9 = -7.97255955009037868891952e-18
 const c8 =  2.81009972710863200091251e-15
 const c7 = -7.64712219118158833288484e-13
@@ -9,15 +11,38 @@ const c4 =  2.75573192239198747630416e-06
 const c3 = -0.000198412698412696162806809
 const c2 =  0.00833333333333332974823815
 const c1 = -0.166666666666666657414808
+"""
+We reduce the argument to be in the domain 0 < s < π/4 and then use a 10 term
+taylor expansion of sin(x)
+"""
 
+"""
+We return the correct sign using `q & 1 != 0` i.e. q is odd (this works for
+positive and negative q) and if this condition is true we flip the sign since
+we are now in the negative branch of sin(x). Recall that q is just the integer
+part of d/π and thus we can determine the correct sign using this information.
+"""
 function xsin(d::Float64)
-    q = xrint(d * M1PI)
+    q = xrint(d*M1PI)
     d = muladd(q, -PI4A*4, d)
     d = muladd(q, -PI4B*4, d)
     d = muladd(q, -PI4C*4, d)
     d = muladd(q, -PI4D*4, d)
     s = d*d
     (q & 1) != 0 && (d = -d)
+    u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9
+    u = muladd(s, u*d, d)
+    return u
+end
+
+function xcos(d::Float64)
+    q = muladd(2, xrint(d*M1PI - 0.5), 1)
+    d = muladd(q, -PI4A*2, d)
+    d = muladd(q, -PI4B*2, d)
+    d = muladd(q, -PI4C*2, d)
+    d = muladd(q, -PI4D*2, d)
+    s = d*d
+    (q & 2) == 0 && (d = -d)
     u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9
     u = muladd(s, u*d, d)
     return u
@@ -47,32 +72,6 @@ function xsin_u1(d::Float64)
     x = ddmul_d2_d2_d2(t, x)
     u = x.x + x.y
     (q & 1) != 0 && (u = -u)
-    return u
-end
-end
-
-let
-global xcos
-const c9 = -7.97255955009037868891952e-18
-const c8 =  2.81009972710863200091251e-15 
-const c7 = -7.64712219118158833288484e-13
-const c6 =  1.60590430605664501629054e-10 
-const c5 = -2.50521083763502045810755e-08
-const c4 =  2.75573192239198747630416e-06 
-const c3 = -0.000198412698412696162806809
-const c2 =  0.00833333333333332974823815  
-const c1 = -0.166666666666666657414808   
-
-function xcos(d::Float64)
-    q = muladd(2, xrint(d*M1PI - 0.5), 1)
-    d = muladd(q, -PI4A*2, d)
-    d = muladd(q, -PI4B*2, d)
-    d = muladd(q, -PI4C*2, d)
-    d = muladd(q, -PI4D*2, d)
-    s = d*d
-    (q & 2) == 0 && (d = -d)
-    u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9
-    u = muladd(s, u * d, d)
     return u
 end
 end

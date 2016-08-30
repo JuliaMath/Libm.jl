@@ -1,4 +1,4 @@
-xldexp(x::Float64, q::Integer) = ldexpk(x, q)
+xldexp{T<:FloatTypes}(x::T, q::Int) = ldexpk(x, q)
 
 function xexp2(a::Float64)
     u = expk(ddmul_d2_d2_d(Double2(0.69314718055994528623, 2.3190468138462995584e-17), a))
