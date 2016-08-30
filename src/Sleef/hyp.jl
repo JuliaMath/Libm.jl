@@ -54,7 +54,7 @@ function xacosh(x::Float64)
 
     y = isinf(x) || isnan(y) ? Inf : y
     y = x == 1.0 ? 0.0 : y
-    y = x < 1.0 ? NaN : y
+    y = x < 1.0  ? NaN : y
     y = isnan(x) ? NaN : y
     return y
 end

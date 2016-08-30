@@ -1,21 +1,21 @@
 # utility functions
 using Base: significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
 
+@pure exponent_max{T<:AbstractFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
-# emits more compact native code
-# copysign(x::Float64, y::Float64) = reinterpret(Float64, reinterpret(Int64,x) $ (reinterpret(Int64,y) & (Int64(1) << 63)))
-
-# emits better native code than Base.sign
-@inline sign{T<:FloatTypes}(d::T) =  copysign(one(T), d)
+@inline sign{T<:FloatTypes}(d::T) =  copysign(one(T), d) # emits better native code than Base.sign
 
 @inline xrint{T<:FloatTypes}(x::T) = x < 0 ? unsafe_trunc(Int, x - T(0.5)) : unsafe_trunc(Int, x + T(0.5))
 
-@inline pow2i(q::Integer) = reinterpret(Float64, Int64(q + exponent_bias(Float64)) << significand_bits(Float64))
+@inline integer2float(::Type{Float64}, m::Int) = reinterpret(Float64, (m % Int64) << significand_bits(Float64))
+@inline integer2float(::Type{Float32}, m::Int) = reinterpret(Float32, (m % Int32) << significand_bits(Float32))
 
-@pure exponent_max{T<:AbstractFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
+@inline float2integer(d::Float64) = (reinterpret(Int64, d) >> significand_bits(Float64)) % Int
+@inline float2integer(d::Float32) = (reinterpret(Int32, d) >> significand_bits(Float32)) % Int
 
-@inline integer2float(::Type{Float64}, m::Integer) = reinterpret(Float64, (m % Int64) << significand_bits(Float64))
-@inline integer2float(::Type{Float32}, m::Integer) = reinterpret(Float32, (m % Int32) << significand_bits(Float32))
+@inline pow2i(::Type{Float64}, q::Int) = integer2float(Float64, q + exponent_bias(Float64))
+@inline pow2i(::Type{Float32}, q::Int) = integer2float(Float32, q + exponent_bias(Float64))
+
 
 # private math functions
 
@@ -29,7 +29,7 @@ For numbers q less than 2^m the following code does the same as the above snippe
     `r = ( (q>>m + q) >> n - q>>m ) << n`
 For numbers larger than or equal to 2^m this subtracts 2^n from q for q>>n times.
 
-The function returns q(input) := q(output) + offset*m
+The function returns q(input) := q(output) + offset*r
 
 In the code for ldexpk we actually use
     `m = ( (m>>n + m) >> n -  m>>m ) << (n-2)`.
@@ -59,13 +59,26 @@ end
     return x*u
 end
 
-@inline function ilogbp1(d::Float64)
-    m = d < 4.9090934652977266e-91 #2.0^-300
-    d = m ? 2.037035976334486e90 * d : d  #2.0^300
-    q = (reinterpret(Int64, d) >> significand_bits(Float64)) & exponent_max(Float64)
-    q = m ? q - (300 + 0x03fe) : q - 0x03fe
+# The following defines threshold values 
+real_cut_offset(::Type{Float64}) = 300
+real_cut_offset(::Type{Float32}) = 64
+
+# 2^-real_cut_offset
+real_cut_min(::Type{Float64}) = 4.9090934652977266e-91 
+real_cut_min(::Type{Float32}) = 5.421010862427522f-20
+
+# 2^real_cut_offset
+real_cut_max(::Type{Float64}) = 2.037035976334486e90
+real_cut_max(::Type{Float32}) = 1.8446744073709552f19
+
+@inline function ilogbp1{T<:FloatTypes}(d::T)
+    m = d < real_cut_min(T) #2.0^-300
+    d = m ? real_cut_max(T) * d : d  #2.0^300
+    q = float2integer(d) & exponent_max(T)
+    q = m ? q - (real_cut_offset(T) + exponent_bias(T) - 1) : q - (exponent_bias(T) - 1)
     return q
 end
+
 
 let
 global atan2k
@@ -237,7 +250,7 @@ const c1 = 0.500000000000000999200722
     u = @horner s.x c1 c2 c3 c4 c5 c6 c7 c8 c9 c10
     t = ddadd_d2_d2_d2(s, ddmul_d2_d2_d(ddsqu_d2_d2(s), u))
     t = ddadd_d2_d_d2(1.0, t)
-    return ddscale_d2_d2_d(t, pow2i(q))
+    return ddscale_d2_d2_d(t, pow2i(Float64, q))
 end
 end
 
@@ -254,7 +267,7 @@ const c1 = 0.666666666666666371239645
 
 @inline function logk2(d::Double2)
     e = ilogbp1(d.x * 0.7071)
-    m = ddscale_d2_d2_d(d, pow2i(-e))
+    m = ddscale_d2_d2_d(d, pow2i(Float64, -e))
     x = dddiv_d2_d2_d2(ddadd2_d2_d2_d(m, -1.0), ddadd2_d2_d2_d(m, 1.0))
     x2 = ddsqu_d2_d2(x)
     t = @horner x2.x c1 c2 c3 c4 c5 c6 c7 c8

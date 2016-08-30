@@ -2,14 +2,14 @@
 
 @testset "denormal/nonnumber $xatan2" for xatan2 in (xatan2, xatan2_u1)
 
-    @test xatan2(T(0.0), T(-0.0)) === T(pi)
+    @test xatan2(T(0.0), T(-0.0))  ===  T(pi)
     @test xatan2(T(-0.0), T(-0.0)) === -T(pi)
     @test ispzero(xatan2(T(0.0), T(0.0)))
     @test isnzero(xatan2(T(-0.0), T(0.0)))
-    @test xatan2(T(Inf), T(-Inf)) === T(3*pi/4)
-    @test xatan2(T(-Inf), T(-Inf)) === T(-3*pi/4)
-    @test xatan2(T(Inf), T(Inf)) === T(pi/4)
-    @test xatan2(T(-Inf), T(Inf)) === T(-pi/4)
+    @test xatan2(T(Inf), T(-Inf))  ===  T(3*pi/4)
+    @test xatan2(T(-Inf), T(-Inf)) ===  T(-3*pi/4)
+    @test xatan2(T(Inf), T(Inf))   ===  T(pi/4)
+    @test xatan2(T(-Inf), T(Inf))  ===  T(-pi/4)
     
 
     y = T(0.0)
@@ -84,12 +84,12 @@
 end # denormal/nonumber atan2
 
 
-@testset "denormal/nonnumber pow" begin
+@testset "denormal/nonnumber xpow" begin
 
-    @test xpow(one(T),T(NaN)) === one(T)
+    @test xpow(one(T),T(NaN))  === one(T)
     @test xpow(T(NaN),zero(T)) === one(T)
-    @test xpow(T(-1),T(Inf)) === one(T)
-    @test xpow(T(-1),T(-Inf)) === one(T)
+    @test xpow(T(-1),T(Inf))   === one(T)
+    @test xpow(T(-1),T(-Inf))  === one(T)
     
 
     xa = T[-100000.5, -100000, -3, -2.5, -2, -1.5, -1.0, -0.5]
@@ -287,7 +287,7 @@ end
 end
 
 
-@testset "denormal/nonnumber exp" begin
+@testset "denormal/nonnumber xexp" begin
     xa = T[NaN, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(xexp(x), exp(BigFloat(x)))
@@ -295,7 +295,7 @@ end
 end
 
 
-@testset "denormal/nonnumber sinh" begin
+@testset "denormal/nonnumber xsinh" begin
     xa = T[NaN, 0.0, -0.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(xsinh(x), sinh(BigFloat(x)))
@@ -303,7 +303,7 @@ end
 end
 
 
-@testset "denormal/nonnumber cosh" begin
+@testset "denormal/nonnumber xcosh" begin
     xa = T[NaN, 0.0, -0.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(xcosh(x), cosh(BigFloat(x)))
@@ -311,7 +311,7 @@ end
 end
 
 
-@testset "denormal/nonnumber tanh" begin
+@testset "denormal/nonnumber xtanh" begin
     xa = T[NaN, 0.0, -0.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(xtanh(x), tanh(BigFloat(x)))
@@ -319,7 +319,7 @@ end
 end
 
 
-@testset "denormal/nonnumber asinh" begin
+@testset "denormal/nonnumber xasinh" begin
     xa = T[NaN, 0.0, -0.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(xasinh(x), asinh(BigFloat(x)))
@@ -327,7 +327,7 @@ end
 end
 
 
-@testset "denormal/nonnumber acosh" begin
+@testset "denormal/nonnumber xacosh" begin
     xa = T[NaN, 0.0, -0.0, 1.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(xacosh(x), acosh(BigFloat(x)))
@@ -335,7 +335,7 @@ end
 end
 
 
-@testset "denormal/nonnumber atanh" begin
+@testset "denormal/nonnumber xatanh" begin
     xa = T[NaN, 0.0, -0.0, 1.0, -1.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(xatanh(x), atanh(BigFloat(x)))
@@ -351,7 +351,7 @@ end
 end
 
 
-@testset "denormal/nonnumber exp2" begin
+@testset "denormal/nonnumber xexp2" begin
     xa = T[NaN, Inf, -Inf]
     for x in xa
         @test cmpdenorm(xexp2(x), exp2(BigFloat(x)))
@@ -359,7 +359,7 @@ end
 end
 
 
-@testset "denormal/nonnumber exp10" begin
+@testset "denormal/nonnumber xexp10" begin
     xa = T[NaN, Inf, -Inf]
     for x in xa
         @test cmpdenorm(xexp10(x), exp10(BigFloat(x)))
@@ -367,7 +367,7 @@ end
 end
 
 
-@testset "denormal/nonnumber expm1" begin
+@testset "denormal/nonnumber xexpm1" begin
     xa = T[NaN, Inf, -Inf]
     for x in xa
         @test cmpdenorm(xexpm1(x), expm1(BigFloat(x)))
@@ -375,7 +375,7 @@ end
 end
 
 
-@testset "denormal/nonnumber log10" begin
+@testset "denormal/nonnumber xlog10" begin
     xa = T[NaN, Inf, -Inf, 0.0, -1.0]
     for x in xa
         @test cmpdenorm(xlog10(x), log10(BigFloat(x)))
@@ -383,7 +383,7 @@ end
 end
 
 
-@testset "denormal/nonnumber log1p" begin
+@testset "denormal/nonnumber xlog1p" begin
     xa = T[NaN, Inf, -Inf, 0.0, -1.0, -2.0]
     for x in xa
         @test cmpdenorm(xlog1p(x), log1p(BigFloat(x)))
@@ -391,12 +391,22 @@ end
 end
 
 
-@testset "denormal/nonnumber ldexp" begin
+@testset "denormal/nonnumber xldexp" begin
     for i = -10000:10000
-        a = xldexp(T(1.0),Int32(i))
+        a = xldexp(T(1.0), i)
         b = ldexp(BigFloat(1.0), i)
         @test (isfinite(b) && a == b || cmpdenorm(a,b))
     end
 end
+
+
+@testset "denormal/nonnumber xilogb" begin
+    @test xilogb(T(Inf))  == typemax(Int)
+    @test xilogb(T(-Inf)) == typemax(Int)
+    @test xilogb(T(0.0))  == typemin(Int)
+    @test xilogb(T(+0.0)) == typemin(Int)
+    @test xilogb(T(NaN))  == typemax(Int)
+end
+
 
 end #denormal/nonnumber
