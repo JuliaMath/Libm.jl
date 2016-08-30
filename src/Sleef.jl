@@ -7,8 +7,8 @@ export xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcos
 export xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xtan_u1, xcbrt_u1, xlog_u1
 
 
-# 4/pi split into four parts
-const PI4A = 0.78539816290140151978
+# 4/pi split into four parts (each is 26 bits)
+const PI4A = 0.78539816290140151978 
 const PI4B = 4.9604678871439933374e-10
 const PI4C = 1.1258708853173288931e-18
 const PI4D = 1.7607799325916000908e-27
