@@ -11,10 +11,8 @@ const c4 =  2.75573192239198747630416e-06
 const c3 = -0.000198412698412696162806809
 const c2 =  0.00833333333333332974823815
 const c1 = -0.166666666666666657414808
-"""
-We reduce the argument to be in the domain 0 < s < π/4 and then use a 10 term
-taylor expansion of sin(x)
-"""
+
+# Argument is first reduced to the domain 0 < s < π/4
 
 """
 We return the correct sign using `q & 1 != 0` i.e. q is odd (this works for
@@ -22,6 +20,8 @@ positive and negative q) and if this condition is true we flip the sign since
 we are now in the negative branch of sin(x). Recall that q is just the integer
 part of d/π and thus we can determine the correct sign using this information.
 """
+@inline _sincos(x::Float64) = @horner(x, c1, c2, c3, c4, c5, c6, c7, c8, c9)
+
 function xsin(d::Float64)
     q = xrint(d*M1PI)
     d = muladd(q, -PI4A*4, d)
@@ -30,7 +30,7 @@ function xsin(d::Float64)
     d = muladd(q, -PI4D*4, d)
     s = d*d
     (q & 1) != 0 && (d = -d)
-    u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9
+    u = _sincos(s)
     u = muladd(s, u*d, d)
     return u
 end
@@ -43,7 +43,7 @@ function xcos(d::Float64)
     d = muladd(q, -PI4D*2, d)
     s = d*d
     (q & 2) == 0 && (d = -d)
-    u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9
+    u = _sincos(s)
     u = muladd(s, u*d, d)
     return u
 end
@@ -51,13 +51,15 @@ end
 
 let
 global xsin_u1
-const c7 =  2.72052416138529567917983e-15  
-const c6 = -7.6429259411395447190023e-13  
-const c5 =  1.60589370117277896211623e-10  
-const c4 = -2.5052106814843123359368e-08  
-const c3 =  2.75573192104428224777379e-06  
-const c2 = -0.000198412698412046454654947 
-const c1 =  0.00833333333333318056201922   
+global xcos_u1
+
+const c7 =  2.72052416138529567917983e-15
+const c6 = -7.6429259411395447190023e-13
+const c5 =  1.60589370117277896211623e-10
+const c4 = -2.5052106814843123359368e-08
+const c3 =  2.75573192104428224777379e-06
+const c2 = -0.000198412698412046454654947
+const c1 =  0.00833333333333318056201922
 
 function xsin_u1(d::Float64)
     q = xrint(d*M1PI)
@@ -74,17 +76,6 @@ function xsin_u1(d::Float64)
     (q & 1) != 0 && (u = -u)
     return u
 end
-end
-
-let
-global xcos_u1
-const c7 =  2.72052416138529567917983e-15
-const c6 = -7.6429259411395447190023e-13
-const c5 =  1.60589370117277896211623e-10
-const c4 = -2.5052106814843123359368e-08
-const c3 =  2.75573192104428224777379e-06
-const c2 = -0.000198412698412046454654947
-const c1 =  0.00833333333333318056201922 
 
 function xcos_u1(d::Float64)
     d = abs(d)
@@ -112,16 +103,16 @@ const a6 =  1.58938307283228937328511e-10
 const a5 = -2.50506943502539773349318e-08
 const a4 =  2.75573131776846360512547e-06
 const a3 = -0.000198412698278911770864914
-const a2 =  0.0083333333333191845961746  
-const a1 = -0.166666666666666130709393 
+const a2 =  0.0083333333333191845961746
+const a1 = -0.166666666666666130709393
 
 const b7 = -1.13615350239097429531523e-11
 const b6 =  2.08757471207040055479366e-09
 const b5 = -2.75573144028847567498567e-07
 const b4 =  2.48015872890001867311915e-05
-const b3 = -0.00138888888888714019282329 
-const b2 =  0.0416666666666665519592062  
-const b1 = -0.5     
+const b3 = -0.00138888888888714019282329
+const b2 =  0.0416666666666665519592062
+const b1 = -0.5
 
 function xsincos(d::Float64)
     q = xrint(d*(2*M1PI))
@@ -141,8 +132,8 @@ function xsincos(d::Float64)
     u = @horner s b1 b2 b3 b4 b5 b6 b7
     ry = u * s + 1
 
-    (q & 1) != 0 && (s = ry; ry = rx; rx = s)
-    (q & 2) != 0 && (rx = -rx)
+    (q & 1) != 0     && (s = ry; ry = rx; rx = s)
+    (q & 2) != 0     && (rx = -rx)
     ((q+1) & 2) != 0 && (ry = -ry)
 
     isinf(d) && (rx = ry = NaN)
@@ -165,12 +156,12 @@ function xsincos_u1(d::Float64)
 
     x = ddadd_d2_d2_d(t, u)
     rx = x.x + x.y
-    u = @horner sx b1 b2 b3 b4 b5 b6 b7 
+    u = @horner sx b1 b2 b3 b4 b5 b6 b7
     x = ddadd_d2_d_d2(1.0, ddmul_d2_d_d(sx, u))
     ry = x.x + x.y
 
-    (q & 1) != 0 && (u = ry; ry = rx; rx = u)
-    (q & 2) != 0 && (rx = -rx)
+    (q & 1) != 0     && (u = ry; ry = rx; rx = u)
+    (q & 2) != 0     && (rx = -rx)
     ((q+1) & 2) != 0 && (ry = -ry)
 
     isinf(d) && (rx = ry = NaN)
@@ -182,21 +173,21 @@ let
 global xtan
 global xtan_u1
 
-const c15 =  1.01419718511083373224408e-05  
+const c15 =  1.01419718511083373224408e-05
 const c14 = -2.59519791585924697698614e-05
-const c13 =  5.23388081915899855325186e-05 
+const c13 =  5.23388081915899855325186e-05
 const c12 = -3.05033014433946488225616e-05
-const c11 =  7.14707504084242744267497e-05 
-const c10 =  8.09674518280159187045078e-05 
-const c9  =  0.000244884931879331847054404 
-const c8  =  0.000588505168743587154904506 
-const c7  =  0.00145612788922812427978848  
-const c6  =  0.00359208743836906619142924  
-const c5  =  0.00886323944362401618113356  
-const c4  =  0.0218694882853846389592078   
-const c3  =  0.0539682539781298417636002   
-const c2  =  0.133333333333125941821962    
-const c1  =  0.333333333333334980164153    
+const c11 =  7.14707504084242744267497e-05
+const c10 =  8.09674518280159187045078e-05
+const c9  =  0.000244884931879331847054404
+const c8  =  0.000588505168743587154904506
+const c7  =  0.00145612788922812427978848
+const c6  =  0.00359208743836906619142924
+const c5  =  0.00886323944362401618113356
+const c4  =  0.0218694882853846389592078
+const c3  =  0.0539682539781298417636002
+const c2  =  0.133333333333125941821962
+const c1  =  0.333333333333334980164153
 
 function xtan(d::Float64)
     q = xrint(d * (2*M1PI))
@@ -254,23 +245,23 @@ let
 global xatan
 const c19 = -1.88796008463073496563746e-05
 const c18 =  0.000209850076645816976906797
-const c17 = -0.00110611831486672482563471 
-const c16 =  0.00370026744188713119232403 
-const c15 = -0.00889896195887655491740809 
-const c14 =  0.016599329773529201970117   
-const c13 = -0.0254517624932312641616861  
-const c12 =  0.0337852580001353069993897  
-const c11 = -0.0407629191276836500001934  
-const c10 =  0.0466667150077840625632675  
-const c9  = -0.0523674852303482457616113  
-const c8  =  0.0587666392926673580854313  
-const c7  = -0.0666573579361080525984562  
-const c6  =  0.0769219538311769618355029  
-const c5  = -0.090908995008245008229153   
-const c4  =  0.111111105648261418443745   
-const c3  = -0.14285714266771329383765    
-const c2  =  0.199999999996591265594148   
-const c1  = -0.333333333333311110369124   
+const c17 = -0.00110611831486672482563471
+const c16 =  0.00370026744188713119232403
+const c15 = -0.00889896195887655491740809
+const c14 =  0.016599329773529201970117
+const c13 = -0.0254517624932312641616861
+const c12 =  0.0337852580001353069993897
+const c11 = -0.0407629191276836500001934
+const c10 =  0.0466667150077840625632675
+const c9  = -0.0523674852303482457616113
+const c8  =  0.0587666392926673580854313
+const c7  = -0.0666573579361080525984562
+const c6  =  0.0769219538311769618355029
+const c5  = -0.090908995008245008229153
+const c4  =  0.111111105648261418443745
+const c3  = -0.14285714266771329383765
+const c2  =  0.199999999996591265594148
+const c1  = -0.333333333333311110369124
 
 function xatan(s::Float64)
     q = 0

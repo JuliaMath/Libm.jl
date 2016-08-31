@@ -1,22 +1,3 @@
-# utility functions
-using Base: significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
-
-@pure exponent_max{T<:AbstractFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
-
-@inline sign{T<:FloatTypes}(d::T) =  copysign(one(T), d) # emits better native code than Base.sign
-
-@inline xrint{T<:FloatTypes}(x::T) = x < 0 ? unsafe_trunc(Int, x - T(0.5)) : unsafe_trunc(Int, x + T(0.5))
-
-@inline integer2float(::Type{Float64}, m::Int) = reinterpret(Float64, (m % Int64) << significand_bits(Float64))
-@inline integer2float(::Type{Float32}, m::Int) = reinterpret(Float32, (m % Int32) << significand_bits(Float32))
-
-@inline float2integer(d::Float64) = (reinterpret(Int64, d) >> significand_bits(Float64)) % Int
-@inline float2integer(d::Float32) = (reinterpret(Int32, d) >> significand_bits(Float32)) % Int
-
-@inline pow2i(::Type{Float64}, q::Int) = integer2float(Float64, q + exponent_bias(Float64))
-@inline pow2i(::Type{Float32}, q::Int) = integer2float(Float32, q + exponent_bias(Float64))
-
-
 # private math functions
 
 """
@@ -26,8 +7,8 @@ First note that `r = (q >> n) << n` clears the lowest n bits of q, i.e. returns 
 largest integer such that q >= 2^n
 
 For numbers q less than 2^m the following code does the same as the above snippet
-    `r = ( (q>>m + q) >> n - q>>m ) << n`
-For numbers larger than or equal to 2^m this subtracts 2^n from q for q>>n times.
+    `r = ( (q>>v + q) >> n - q>>v ) << n`
+For numbers larger than or equal to 2^v this subtracts 2^n from q for q>>n times.
 
 The function returns q(input) := q(output) + offset*r
 
@@ -38,13 +19,18 @@ exponent amount back in.
 """
 @inline split_exponent(::Type{Float64}, q::Int) = _split_exponent(q, 9, 31, 2)
 @inline split_exponent(::Type{Float32}, q::Int) = _split_exponent(q, 6, 31, 2)
-@inline function _split_exponent(q, n, m, offset)
-    r = q >> m
-    r = (((r + q) >> n) - r) << (n-offset)
-    q = q - (r << offset)
-    return r, q
+@inline function _split_exponent(q, n, v, offset)
+    m = q >> v
+    m = (((m + q) >> n) - m) << (n-offset)
+    q = q - (m << offset)
+    return m, q
 end
 
+"""
+    ldexpk(x::FloatTypes, n::Int) -> FloatTypes
+
+Computes `x \times 2^n`
+"""
 @inline function ldexpk{T<:FloatTypes}(x::T, q::Int)
     bias = exponent_bias(T)
     emax = exponent_max(T)
@@ -59,23 +45,33 @@ end
     return x*u
 end
 
-# The following defines threshold values 
+# The following define threshold values for `ilogbp1`
 real_cut_offset(::Type{Float64}) = 300
 real_cut_offset(::Type{Float32}) = 64
 
 # 2^-real_cut_offset
-real_cut_min(::Type{Float64}) = 4.9090934652977266e-91 
+real_cut_min(::Type{Float64}) = 4.9090934652977266e-91
 real_cut_min(::Type{Float32}) = 5.421010862427522f-20
 
 # 2^real_cut_offset
 real_cut_max(::Type{Float64}) = 2.037035976334486e90
 real_cut_max(::Type{Float32}) = 1.8446744073709552f19
 
+"""
+Private helper function
+
+    exponent = ilogbp1(x)
+
+Returns the integral part of the logarithm of `|x|`, using 2 as base for the logarithm; in other
+words this returns the binary exponent of `x` so that
+    x = significand \times 2^exponenet
+where `significand \in [0.5, 1)`
+"""
 @inline function ilogbp1{T<:FloatTypes}(d::T)
-    m = d < real_cut_min(T) #2.0^-300
-    d = m ? real_cut_max(T) * d : d  #2.0^300
+    m = d < real_cut_min(T)
+    d = m ? real_cut_max(T) * d : d
     q = float2integer(d) & exponent_max(T)
-    q = m ? q - (real_cut_offset(T) + exponent_bias(T) - 1) : q - (exponent_bias(T) - 1)
+    q = m ? q - (real_cut_offset(T) + exponent_bias(T) - 1) : q - (exponent_bias(T) - 1) # we subtract 1 since we want 2^q
     return q
 end
 
