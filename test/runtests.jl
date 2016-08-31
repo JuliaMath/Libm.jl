@@ -76,7 +76,7 @@ for f in (:sin, :cos, :tan, :asin, :acos, :atan, :asinh, :acosh, :atanh, :log, :
     end
 end
 
-strip_module_name(f::Function) = split(string(f), '.')[end] # strip module name from function f
+strip_module_name(f::Function) = last(split(string(f), '.')) # strip module name from function f
 """
 test the accuracy of a function where fun_table is a Dict mapping the function you want
 to test to a reference function
@@ -86,25 +86,27 @@ tol is the acceptable tolerance to test against
 function test_acc(T, fun_table, xx, tol; debug=false, tol_debug=5)
     @testset "accuracy $(strip_module_name(xfun))" for (xfun, fun) in fun_table
         rmax = 0.0
+        xmax = map(zero, first(xx))
         for x in xx
             q = xfun(x...)
             c = fun(map(BigFloat,x)...)
             u = countulp(q, c)
             rmax = max(rmax, u)
+            xmax = rmax == u ? x : xmax 
             if debug && rmax > tol_debug
                 @printf("%s = %.20g\n%s  = %.20g\nx = %.20g\nulp = %g\n", strip_module_name(xfun), q, strip_module_name(fun), T(c), x, ulp(T,c))
             end
         end
         t = @test rmax < tol
         t.value == true ? (v = "GOOD") : (v = "FAIL")
-        println(rpad(strip_module_name(xfun), 15, " "), " : ", @sprintf("%f", rmax), " ... ", v)
+        println(rpad(strip_module_name(xfun), 15, " "), " : ", @sprintf("%f", rmax), " ... ", " at x = ",  string(xmax))
     end
 end
 
 const pow = ^
 function runtests()
-    include("dnml_nan.jl")
-    include("accuracy.jl")
+    # include("dnml_nan.jl")
+    # include("accuracy.jl")
     # include("accuracy_base.jl") # uncomment to benchmark base
 end
 
