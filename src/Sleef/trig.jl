@@ -137,7 +137,7 @@ function xsincos(d::Float64)
     ((q+1) & 2) != 0 && (ry = -ry)
 
     isinf(d) && (rx = ry = NaN)
-    return Double2(rx,ry)
+    return Double(rx,ry)
 end
 
 function xsincos_u1(d::Float64)
@@ -165,7 +165,7 @@ function xsincos_u1(d::Float64)
     ((q+1) & 2) != 0 && (ry = -ry)
 
     isinf(d) && (rx = ry = NaN)
-    return Double2(rx,ry)
+    return Double(rx,ry)
 end
 end
 
@@ -301,7 +301,7 @@ end
 end
 
 function xatan2_u1(y::Float64, x::Float64)
-    d = atan2k_u1(Double2(abs(y), 0.0), Double2(x, 0.0))
+    d = atan2k_u1(Double(abs(y), 0.0), Double(x, 0.0))
     r = d.x + d.y
 
     r = flipsign(r, x)
@@ -318,22 +318,22 @@ function xatan2_u1(y::Float64, x::Float64)
 end
 
 function xasin_u1(d::Float64)
-    d2 = atan2k_u1(Double2(abs(d), 0.0), ddsqrt_d2_d2(ddmul_d2_d2_d2(ddadd_d2_d_d(1.0, d), ddadd_d2_d_d(1.0,-d))))
+    d2 = atan2k_u1(Double(abs(d), 0.0), ddsqrt_d2_d2(ddmul_d2_d2_d2(ddadd_d2_d_d(1.0, d), ddadd_d2_d_d(1.0,-d))))
     r = d2.x + d2.y
     abs(d) == 1 && (r = 1.570796326794896557998982)
     return flipsign(r, d)
 end
 
 function xacos_u1(d::Float64)
-    d2 = atan2k_u1(ddsqrt_d2_d2(ddmul_d2_d2_d2(ddadd_d2_d_d(1.0, d), ddadd_d2_d_d(1.0,-d))), Double2(abs(d), 0.0))
+    d2 = atan2k_u1(ddsqrt_d2_d2(ddmul_d2_d2_d2(ddadd_d2_d_d(1.0, d), ddadd_d2_d_d(1.0,-d))), Double(abs(d), 0.0))
     d2 = ddscale_d2_d2_d(d2, sign(d))
-    abs(d) == 1 && (d2 = Double2(0.0, 0.0))
-    d < 0 && (d2 = ddadd_d2_d2_d2(Double2(3.141592653589793116, 1.2246467991473532072e-16), d2))
+    abs(d) == 1 && (d2 = Double(0.0, 0.0))
+    d < 0 && (d2 = ddadd_d2_d2_d2(Double(3.141592653589793116, 1.2246467991473532072e-16), d2))
     return d2.x + d2.y
 end
 
 function xatan_u1(d::Float64)
-    d2 = atan2k_u1(Double2(abs(d), 0.0), Double2(1.0, 0.0))
+    d2 = atan2k_u1(Double(abs(d), 0.0), Double(1.0, 0.0))
     r = d2.x + d2.y
     isinf(d) && (r = 1.570796326794896557998982)
     return flipsign(r, d)

@@ -9,7 +9,6 @@ export xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xt
 # Alias for supported floating point types
 typealias FloatTypes Union{Float32,Float64}
 
-
 # Split 4/pi into four parts (each is 26 bits)
 const PI4A = 0.78539816290140151978 
 const PI4B = 4.9604678871439933374e-10
@@ -28,9 +27,9 @@ const M1PI = 0.318309886183790671538 # 1/pi
 const M2PI = 0.636619772367581343076 # 2/pi
 const MPI  = 3.14159265358979323846  # pi
 
-using Base.Math.@horner
+using Base: Math.@horner, significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
 
-include("Sleef/double2.jl")
+include("Sleef/double.jl")
 include("Sleef/priv.jl") # private math functions
 
 # exported math functions
@@ -41,7 +40,6 @@ include("Sleef/hyp.jl")  # hyperbolic and inverse hyperbolic functions
 include("Sleef/misc.jl") # miscallenous math functions including pow and cbrt
 
 # utility functions used by the private math functions in priv.jl
-using Base: significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
 
 @pure exponent_max{T<:AbstractFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
@@ -58,7 +56,10 @@ using Base: significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
 @inline pow2i(::Type{Float64}, q::Int) = integer2float(Float64, q + exponent_bias(Float64))
 @inline pow2i(::Type{Float32}, q::Int) = integer2float(Float32, q + exponent_bias(Float64))
 
-# sqrt without the domain checks which we don't need since we handle the checks ourselves
+@inline upper(d::Float64) = reinterpret(Float64, reinterpret(UInt64, d) & 0xfffffffff8000000) # clear lower 27 bits (leave upper 26 bits)
+@inline upper(d::Float32) = reinterpret(Float32, reinterpret(UInt32, d) & 0xfffff000) # clear lowest 12 bits (leave upper 12 bits)
+
+# sqrt without the domain checks that we don't need since we handle the checks ourselves
 _sqrt{T<:FloatTypes}(x::T) = Base.box(T, Base.sqrt_llvm_fast(Base.unbox(T,x)))
 
 end
