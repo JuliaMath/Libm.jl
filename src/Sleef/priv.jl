@@ -1,7 +1,7 @@
 # private math functions
 
 """
-`split_exponent` is a helper function for `ldexpk`
+A helper function for `ldexpk`
 
 First note that `r = (q >> n) << n` clears the lowest n bits of q, i.e. returns 2^n where n is the
 largest integer such that q >= 2^n
@@ -45,6 +45,15 @@ Computes `x \times 2^n`
     return x*u
 end
 
+"""
+    exponent = ilogbp1(x)
+
+Returns the integral part of the logarithm of `|x|`, using 2 as base for the logarithm; in other
+words this returns the binary exponent of `x` so that
+    x = significand \times 2^exponenet
+where `significand \in [0.5, 1)`
+"""
+
 # The following define threshold values for `ilogbp1`
 real_cut_offset(::Type{Float64}) = 300
 real_cut_offset(::Type{Float32}) = 64
@@ -57,16 +66,6 @@ real_cut_min(::Type{Float32}) = 5.421010862427522f-20
 real_cut_max(::Type{Float64}) = 2.037035976334486e90
 real_cut_max(::Type{Float32}) = 1.8446744073709552f19
 
-"""
-Private helper function
-
-    exponent = ilogbp1(x)
-
-Returns the integral part of the logarithm of `|x|`, using 2 as base for the logarithm; in other
-words this returns the binary exponent of `x` so that
-    x = significand \times 2^exponenet
-where `significand \in [0.5, 1)`
-"""
 @inline function ilogbp1{T<:FloatTypes}(d::T)
     m = d < real_cut_min(T)
     d = m ? real_cut_max(T) * d : d
@@ -157,15 +156,15 @@ const c3  = -0.142857142756268568062339
 const c2  =  0.199999999997977351284817
 const c1  = -0.333333333333317605173818
 
-@inline function atan2k_u1(y::Double2, x::Double2)
+@inline function atan2k_u1(y::Double, x::Double)
     q = 0
     if x.x < 0
-        x = Double2(-x.x,-x.y)
+        x = Double(-x.x,-x.y)
         q = -2
     end
     if y.x > x.x
         t = x; x = y
-        y = Double2(-t.x,-t.y)
+        y = Double(-t.x,-t.y)
         q += 1
     end
     s = dddiv_d2_d2_d2(y, x)
@@ -174,7 +173,7 @@ const c1  = -0.333333333333317605173818
     u = @horner t.x c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20
     t = ddmul_d2_d2_d(t, u)
     t = ddmul_d2_d2_d2(s, ddadd_d2_d_d2(1.0, t))
-    t = ddadd2_d2_d2_d2(ddmul_d2_d2_d(Double2(1.570796326794896557998982, 6.12323399573676603586882e-17), Float64(q)), t)
+    t = ddadd2_d2_d2_d2(ddmul_d2_d2_d(Double(1.570796326794896557998982, 6.12323399573676603586882e-17), Float64(q)), t)
     return t
 end
 end
@@ -196,7 +195,7 @@ const c1 = 0.666666666666666371239645
     x = dddiv_d2_d2_d2(ddadd2_d2_d_d(-1.0, m), ddadd2_d2_d_d(1.0, m))
     x2 = ddsqu_d2_d2(x)
     t = @horner x2.x c1 c2 c3 c4 c5 c6 c7 c8
-    return ddadd2_d2_d2_d2(ddmul_d2_d2_d(Double2(0.693147180559945286226764, 2.319046813846299558417771e-17), Float64(e)),
+    return ddadd2_d2_d2_d2(ddmul_d2_d2_d(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), Float64(e)),
             ddadd2_d2_d2_d2(ddscale_d2_d2_d(x, 2.0), ddmul_d2_d2_d(ddmul_d2_d2_d2(x2, x), t)))
 end
 end
@@ -214,7 +213,7 @@ const c3 = 0.0416666666665409524128449
 const c2 = 0.166666666666666740681535
 const c1 = 0.500000000000000999200722
 
-@inline function expk(d::Double2)
+@inline function expk(d::Double)
     q = xrint((d.x + d.y)*LOG2E)
     s = ddadd2_d2_d2_d(d, q*-LN2U)
     s = ddadd2_d2_d2_d(s, q*-LN2L)
@@ -239,7 +238,7 @@ const c3 = 0.0416666666665409524128449
 const c2 = 0.166666666666666740681535
 const c1 = 0.500000000000000999200722
 
-@inline function expk2(d::Double2)
+@inline function expk2(d::Double)
     q = xrint((d.x + d.y)*LOG2E)
     s = ddadd2_d2_d2_d(d, q*-LN2U)
     s = ddadd2_d2_d2_d(s, q*-LN2L)
@@ -261,13 +260,13 @@ const c3 = 0.285714285651261412873718
 const c2 = 0.400000000000222439910458
 const c1 = 0.666666666666666371239645
 
-@inline function logk2(d::Double2)
+@inline function logk2(d::Double)
     e = ilogbp1(d.x * 0.7071)
     m = ddscale_d2_d2_d(d, pow2i(Float64, -e))
     x = dddiv_d2_d2_d2(ddadd2_d2_d2_d(m, -1.0), ddadd2_d2_d2_d(m, 1.0))
     x2 = ddsqu_d2_d2(x)
     t = @horner x2.x c1 c2 c3 c4 c5 c6 c7 c8
-    return ddadd2_d2_d2_d2(ddmul_d2_d2_d(Double2(0.693147180559945286226764, 2.319046813846299558417771e-17), Float64(e)),
+    return ddadd2_d2_d2_d2(ddmul_d2_d2_d(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), Float64(e)),
             ddadd2_d2_d2_d2(ddscale_d2_d2_d(x, 2.0), ddmul_d2_d2_d(ddmul_d2_d2_d2(x2, x), t)))
 end
 end

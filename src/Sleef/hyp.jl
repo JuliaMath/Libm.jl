@@ -1,6 +1,6 @@
 function xsinh(x::Float64)
     y = abs(x)
-    d = expk2(Double2(y, 0.0))
+    d = expk2(Double(y, 0.0))
     d = ddsub_d2_d2_d2(d, ddrec_d2_d2(d))
     y = (d.x + d.y) * 0.5
 
@@ -13,7 +13,7 @@ end
 
 function xcosh(x::Float64)
     y = abs(x)
-    d = expk2(Double2(y, 0.0))
+    d = expk2(Double(y, 0.0))
     d = ddadd_d2_d2_d2(d, ddrec_d2_d2(d))
     y = (d.x + d.y) * 0.5
 
@@ -25,7 +25,7 @@ end
 
 function xtanh(x::Float64)
     y = abs(x)
-    d = expk2(Double2(y, 0.0))
+    d = expk2(Double(y, 0.0))
     e = ddrec_d2_d2(d)
     d = dddiv_d2_d2_d2(ddsub_d2_d2_d2(d, e), ddadd_d2_d2_d2(d, e))
     y = d.x + d.y

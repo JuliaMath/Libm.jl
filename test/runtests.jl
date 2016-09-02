@@ -20,32 +20,27 @@ function cmpdenorm{Tx<:AbstractFloat, Ty<:AbstractFloat}(x::Tx, y::Ty)
     return false
 end
 
-# the following compares x with y first it promotes them to the larger of the two types x,y
-# todo update eps to ulp from reference article
-countulp{T<:Float64}(x::T, y::BigFloat) = _countulp(T, promote(x, y)...)
-countulp{T<:Float32}(x::T, y::Union{Float64, BigFloat})  = _countulp(T, promote(x, y)...)
-function _countulp(T, x::AbstractFloat, y::AbstractFloat)::T
-    T == Float64 && (infh = 1e+300)
-    T == Float32 && (infh = 1e+37)
-    fx, fy = T(x), T(y) # cast to smaller type
-    (isnan(fx) && isnan(fy)) && return 0
-    (isnan(fx) || isnan(fy)) && return 10000
-    if isinf(fx)
-        if sign(fx) == sign(fy) && abs(fy) > infh
-            return 0 #Relaxed infinity handling
-        end
+# the following compares the ulp between x and y.
+# First it promotes them to the larger of the two types x,y
+infh(::Type{Float32}) = 1e+300
+infh(::Type{Float64}) = 1e+37
+function countulp(T, x::AbstractFloat, y::AbstractFloat)
+    X,Y = promote(x,y)
+    x, y = T(X), T(Y) # Cast to smaller type
+    (isnan(x) && isnan(y)) && return 0
+    (isnan(x) || isnan(y)) && return 10000
+    if isinf(x)
+        (sign(x) == sign(y) && abs(y) > infh(T)) && return 0 # Relaxed infinity handling
         return 10001
     end
-    (fx ==  Inf && fy ==  Inf) && return 0
-    (fx == -Inf && fy == -Inf) && return 0
-    if fy == 0
-        if fx == 0
-            return 0
-        end
-    return 10002
+    (x ==  Inf && y ==  Inf) && return 0
+    (x == -Inf && y == -Inf) && return 0
+    if y == 0
+        (x == 0) && return 0
+        return 10002
     end
-    if !isnan(fx) && !isnan(fy) && !isinf(fx) && !isinf(fy)
-        return T(abs( (x - y) / eps(T(y)) ))
+    if isfinite(x) && isfinite(y)
+        return T(abs(X - Y)/eps(y))
     end
     return 10003
 end
@@ -86,27 +81,35 @@ tol is the acceptable tolerance to test against
 function test_acc(T, fun_table, xx, tol; debug=false, tol_debug=5)
     @testset "accuracy $(strip_module_name(xfun))" for (xfun, fun) in fun_table
         rmax = 0.0
+        rmean = 0.0
         xmax = map(zero, first(xx))
         for x in xx
             q = xfun(x...)
             c = fun(map(BigFloat,x)...)
-            u = countulp(q, c)
+            u = countulp(T,q,c)
             rmax = max(rmax, u)
-            xmax = rmax == u ? x : xmax 
-            if debug && rmax > tol_debug
-                @printf("%s = %.20g\n%s  = %.20g\nx = %.20g\nulp = %g\n", strip_module_name(xfun), q, strip_module_name(fun), T(c), x, ulp(T,c))
+            xmax = rmax == u ? x : xmax
+            rmean += u
+            if debug && u > tol_debug
+                @printf("%s = %.20g\n%s  = %.20g\nx = %.20g\nulp = %g\n", strip_module_name(xfun), q, strip_module_name(fun), T(c), x, ulp(T(c)))
             end
         end
+        rmean = rmean/length(xx)
+
         t = @test rmax < tol
-        t.value == true ? (v = "GOOD") : (v = "FAIL")
-        println(rpad(strip_module_name(xfun), 15, " "), " : ", @sprintf("%f", rmax), " ... ", " at x = ",  string(xmax))
+
+        fmtxloc = isa(xmax, Tuple) ? string('(', join((@sprintf("%.5f", x) for x in xmax), ", "), ')') : @sprintf("%.5f", xmax)
+        println(rpad(strip_module_name(xfun), 15, " "), ": max ", @sprintf("%f", rmax),
+            rpad(" at x = "*fmtxloc, 40, " "),
+            ": mean ", @sprintf("%f", rmean))
     end
 end
 
 const pow = ^
 function runtests()
-    # include("dnml_nan.jl")
-    # include("accuracy.jl")
+    include("accuracy_wip.jl")
+    include("dnml_nan.jl")
+    include("accuracy.jl")
     # include("accuracy_base.jl") # uncomment to benchmark base
 end
 

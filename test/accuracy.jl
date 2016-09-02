@@ -1,5 +1,5 @@
 @testset "Accuracy (max error in ulp) for $T" for T in (Float64,)
-println("Accuracy (max error in ulp) for $T")
+println("Accuracy tests for $T")
 
     xx = T[]
     for i = 1:10000
