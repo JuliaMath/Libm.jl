@@ -44,6 +44,7 @@ function countulp(T, x::AbstractFloat, y::AbstractFloat)
     end
     return 10003
 end
+countulp{T<:AbstractFloat}(x::T, y::T) = countulp(T,x,y)
 
 # get rid off annoying warnings from overwritten function
 macro nowarn(expr)
@@ -107,9 +108,11 @@ end
 
 const pow = ^
 function runtests()
-    include("accuracy_wip.jl")
+    # include("accuracy_wip.jl")
+    @testset "Libm" begin
     include("dnml_nan.jl")
     include("accuracy.jl")
+    end
     # include("accuracy_base.jl") # uncomment to benchmark base
 end
 

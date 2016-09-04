@@ -19,28 +19,28 @@ xx_hyp = linspace(-15, 15, 50_000_000)
 xx_cbrt = vcat(-10000:0.2:10000, 2.1.^(-1000:1000))
 
 const micros = Dict(
-    # "exp"   => xx_exp,
-    # "exp2"  => xx_exp,
-    # "exp10" => xx_exp,
-    # "expm1" => xx_sml,
+    "exp"   => xx_exp,
+    "exp2"  => xx_exp,
+    "exp10" => xx_exp,
+    "expm1" => xx_sml,
     "log"   => xx_log,
-    # "log10" => xx_log,
-    # "log1p" => xx_sml,
+    "log10" => xx_log,
+    "log1p" => xx_sml,
     "sin"   => xx_trig,
-    "cos"   => xx_trig
-    # "tan"   => xx_trig,
-    # "cbrt"  => xx_cbrt,
-    # "sinh"  => xx_hyp,
-    # "cosh"  => xx_hyp
-    # "tanh"  => xx_hyp
+    "cos"   => xx_trig,
+    "tan"   => xx_trig,
+    "cbrt"  => xx_cbrt,
+    "sinh"  => xx_hyp,
+    "cosh"  => xx_hyp,
+    "tanh"  => xx_hyp
     )
 
 const micros_u1 = Dict(
-    "log"   => xx_log
-    # "sin"   => xx_trig,
-    # "cos"   => xx_trig,
-    # "tan"   => xx_trig,
-    # "cbrt"  => xx_cbrt
+    "log"   => xx_log,
+    "sin"   => xx_trig,
+    "cos"   => xx_trig,
+    "tan"   => xx_trig,
+    "cbrt"  => xx_cbrt
     )
 
 for n in ("Base","Sleef")

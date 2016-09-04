@@ -4,7 +4,7 @@ function xpow(x::Float64, y::Float64)
     yisint = yint == y
     yisodd = isodd(yint) && yisint
 
-    result = expk(ddmul_d2_d2_d(logk(abs(x)), y))
+    result = expk(ddmul(logk(abs(x)), y))
 
     result = isnan(result) ? Inf : result
     result *=  (x >= 0 ? 1.0 : (!yisint ? NaN : (yisodd ? -1 : 1)));
@@ -52,7 +52,7 @@ function xcbrt(d::Float64) # max error 2 ulps
 end
 
 function xcbrt_u1(d::Float64)
-    q2 = Double(1.0, 0.0)
+    q2 = Double(1.0)
     
     e = ilogbp1(d)
     d = ldexpk(d, -e)
@@ -60,7 +60,7 @@ function xcbrt_u1(d::Float64)
     q2 = (r == 1) ? Double(1.2599210498948731907, -2.5899333753005069177e-17) : q2
     q2 = (r == 2) ? Double(1.5874010519681995834, -1.0869008194197822986e-16) : q2
 
-    q3 = Double(flipsign(q2.x, d), flipsign(q2.y, d))
+    q3 = Double(flipsign(q2.hi, d), flipsign(q2.lo, d))
     d = abs(d)
     
     x = -0.640245898480692909870982
@@ -76,20 +76,20 @@ function xcbrt_u1(d::Float64)
 
     z = x
 
-    u = ddmul_d2_d_d(x, x)
-    u = ddmul_d2_d2_d2(u, u)
-    u = ddmul_d2_d2_d(u, d)
-    u = ddadd2_d2_d2_d(u, -x)
-    y = u.x + u.y
+    u = ddmul(x, x)
+    u = ddmul(u, u)
+    u = ddmul(u, d)
+    u = ddadd2(u, -x)
+    y = u.hi + u.lo
 
     y = -2.0/3.0*y*z
-    v = ddadd2_d2_d2_d(ddmul_d2_d_d(z, z), y)
-    v = ddmul_d2_d2_d(v, d)
-    v = ddmul_d2_d2_d2(v, q3)
-    z = ldexp(v.x + v.y, (e + 6144)÷3 - 2048)
+    v = ddadd2(ddmul(z, z), y)
+    v = ddmul(v, d)
+    v = ddmul(v, q3)
+    z = ldexp(v.hi + v.lo, (e + 6144)÷3 - 2048)
 
-    isinf(d) && (z = flipsign(Inf, q3.x))
-    d == 0 && (z = flipsign(0.0, q3.x))
+    isinf(d) && (z = flipsign(Inf, q3.hi))
+    d == 0 && (z = flipsign(0.0, q3.hi))
 
     return z
 end

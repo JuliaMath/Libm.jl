@@ -156,24 +156,24 @@ const c3  = -0.142857142756268568062339
 const c2  =  0.199999999997977351284817
 const c1  = -0.333333333333317605173818
 
-@inline function atan2k_u1(y::Double, x::Double)
+@inline function atan2k_u1{T<:Float64}(y::Double{T}, x::Double{T})
     q = 0
-    if x.x < 0
-        x = Double(-x.x,-x.y)
+    if x.hi < 0
+        x = Double(-x.hi,-x.lo)
         q = -2
     end
-    if y.x > x.x
+    if y.hi > x.hi
         t = x; x = y
-        y = Double(-t.x,-t.y)
+        y = Double(-t.hi,-t.lo)
         q += 1
     end
-    s = dddiv_d2_d2_d2(y, x)
-    t = ddsqu_d2_d2(s)
-    t = ddnormalize_d2_d2(t)
-    u = @horner t.x c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20
-    t = ddmul_d2_d2_d(t, u)
-    t = ddmul_d2_d2_d2(s, ddadd_d2_d_d2(1.0, t))
-    t = ddadd2_d2_d2_d2(ddmul_d2_d2_d(Double(1.570796326794896557998982, 6.12323399573676603586882e-17), Float64(q)), t)
+    s = dddiv(y, x)
+    t = ddsqu(s)
+    t = ddnormalize(t)
+    u = @horner t.hi c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20
+    t = ddmul(t, u)
+    t = ddmul(s, ddadd(1.0, t))
+    t = ddadd2(ddmul(Double(1.570796326794896557998982, 6.12323399573676603586882e-17), T(q)), t)
     return t
 end
 end
@@ -189,14 +189,14 @@ const c3 = 0.285714285651261412873718
 const c2 = 0.400000000000222439910458
 const c1 = 0.666666666666666371239645
 
-@inline function logk(d::Float64)
+@inline function logk{T<:Float64}(d::T)
     e = ilogbp1(d*0.7071)
     m = ldexpk(d,-e)
-    x = dddiv_d2_d2_d2(ddadd2_d2_d_d(-1.0, m), ddadd2_d2_d_d(1.0, m))
-    x2 = ddsqu_d2_d2(x)
-    t = @horner x2.x c1 c2 c3 c4 c5 c6 c7 c8
-    return ddadd2_d2_d2_d2(ddmul_d2_d2_d(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), Float64(e)),
-            ddadd2_d2_d2_d2(ddscale_d2_d2_d(x, 2.0), ddmul_d2_d2_d(ddmul_d2_d2_d2(x2, x), t)))
+    x = dddiv(ddadd2(-1.0, m), ddadd2(1.0, m))
+    x2 = ddsqu(x)
+    t = @horner x2.hi c1 c2 c3 c4 c5 c6 c7 c8
+    return ddadd2(ddmul(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), T(e)),
+            ddadd2(ddscale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
 end
 end
 
@@ -213,15 +213,15 @@ const c3 = 0.0416666666665409524128449
 const c2 = 0.166666666666666740681535
 const c1 = 0.500000000000000999200722
 
-@inline function expk(d::Double)
-    q = xrint((d.x + d.y)*LOG2E)
-    s = ddadd2_d2_d2_d(d, q*-LN2U)
-    s = ddadd2_d2_d2_d(s, q*-LN2L)
-    s = ddnormalize_d2_d2(s)
-    u = @horner s.x c1 c2 c3 c4 c5 c6 c7 c8 c9 c10
-    t = ddadd_d2_d2_d2(s, ddmul_d2_d2_d(ddsqu_d2_d2(s), u))
-    t = ddadd_d2_d_d2(1.0, t)
-    return ldexpk(t.x + t.y, q)
+@inline function expk{T<:Float64}(d::Double{T})
+    q = xrint((d.hi + d.lo)*LOG2E)
+    s = ddadd2(d, q*-LN2U)
+    s = ddadd2(s, q*-LN2L)
+    s = ddnormalize(s)
+    u = @horner s.hi c1 c2 c3 c4 c5 c6 c7 c8 c9 c10
+    t = ddadd(s, ddmul(ddsqu(s), u))
+    t = ddadd(one(T), t)
+    return ldexpk(t.hi + t.lo, q)
 end
 end
 
@@ -238,14 +238,14 @@ const c3 = 0.0416666666665409524128449
 const c2 = 0.166666666666666740681535
 const c1 = 0.500000000000000999200722
 
-@inline function expk2(d::Double)
-    q = xrint((d.x + d.y)*LOG2E)
-    s = ddadd2_d2_d2_d(d, q*-LN2U)
-    s = ddadd2_d2_d2_d(s, q*-LN2L)
-    u = @horner s.x c1 c2 c3 c4 c5 c6 c7 c8 c9 c10
-    t = ddadd_d2_d2_d2(s, ddmul_d2_d2_d(ddsqu_d2_d2(s), u))
-    t = ddadd_d2_d_d2(1.0, t)
-    return ddscale_d2_d2_d(t, pow2i(Float64, q))
+@inline function expk2{T<:Float64}(d::Double{T})
+    q = xrint((d.hi + d.lo)*LOG2E)
+    s = ddadd2(d, q*-LN2U)
+    s = ddadd2(s, q*-LN2L)
+    u = @horner s.hi c1 c2 c3 c4 c5 c6 c7 c8 c9 c10
+    t = ddadd(s, ddmul(ddsqu(s), u))
+    t = ddadd(T(1.0), t)
+    return ddscale(t, pow2i(T, q))
 end
 end
 
@@ -260,13 +260,13 @@ const c3 = 0.285714285651261412873718
 const c2 = 0.400000000000222439910458
 const c1 = 0.666666666666666371239645
 
-@inline function logk2(d::Double)
-    e = ilogbp1(d.x * 0.7071)
-    m = ddscale_d2_d2_d(d, pow2i(Float64, -e))
-    x = dddiv_d2_d2_d2(ddadd2_d2_d2_d(m, -1.0), ddadd2_d2_d2_d(m, 1.0))
-    x2 = ddsqu_d2_d2(x)
-    t = @horner x2.x c1 c2 c3 c4 c5 c6 c7 c8
-    return ddadd2_d2_d2_d2(ddmul_d2_d2_d(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), Float64(e)),
-            ddadd2_d2_d2_d2(ddscale_d2_d2_d(x, 2.0), ddmul_d2_d2_d(ddmul_d2_d2_d2(x2, x), t)))
+@inline function logk2{T<:Float64}(d::Double{T})
+    e = ilogbp1(d.hi * 0.7071)
+    m = ddscale(d, pow2i(Float64, -e))
+    x = dddiv(ddadd2(m, T(-1.0)), ddadd2(m, T(1.0)))
+    x2 = ddsqu(x)
+    t = @horner x2.hi c1 c2 c3 c4 c5 c6 c7 c8
+    return ddadd2(ddmul(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), Float64(e)),
+            ddadd2(ddscale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
 end
 end

@@ -25,7 +25,7 @@ end
 
 function xlog_u1(d::Float64)
     s = logk(d)
-    x = s.x + s.y
+    x = s.hi + s.lo
     isinf(d) && (x =  Inf)
     d < 0    && (x =  NaN)
     d == 0   && (x = -Inf)
@@ -33,8 +33,8 @@ function xlog_u1(d::Float64)
 end
 
 function xlog10(a::Float64)
-    d = ddmul_d2_d2_d2(logk(a), Double(0.43429448190325176116, 6.6494347733425473126e-17))
-    x = d.x + d.y
+    d = ddmul(logk(a), Double(0.43429448190325176116, 6.6494347733425473126e-17))
+    x = d.hi + d.lo
     isinf(a) && (x =  Inf)
     a < 0    && (x =  NaN)
     a == 0   && (x = -Inf)
@@ -42,8 +42,8 @@ function xlog10(a::Float64)
 end
 
 function xlog1p(a::Float64)
-    d = logk2(ddadd2_d2_d_d(a, 1.0))
-    x = d.x + d.y
+    d = logk2(ddadd2(a, 1.0))
+    x = d.hi + d.lo
     isinf(a) && (x = Inf)
     a < -1   && (x = NaN)
     a == -1  && (x = -Inf)
@@ -87,9 +87,9 @@ const c1f = 2.0f0
 const SQRT22 = 7.07106781186547524400844362104849039284835937688474036588339868995366239231051e-01
 
 @inline _xlog(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
-@inline _xlog(x::Float32) = @horner x c1f c2f c3f c4f c5f
+# @inline _xlog(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
-function xlog{T<:FloatTypes}(d::T)
+function xlog{T<:Float64}(d::T)
     e = ilogbp1(d*T(SQRT22))
     m = ldexpk(d,-e)
     x = (m-1)/(m+1)
