@@ -234,7 +234,20 @@ end # denormal/nonumber atan2
 end # denormal/nonumber pow
 
 
-fun_table = Dict(xsin => sin, xsin_u1 => sin, xcos => cos, xcos_u1 => cos)
+fun_table = Dict(xsin => sin, xsin_u1 => sin)
+@testset "denormal/nonnumber $xtrig" for (xtrig, trig) in fun_table
+    xa = T[NaN, T(-0.0), T(0.0), Inf, -Inf]
+    for x in xa
+        if x !== -0.0
+            @test cmpdenorm(xtrig(x), trig(BigFloat(x)))
+        else
+            @test_broken cmpdenorm(xtrig(x), trig(BigFloat(x)))
+        end
+    end
+end
+
+
+fun_table = Dict(xcos => cos, xcos_u1 => cos)
 @testset "denormal/nonnumber $xtrig" for (xtrig, trig) in fun_table
     xa = T[NaN, Inf, -Inf]
     for x in xa
@@ -243,12 +256,24 @@ fun_table = Dict(xsin => sin, xsin_u1 => sin, xcos => cos, xcos_u1 => cos)
 end
 
 
-@testset "denormal/nonnumber $trig in $xsincos"for xsincos in (xsincos, xsincos_u1), trig in (sin, cos)
+@testset "denormal/nonnumber sin in $xsincos"for xsincos in (xsincos, xsincos_u1)
+    xa = T[NaN, T(-0.0), T(0.0), Inf, -Inf]
+    for x in xa
+        q = xsincos(x)
+        if x !== -0.0
+            @test cmpdenorm(q.hi, sin(BigFloat(x)))
+        else
+            @test_broken cmpdenorm(q.hi, sin(BigFloat(x)))
+        end
+    end
+end
+
+
+@testset "denormal/nonnumber cos in $xsincos"for xsincos in (xsincos, xsincos_u1)
     xa = T[NaN, Inf, -Inf]
     for x in xa
         q = xsincos(x)
-        trig == sin ? val = q.x : val = q.y
-        @test cmpdenorm(val, trig(BigFloat(x)))
+        @test cmpdenorm(q.lo, cos(BigFloat(x)))
     end
 end
 

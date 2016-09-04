@@ -63,16 +63,16 @@ const c1 =  0.00833333333333318056201922
 
 function xsin_u1(d::Float64)
     q = xrint(d*M1PI)
-    s = ddadd2_d2_d_d(d, q * (-PI4A*4))
-    s = ddadd2_d2_d2_d(s, q * (-PI4B*4))
-    s = ddadd2_d2_d2_d(s, q * (-PI4C*4))
-    s = ddadd2_d2_d2_d(s, q * (-PI4D*4))
+    s = ddadd2(d, q * (-PI4A*4))
+    s = ddadd2(s, q * (-PI4B*4))
+    s = ddadd2(s, q * (-PI4C*4))
+    s = ddadd2(s, q * (-PI4D*4))
     t = s
-    s = ddsqu_d2_d2(s)
-    u = @horner s.x c1 c2 c3 c4 c5 c6 c7
-    x = ddadd_d2_d_d2(1.0, ddmul_d2_d2_d2(ddadd_d2_d_d(-0.166666666666666657414808, u * s.x), s))
-    x = ddmul_d2_d2_d2(t, x)
-    u = x.x + x.y
+    s = ddsqu(s)
+    u = @horner s.hi c1 c2 c3 c4 c5 c6 c7
+    x = ddadd(1.0, ddmul(ddadd(-0.166666666666666657414808, u * s.hi), s))
+    x = ddmul(t, x)
+    u = x.hi + x.lo
     (q & 1) != 0 && (u = -u)
     return u
 end
@@ -80,16 +80,16 @@ end
 function xcos_u1(d::Float64)
     d = abs(d)
     q = muladd(2, xrint(d * M1PI - 0.5), 1)
-    s = ddadd2_d2_d_d(d, q * (-PI4A*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4B*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4C*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4D*2))
+    s = ddadd2(d, q * (-PI4A*2))
+    s = ddadd2(s, q * (-PI4B*2))
+    s = ddadd2(s, q * (-PI4C*2))
+    s = ddadd2(s, q * (-PI4D*2))
     t = s
-    s = ddsqu_d2_d2(s)
-    u = @horner s.x c1 c2 c3 c4 c5 c6 c7
-    x = ddadd_d2_d_d2(1.0, ddmul_d2_d2_d2(ddadd_d2_d_d(-0.166666666666666657414808, u * s.x), s))
-    x = ddmul_d2_d2_d2(t, x)
-    u = x.x + x.y
+    s = ddsqu(s)
+    u = @horner s.hi c1 c2 c3 c4 c5 c6 c7
+    x = ddadd(1.0, ddmul(ddadd(-0.166666666666666657414808, u * s.hi), s))
+    x = ddmul(t, x)
+    u = x.hi + x.lo
     (q & 2) == 0 && (u = -u)
     return u
 end
@@ -143,22 +143,22 @@ end
 function xsincos_u1(d::Float64)
     q = xrint(d*(2*M1PI))
 
-    s = ddadd2_d2_d_d(d, q * (-PI4A*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4B*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4C*2))
-    s = ddadd2_d2_d2_d(s, q * (-PI4D*2))
+    s = ddadd2(d, q * (-PI4A*2))
+    s = ddadd2(s, q * (-PI4B*2))
+    s = ddadd2(s, q * (-PI4C*2))
+    s = ddadd2(s, q * (-PI4D*2))
 
     t = s
-    s = ddsqu_d2_d2(s)
-    sx = s.x + s.y
+    s = ddsqu(s)
+    sx = s.hi + s.lo
     u = @horner sx a1 a2 a3 a4 a5 a6
-    u *= sx * t.x
+    u *= sx * t.hi
 
-    x = ddadd_d2_d2_d(t, u)
-    rx = x.x + x.y
+    x = ddadd(t, u)
+    rx = x.hi + x.lo
     u = @horner sx b1 b2 b3 b4 b5 b6 b7
-    x = ddadd_d2_d_d2(1.0, ddmul_d2_d_d(sx, u))
-    ry = x.x + x.y
+    x = ddadd(1.0, ddmul(sx, u))
+    ry = x.hi + x.lo
 
     (q & 1) != 0     && (u = ry; ry = rx; rx = u)
     (q & 2) != 0     && (rx = -rx)
@@ -206,18 +206,18 @@ end
 
 function xtan_u1(d::Float64)
     q = xrint(d*M2PI)
-    s = ddadd2_d2_d_d(d, q*(-PI4A*2))
-    s = ddadd2_d2_d2_d(s, q*(-PI4B*2))
-    s = ddadd2_d2_d2_d(s, q*(-PI4C*2))
-    s = ddadd2_d2_d2_d(s, q*(-PI4D*2))
-    (q & 1) != 0 && (s = ddneg_d2_d2(s))
+    s = ddadd2(d, q*(-PI4A*2))
+    s = ddadd2(s, q*(-PI4B*2))
+    s = ddadd2(s, q*(-PI4C*2))
+    s = ddadd2(s, q*(-PI4D*2))
+    (q & 1) != 0 && (s = ddneg(s))
     t = s
-    s = ddsqu_d2_d2(s)
-    u = @horner s.x c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15
-    x = ddadd_d2_d_d2(1.0, ddmul_d2_d2_d2(ddadd_d2_d_d(0.333333333333334980164153, u * s.x), s))
-    x = ddmul_d2_d2_d2(t, x)
-    (q & 1) != 0 && (x = ddrec_d2_d2(x))
-    u = x.x + x.y
+    s = ddsqu(s)
+    u = @horner s.hi c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15
+    x = ddadd(1.0, ddmul(ddadd(0.333333333333334980164153, u * s.hi), s))
+    x = ddmul(t, x)
+    (q & 1) != 0 && (x = ddrec(x))
+    u = x.hi + x.lo
     return u
 end
 end
@@ -301,8 +301,8 @@ end
 end
 
 function xatan2_u1(y::Float64, x::Float64)
-    d = atan2k_u1(Double(abs(y), 0.0), Double(x, 0.0))
-    r = d.x + d.y
+    d = atan2k_u1(Double(abs(y)), Double(x))
+    r = d.hi + d.lo
 
     r = flipsign(r, x)
     if isinf(x) || x == 0
@@ -318,23 +318,23 @@ function xatan2_u1(y::Float64, x::Float64)
 end
 
 function xasin_u1(d::Float64)
-    d2 = atan2k_u1(Double(abs(d), 0.0), ddsqrt_d2_d2(ddmul_d2_d2_d2(ddadd_d2_d_d(1.0, d), ddadd_d2_d_d(1.0,-d))))
-    r = d2.x + d2.y
+    d2 = atan2k_u1(Double(abs(d)), ddsqrt(ddmul(ddadd(1.0, d), ddadd(1.0,-d))))
+    r = d2.hi + d2.lo
     abs(d) == 1 && (r = 1.570796326794896557998982)
     return flipsign(r, d)
 end
 
 function xacos_u1(d::Float64)
-    d2 = atan2k_u1(ddsqrt_d2_d2(ddmul_d2_d2_d2(ddadd_d2_d_d(1.0, d), ddadd_d2_d_d(1.0,-d))), Double(abs(d), 0.0))
-    d2 = ddscale_d2_d2_d(d2, sign(d))
-    abs(d) == 1 && (d2 = Double(0.0, 0.0))
-    d < 0 && (d2 = ddadd_d2_d2_d2(Double(3.141592653589793116, 1.2246467991473532072e-16), d2))
-    return d2.x + d2.y
+    d2 = atan2k_u1(ddsqrt(ddmul(ddadd(1.0, d), ddadd(1.0,-d))), Double(abs(d)))
+    d2 = ddscale(d2, sign(d))
+    abs(d) == 1 && (d2 = Double(0.0))
+    d < 0 && (d2 = ddadd(Double(3.141592653589793116, 1.2246467991473532072e-16), d2))
+    return d2.hi + d2.lo
 end
 
 function xatan_u1(d::Float64)
-    d2 = atan2k_u1(Double(abs(d), 0.0), Double(1.0, 0.0))
-    r = d2.x + d2.y
+    d2 = atan2k_u1(Double(abs(d)), Double(1.0))
+    r = d2.hi + d2.lo
     isinf(d) && (r = 1.570796326794896557998982)
     return flipsign(r, d)
 end
