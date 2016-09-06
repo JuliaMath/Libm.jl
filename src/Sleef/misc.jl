@@ -14,7 +14,7 @@ function xpow(x::Float64, y::Float64)
         result = efx < 0 ? 0.0 : (efx == 0 ? 1.0 : Inf)
     end
     if isinf(x) || x == 0
-        result = (yisodd ? sign(x) : 1.0) * ((x == 0 ? -y : y) < 0 ? 0.0 : Inf)
+        result = (yisodd ? _sign(x) : 1.0) * ((x == 0 ? -y : y) < 0 ? 0.0 : Inf)
     end
     (isnan(x) || isnan(y)) && (result = NaN)
     (y == 0 || x == 1) && (result = 1.0)
