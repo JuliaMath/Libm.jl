@@ -9,16 +9,6 @@ export xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xt
 # Alias for supported floating point types
 typealias FloatTypes Union{Float32,Float64}
 
-# function is_fma_fast end
-# for T in (Float32, Float64)
-#     @eval is_fma_fast(::Type{$T}) = $(fma(nextfloat(one(T)),nextfloat(one(T)),-nextfloat(one(T),2)) != zero(T))
-# end
-
-# if is_fma_fast(Float32) && is_fma_fast(Float64)
-#     muladd = fma
-# end
-
-
 # Split 4/pi into four parts (each is 26 bits)
 const PI4A = 0.78539816290140151978 
 const PI4B = 4.9604678871439933374e-10
@@ -53,7 +43,8 @@ include("Sleef/misc.jl") # miscallenous math functions including pow and cbrt
 
 @pure exponent_max{T<:AbstractFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
-@inline sign{T<:FloatTypes}(d::T) =  copysign(one(T), d) # emits better native code than Base.sign
+# _sign emits better native code than sign but does not properly handle the Inf/NaN cases
+@inline _sign{T<:FloatTypes}(d::T) =  flipsign(one(T), d) 
 
 @inline xrint{T<:FloatTypes}(x::T) = x < 0 ? unsafe_trunc(Int, x - T(0.5)) : unsafe_trunc(Int, x + T(0.5))
 

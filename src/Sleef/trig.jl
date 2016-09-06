@@ -22,9 +22,8 @@ part of d/π and thus we can determine the correct sign using this information.
 """
 @inline _sincos(x::Float64) = @horner x c1 c2 c3 c4 c5 c6 c7 c8 c9
 
-function xsin(d::Float64)
-    sgn = sign(d)
-    d = abs(d)
+function xsin(x::Float64)
+    d = abs(x)
     q = xrint(d*M1PI)
     d = muladd(q, -PI4A*4, d)
     d = muladd(q, -PI4B*4, d)
@@ -34,7 +33,7 @@ function xsin(d::Float64)
     (q & 1) != 0 && (d = -d)
     u = _sincos(s)
     u = muladd(s, u*d, d)
-    return sgn*u
+    return flipsign(u,x)
 end
 
 function xcos(d::Float64)
@@ -63,9 +62,8 @@ const c3 =  2.75573192104428224777379e-06
 const c2 = -0.000198412698412046454654947
 const c1 =  0.00833333333333318056201922
 
-function xsin_u1(d::Float64)
-    sgn = sign(d)
-    d = abs(d)
+function xsin_u1(x::Float64)
+    d = abs(x)
     q = xrint(d*M1PI)
     s = ddadd2(d, q * (-PI4A*4))
     s = ddadd2(s, q * (-PI4B*4))
@@ -74,11 +72,11 @@ function xsin_u1(d::Float64)
     t = s
     s = ddsqu(s)
     u = @horner s.hi c1 c2 c3 c4 c5 c6 c7
-    x = ddadd(1.0, ddmul(ddadd(-0.166666666666666657414808, u * s.hi), s))
-    x = ddmul(t, x)
-    u = x.hi + x.lo
+    v = ddadd(1.0, ddmul(ddadd(-0.166666666666666657414808, u*s.hi), s))
+    v = ddmul(t, v)
+    u = v.hi + v.lo
     (q & 1) != 0 && (u = -u)
-    return sgn*u
+    return flipsign(u,x)
 end
 
 function xcos_u1(d::Float64)
@@ -91,9 +89,9 @@ function xcos_u1(d::Float64)
     t = s
     s = ddsqu(s)
     u = @horner s.hi c1 c2 c3 c4 c5 c6 c7
-    x = ddadd(1.0, ddmul(ddadd(-0.166666666666666657414808, u * s.hi), s))
-    x = ddmul(t, x)
-    u = x.hi + x.lo
+    v = ddadd(1.0, ddmul(ddadd(-0.166666666666666657414808, u*s.hi), s))
+    v = ddmul(t, v)
+    u = v.hi + v.lo
     (q & 2) == 0 && (u = -u)
     return u
 end
@@ -118,9 +116,8 @@ const b3 = -0.00138888888888714019282329
 const b2 =  0.0416666666666665519592062
 const b1 = -0.5
 
-function xsincos(d::Float64)
-    sgn = sign(d)
-    d = abs(d)
+function xsincos(x::Float64)
+    d = abs(x)
     q = xrint(d*(2*M1PI))
     s = d
     s = muladd(-q, PI4A*2, s)
@@ -138,12 +135,11 @@ function xsincos(d::Float64)
     (q & 2) != 0     && (rx = -rx)
     ((q+1) & 2) != 0 && (ry = -ry)
     isinf(d) && (rx = ry = NaN)
-    return Double(sgn*rx,ry)
+    return Double(flipsign(rx,x),ry)
 end
 
-function xsincos_u1(d::Float64)
-    sgn = sign(d)
-    d = abs(d)
+function xsincos_u1(x::Float64)
+    d = abs(x)
     q = xrint(d*(2*M1PI))
     s = ddadd2(d, q * (-PI4A*2))
     s = ddadd2(s, q * (-PI4B*2))
@@ -154,16 +150,16 @@ function xsincos_u1(d::Float64)
     sx = s.hi + s.lo
     u = @horner sx a1 a2 a3 a4 a5 a6
     u *= sx * t.hi
-    x = ddadd(t, u)
-    rx = x.hi + x.lo
+    v = ddadd(t, u)
+    rx = v.hi + v.lo
     u = @horner sx b1 b2 b3 b4 b5 b6 b7
-    x = ddadd(1.0, ddmul(sx, u))
-    ry = x.hi + x.lo
+    v = ddadd(1.0, ddmul(sx, u))
+    ry = v.hi + v.lo
     (q & 1) != 0     && (u = ry; ry = rx; rx = u)
     (q & 2) != 0     && (rx = -rx)
     ((q+1) & 2) != 0 && (ry = -ry)
     isinf(d) && (rx = ry = NaN)
-    return Double(sgn*rx,ry)
+    return Double(flipsign(rx,x),ry)
 end
 end
 
@@ -224,13 +220,13 @@ function xatan2(y::Float64, x::Float64)
     r = atan2k(abs(y), x)
     r = flipsign(r, x)
     if isinf(x) || x == 0
-        r = MPI/2 - (isinf(x) ? (sign(x) * (MPI/2)) : 0.0)
+        r = MPI/2 - (isinf(x) ? (_sign(x) * (MPI/2)) : 0.0)
     end
     if isinf(y)
-        r = MPI/2 - (isinf(x) ? (sign(x) * (MPI/4)) : 0.0)
+        r = MPI/2 - (isinf(x) ? (_sign(x) * (MPI/4)) : 0.0)
     end
     if y == 0
-        r = (sign(x) == -1 ? MPI/1 : 0.0)
+        r = (_sign(x) == -1 ? MPI/1 : 0.0)
     end
     return isnan(x) || isnan(y) ? NaN : flipsign(r, y)
 end
@@ -304,13 +300,13 @@ function xatan2_u1(y::Float64, x::Float64)
 
     r = flipsign(r, x)
     if isinf(x) || x == 0
-        r = MPI/2 - (isinf(x) ? (sign(x) * (MPI/2)) : 0.0)
+        r = MPI/2 - (isinf(x) ? (_sign(x) * (MPI/2)) : 0.0)
     end
     if isinf(y)
-        r = MPI/2 - (isinf(x) ? (sign(x) * (MPI/4)) : 0.0)
+        r = MPI/2 - (isinf(x) ? (_sign(x) * (MPI/4)) : 0.0)
     end
     if y == 0
-        r = sign(x) == -1 ? MPI/1 : 0.0
+        r = _sign(x) == -1 ? MPI/1 : 0.0
     end
     return isnan(x) || isnan(y) ? NaN : flipsign(r, y)
 end
@@ -324,7 +320,7 @@ end
 
 function xacos_u1(d::Float64)
     d2 = atan2k_u1(ddsqrt(ddmul(ddadd(1.0, d), ddadd(1.0,-d))), Double(abs(d)))
-    d2 = ddscale(d2, sign(d))
+    d2 = ddscale(d2, _sign(d))
     abs(d) == 1 && (d2 = Double(0.0))
     d < 0 && (d2 = ddadd(Double(3.141592653589793116, 1.2246467991473532072e-16), d2))
     return d2.hi + d2.lo

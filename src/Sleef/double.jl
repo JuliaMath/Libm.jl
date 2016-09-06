@@ -4,11 +4,11 @@ immutable Double{T<:FloatTypes}
 end
 Double{T}(x::T) = Double(x, zero(T))
 
-@inline upper(d::Float64) = reinterpret(Float64, reinterpret(UInt64, d) & 0xfffffffff8000000) # clear lower 27 bits (leave upper 26 bits)
-@inline upper(d::Float32) = reinterpret(Float32, reinterpret(UInt32, d) & 0xfffff000) # clear lowest 12 bits (leave upper 12 bits)
+@inline trunclo(x::Float64) = reinterpret(Float64, reinterpret(UInt64, x) & 0xffff_ffff_f800_0000) # clear lower 27 bits (leave upper 26 bits)
+@inline trunclo(x::Float32) = reinterpret(Float32, reinterpret(UInt32, x) & 0xffff_f000) # clear lowest 12 bits (leave upper 12 bits)
 
 @inline function splitprec(x::FloatTypes)
-    hx = upper(x)
+    hx = trunclo(x)
     hx, x-hx
 end
 
