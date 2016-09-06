@@ -20,9 +20,11 @@ positive and negative q) and if this condition is true we flip the sign since
 we are now in the negative branch of sin(x). Recall that q is just the integer
 part of d/π and thus we can determine the correct sign using this information.
 """
-@inline _sincos(x::Float64) = @horner(x, c1, c2, c3, c4, c5, c6, c7, c8, c9)
+@inline _sincos(x::Float64) = @horner x c1 c2 c3 c4 c5 c6 c7 c8 c9
 
 function xsin(d::Float64)
+    sgn = sign(d)
+    d = abs(d)
     q = xrint(d*M1PI)
     d = muladd(q, -PI4A*4, d)
     d = muladd(q, -PI4B*4, d)
@@ -32,7 +34,7 @@ function xsin(d::Float64)
     (q & 1) != 0 && (d = -d)
     u = _sincos(s)
     u = muladd(s, u*d, d)
-    return u
+    return sgn*u
 end
 
 function xcos(d::Float64)
@@ -62,6 +64,8 @@ const c2 = -0.000198412698412046454654947
 const c1 =  0.00833333333333318056201922
 
 function xsin_u1(d::Float64)
+    sgn = sign(d)
+    d = abs(d)
     q = xrint(d*M1PI)
     s = ddadd2(d, q * (-PI4A*4))
     s = ddadd2(s, q * (-PI4B*4))
@@ -74,7 +78,7 @@ function xsin_u1(d::Float64)
     x = ddmul(t, x)
     u = x.hi + x.lo
     (q & 1) != 0 && (u = -u)
-    return u
+    return sgn*u
 end
 
 function xcos_u1(d::Float64)
@@ -115,57 +119,51 @@ const b2 =  0.0416666666666665519592062
 const b1 = -0.5
 
 function xsincos(d::Float64)
+    sgn = sign(d)
+    d = abs(d)
     q = xrint(d*(2*M1PI))
     s = d
-
     s = muladd(-q, PI4A*2, s)
     s = muladd(-q, PI4B*2, s)
     s = muladd(-q, PI4C*2, s)
     s = muladd(-q, PI4D*2, s)
-
     t = s
     s = s*s
     u = @horner s a1 a2 a3 a4 a5 a6
     u = u * s * t
-
     rx = t + u
     u = @horner s b1 b2 b3 b4 b5 b6 b7
     ry = u * s + 1
-
     (q & 1) != 0     && (s = ry; ry = rx; rx = s)
     (q & 2) != 0     && (rx = -rx)
     ((q+1) & 2) != 0 && (ry = -ry)
-
     isinf(d) && (rx = ry = NaN)
-    return Double(rx,ry)
+    return Double(sgn*rx,ry)
 end
 
 function xsincos_u1(d::Float64)
+    sgn = sign(d)
+    d = abs(d)
     q = xrint(d*(2*M1PI))
-
     s = ddadd2(d, q * (-PI4A*2))
     s = ddadd2(s, q * (-PI4B*2))
     s = ddadd2(s, q * (-PI4C*2))
     s = ddadd2(s, q * (-PI4D*2))
-
     t = s
     s = ddsqu(s)
     sx = s.hi + s.lo
     u = @horner sx a1 a2 a3 a4 a5 a6
     u *= sx * t.hi
-
     x = ddadd(t, u)
     rx = x.hi + x.lo
     u = @horner sx b1 b2 b3 b4 b5 b6 b7
     x = ddadd(1.0, ddmul(sx, u))
     ry = x.hi + x.lo
-
     (q & 1) != 0     && (u = ry; ry = rx; rx = u)
     (q & 2) != 0     && (rx = -rx)
     ((q+1) & 2) != 0 && (ry = -ry)
-
     isinf(d) && (rx = ry = NaN)
-    return Double(rx,ry)
+    return Double(sgn*rx,ry)
 end
 end
 

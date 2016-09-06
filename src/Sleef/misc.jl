@@ -24,72 +24,58 @@ end
 
 function xcbrt(d::Float64) # max error 2 ulps
     q = 1.0
-
     e = ilogbp1(d)
     d = ldexpk(d, -e)
     r = (e + 6144) % 3
     q = (r == 1) ? 1.2599210498948731647672106 : q
     q = (r == 2) ? 1.5874010519681994747517056 : q
     q = ldexpk(q, (e + 6144)÷3 - 2048)
-
     q = flipsign(q, d)
     d = abs(d)
-
     x = -0.640245898480692909870982
     x = x * d + 2.96155103020039511818595
     x = x * d + -5.73353060922947843636166
     x = x * d + 6.03990368989458747961407
     x = x * d + -3.85841935510444988821632
     x = x * d + 2.2307275302496609725722
-
     y = x*x
     y = y*y
     x -= (d*y - x)*(1.0/3.0)
     y = d*x*x
     y = (y - (2.0/3.0)*y*(y*x - 1))*q
-
     return y
 end
 
 function xcbrt_u1(d::Float64)
-    q2 = Double(1.0)
-    
+    q2 = Double(1.0)  
     e = ilogbp1(d)
     d = ldexpk(d, -e)
     r = (e + 6144) % 3
     q2 = (r == 1) ? Double(1.2599210498948731907, -2.5899333753005069177e-17) : q2
     q2 = (r == 2) ? Double(1.5874010519681995834, -1.0869008194197822986e-16) : q2
-
     q3 = Double(flipsign(q2.hi, d), flipsign(q2.lo, d))
     d = abs(d)
-    
     x = -0.640245898480692909870982
     x = x * d + 2.96155103020039511818595
     x = x * d + -5.73353060922947843636166
     x = x * d + 6.03990368989458747961407
     x = x * d + -3.85841935510444988821632
     x = x * d + 2.2307275302496609725722
-
     y = x*x
     y = y*y
     x -= (d*y - x)*(1.0/3.0)
-
     z = x
-
     u = ddmul(x, x)
     u = ddmul(u, u)
     u = ddmul(u, d)
     u = ddadd2(u, -x)
     y = u.hi + u.lo
-
     y = -2.0/3.0*y*z
     v = ddadd2(ddmul(z, z), y)
     v = ddmul(v, d)
     v = ddmul(v, q3)
     z = ldexp(v.hi + v.lo, (e + 6144)÷3 - 2048)
-
     isinf(d) && (z = flipsign(Inf, q3.hi))
     d == 0 && (z = flipsign(0.0, q3.hi))
-
     return z
 end
