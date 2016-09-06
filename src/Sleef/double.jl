@@ -75,6 +75,12 @@ end
     Double(c,((((x.hi - u.hi) - u.lo) + x.lo) - c*y.lo)/y.hi)
 end
 
+# two-prod-fma
+# @inline function ddmul{T<:FloatTypes}(x::T, y::T)
+#     z = x*y
+#     Double(z, fma(x, y, -z))
+# end
+
 # two-prod x*y
 @inline function ddmul{T<:FloatTypes}(x::T, y::T)
     hx, lx = splitprec(x)
@@ -99,12 +105,6 @@ end
     Double(z, (((hx*hy-z) + lx*hy + hx*ly) + lx*ly) + x.hi*y.lo + x.lo*y.hi)
 end
 
-# two-prod-fma
-@inline function ddmul_fma{T<:FloatTypes}(x::T, y::T)
-    z = x*y
-    Double(z, fma(x, y, -z))
-end
-
 # x^2
 @inline function ddsqu{T<:FloatTypes}(x::T)
     hx, lx = splitprec(x)
@@ -120,15 +120,17 @@ end
 
 # 1/x
 @inline function ddrec{T<:FloatTypes}(x::T)
-    c = one(T)/x
+    invx = 1/x
+    c = one(T)*invx
     u = ddmul(c,x)
-    Double(c, (one(T) - u.hi - u.lo)/x)
+    Double(c, (one(T) - u.hi - u.lo)*invx)
 end
 
 @inline function ddrec{T}(x::Double{T})
-    c = one(T)/x.hi
+    invx = 1/x.hi
+    c = one(T)*invx
     u = ddmul(c,x.hi)
-    Double(c, (one(T) -u.hi - u.lo - c*x.lo)/x.hi)
+    Double(c, (one(T) -u.hi - u.lo - c*x.lo)*invx)
 end
 
 # sqrt(x)

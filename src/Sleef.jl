@@ -9,6 +9,16 @@ export xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xt
 # Alias for supported floating point types
 typealias FloatTypes Union{Float32,Float64}
 
+# function is_fma_fast end
+# for T in (Float32, Float64)
+#     @eval is_fma_fast(::Type{$T}) = $(fma(nextfloat(one(T)),nextfloat(one(T)),-nextfloat(one(T),2)) != zero(T))
+# end
+
+# if is_fma_fast(Float32) && is_fma_fast(Float64)
+#     muladd = fma
+# end
+
+
 # Split 4/pi into four parts (each is 26 bits)
 const PI4A = 0.78539816290140151978 
 const PI4B = 4.9604678871439933374e-10

@@ -109,10 +109,10 @@ end
 const pow = ^
 function runtests()
     # include("accuracy_wip.jl")
-    @testset "Libm" begin
+    # @testset "Libm" begin
     include("dnml_nan.jl")
     include("accuracy.jl")
-    end
+    # end
     # include("accuracy_base.jl") # uncomment to benchmark base
 end
 

@@ -238,11 +238,7 @@ fun_table = Dict(xsin => sin, xsin_u1 => sin)
 @testset "denormal/nonnumber $xtrig" for (xtrig, trig) in fun_table
     xa = T[NaN, T(-0.0), T(0.0), Inf, -Inf]
     for x in xa
-        if x !== -0.0
-            @test cmpdenorm(xtrig(x), trig(BigFloat(x)))
-        else
-            @test_broken cmpdenorm(xtrig(x), trig(BigFloat(x)))
-        end
+        @test cmpdenorm(xtrig(x), trig(BigFloat(x)))
     end
 end
 
@@ -260,11 +256,7 @@ end
     xa = T[NaN, T(-0.0), T(0.0), Inf, -Inf]
     for x in xa
         q = xsincos(x)
-        if x !== -0.0
-            @test cmpdenorm(q.hi, sin(BigFloat(x)))
-        else
-            @test_broken cmpdenorm(q.hi, sin(BigFloat(x)))
-        end
+        @test cmpdenorm(q.hi, sin(BigFloat(x)))
     end
 end
 
