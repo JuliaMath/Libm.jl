@@ -68,54 +68,84 @@ end
     Double(s,(x.hi - (s - v)) + (y.hi - v) + x.lo + y.lo)
 end
 
+if is_fma_fast()
+
+    # two-prod-fma
+    @inline function ddmul{T<:FloatTypes}(x::T, y::T)
+        z = x*y
+        Double(z, fma(x, y, -z))
+    end
+
+    @inline function ddmul{T<:FloatTypes}(x::Double{T}, y::T)
+        z = x.hi*y
+        Double(z, fma(x.hi, y, -z) + x.lo*y)
+    end
+
+    @inline ddmul{T<:FloatTypes}(x::T, y::Double{T}) = ddmul(y,x)
+
+    @inline function ddmul{T}(x::Double{T}, y::Double{T})
+        z = x.hi*y.hi
+        Double(z, fma(x.hi, y.hi, -z) + x.hi*y.lo + x.lo*y.hi)
+    end
+
+    # x^2
+    @inline function ddsqu{T<:FloatTypes}(x::T)
+        z = x*x
+        Double(z, fma(x,x,-z))
+    end
+
+    @inline function ddsqu{T}(x::Double{T})
+        z = x.hi*x.hi
+        Double(z, fma(x.hi, x.hi, -z) + x.hi*(x.lo+x.lo))
+    end
+
+else
+
+    #two-prod x*y
+    @inline function ddmul{T<:FloatTypes}(x::T, y::T)
+        hx, lx = splitprec(x)
+        hy, ly = splitprec(y)
+        z = x*y
+        Double(z, ((hx*hy-z) + lx*hy + hx*ly) + lx*ly)
+    end
+
+    @inline function ddmul{T<:FloatTypes}(x::Double{T}, y::T)
+        hx, lx = splitprec(x.hi)
+        hy, ly = splitprec(y)
+        z = x.hi*y
+        Double(z, (hx*hy-z) + lx*hy + hx*ly + lx*ly + x.lo*y)
+    end
+
+    @inline ddmul{T<:FloatTypes}(x::T, y::Double{T}) = ddmul(y,x)
+
+    @inline function ddmul{T}(x::Double{T}, y::Double{T})
+        hx, lx = splitprec(x.hi)
+        hy, ly = splitprec(y.hi)
+        z = x.hi*y.hi
+        Double(z, (((hx*hy-z) + lx*hy + hx*ly) + lx*ly) + x.hi*y.lo + x.lo*y.hi)
+    end
+
+    # x^2
+    @inline function ddsqu{T<:FloatTypes}(x::T)
+        hx, lx = splitprec(x)
+        z = x*x
+        Double(z, (hx*hx-z) + lx*(hx + hx) + lx*lx)
+    end
+
+    @inline function ddsqu{T}(x::Double{T})
+        hx, lx = splitprec(x.hi)
+        z = x.hi*x.hi
+        Double(z, (hx*hx-z) + lx*(hx+hx) + lx*lx + x.hi*(x.lo+x.lo))
+    end
+
+end
+
 # x/y
 @inline function dddiv{T}(x::Double{T}, y::Double{T})
-    c = x.hi/y.hi
+    invy = 1/y.hi
+    c = x.hi*invy
     u = ddmul(c, y.hi)
-    Double(c,((((x.hi - u.hi) - u.lo) + x.lo) - c*y.lo)/y.hi)
-end
-
-# two-prod-fma
-# @inline function ddmul{T<:FloatTypes}(x::T, y::T)
-#     z = x*y
-#     Double(z, fma(x, y, -z))
-# end
-
-# two-prod x*y
-@inline function ddmul{T<:FloatTypes}(x::T, y::T)
-    hx, lx = splitprec(x)
-    hy, ly = splitprec(y)
-    z = x*y
-    Double(z, ((hx*hy-z) + lx*hy + hx*ly) + lx*ly)
-end
-
-@inline function ddmul{T<:FloatTypes}(x::Double{T}, y::T)
-    hx, lx = splitprec(x.hi)
-    hy, ly = splitprec(y)
-    z = x.hi*y
-    Double(z, (hx*hy-z) + lx*hy + hx*ly + lx*ly + x.lo*y)
-end
-
-@inline ddmul{T<:FloatTypes}(x::T, y::Double{T}) = ddmul(y,x)
-
-@inline function ddmul{T}(x::Double{T}, y::Double{T})
-    hx, lx = splitprec(x.hi)
-    hy, ly = splitprec(y.hi)
-    z = x.hi*y.hi
-    Double(z, (((hx*hy-z) + lx*hy + hx*ly) + lx*ly) + x.hi*y.lo + x.lo*y.hi)
-end
-
-# x^2
-@inline function ddsqu{T<:FloatTypes}(x::T)
-    hx, lx = splitprec(x)
-    z = x*x
-    Double(z, (hx*hx-z) + lx*(hx + hx) + lx*lx)
-end
-
-@inline function ddsqu{T}(x::Double{T})
-    hx, lx = splitprec(x.hi)
-    z = x.hi*x.hi
-    Double(z, (hx*hx-z) + lx*(hx+hx) + lx*lx + x.hi*(x.lo+x.lo))
+    Double(c,((((x.hi - u.hi) - u.lo) + x.lo) - c*y.lo)*invy)
 end
 
 # 1/x

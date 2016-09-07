@@ -108,25 +108,7 @@ const c1  = -0.333333333333311110369124
     end
     s = y/x
     t = s*s
-    u = c19
-    u = u * t + c18
-    u = u * t + c17
-    u = u * t + c16
-    u = u * t + c15
-    u = u * t + c14
-    u = u * t + c13
-    u = u * t + c12
-    u = u * t + c11
-    u = u * t + c10
-    u = u * t + c9
-    u = u * t + c8
-    u = u * t + c7
-    u = u * t + c6
-    u = u * t + c5
-    u = u * t + c4
-    u = u * t + c3
-    u = u * t + c2
-    u = u * t + c1
+    u = @horner t c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19
     t = u*t*s + s
     t = q*(MPI/2) + t
     return t
@@ -172,9 +154,8 @@ const c1  = -0.333333333333317605173818
     t = ddnormalize(t)
     u = @horner t.hi c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20
     t = ddmul(t, u)
-    t = ddmul(s, ddadd(1.0, t))
-    t = ddadd2(ddmul(Double(1.570796326794896557998982, 6.12323399573676603586882e-17), T(q)), t)
-    return t
+    t = ddmul(s, ddadd(T(1.0), t))
+    return ddadd2(ddmul(Double(1.570796326794896557998982, 6.12323399573676603586882e-17), T(q)), t)
 end
 end
 
@@ -262,11 +243,11 @@ const c1 = 0.666666666666666371239645
 
 @inline function logk2{T<:Float64}(d::Double{T})
     e = ilogbp1(d.hi * 0.7071)
-    m = ddscale(d, pow2i(Float64, -e))
+    m = ddscale(d, pow2i(T, -e))
     x = dddiv(ddadd2(m, T(-1.0)), ddadd2(m, T(1.0)))
     x2 = ddsqu(x)
     t = @horner x2.hi c1 c2 c3 c4 c5 c6 c7 c8
-    return ddadd2(ddmul(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), Float64(e)),
+    return ddadd2(ddmul(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), T(e)),
             ddadd2(ddscale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
 end
 end
