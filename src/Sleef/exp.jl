@@ -4,7 +4,7 @@ function xexp2(a::Float64)
     u = expk(ddmul(Double(0.69314718055994528623, 2.3190468138462995584e-17), a))
     a > 1023   && (u = Inf)
     a === -Inf && (u = 0.0)
-  return u
+    return u
 end
 
 function xexp10(a::Float64)

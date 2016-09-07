@@ -99,6 +99,30 @@ if is_fma_fast()
         Double(z, fma(x.hi, x.hi, -z) + x.hi*(x.lo+x.lo))
     end
 
+    # sqrt(x)
+    @inline function ddsqrt{T}(x::Double{T})
+        zhi = _sqrt(x.hi)
+        Double(zhi, (x.lo + fma(-zhi, zhi, x.hi))*T(0.5)/zhi)
+    end
+
+    # x/y
+    @inline function dddiv{T}(x::Double{T}, y::Double{T})
+        invy = 1/y.hi
+        zhi = x.hi*invy
+        Double(zhi, (fma(-zhi, y.hi, x.hi) + fma(-zhi, y.lo, x.lo))*invy)
+    end
+
+    # 1/x
+    @inline function ddrec{T<:FloatTypes}(x::T)
+        zhi = one(T)/x
+        Double(zhi, fma(-zhi, x, one(T))*zhi)
+    end
+
+    @inline function ddrec{T}(x::Double{T})
+        zhi = one(T)/x.hi
+        Double(zhi, (fma(-zhi, x.hi, one(T)) + -zhi*x.lo)*zhi)
+    end
+
 else
 
     #two-prod x*y
@@ -138,34 +162,38 @@ else
         Double(z, (hx*hx-z) + lx*(hx+hx) + lx*lx + x.hi*(x.lo+x.lo))
     end
 
+    # sqrt(x)
+    @inline function ddsqrt{T}(x::Double{T})
+        c = _sqrt(x.hi)
+        u = ddsqu(c)
+        Double(c, (x.hi - u.hi - u.lo + x.lo)*T(0.5)/c)
+    end
+
+    # x/y
+    @inline function dddiv{T}(x::Double{T}, y::Double{T})
+        invy = one(T)/y.hi
+        c = x.hi*invy
+        u = ddmul(c, y.hi)
+        Double(c,((((x.hi - u.hi) - u.lo) + x.lo) - c*y.lo)*invy)
+    end
+
+    # 1/x
+    @inline function ddrec{T<:FloatTypes}(x::T)
+        invx = one(T)/x
+        c = one(T)*invx
+        u = ddmul(c,x)
+        Double(c, (one(T) - u.hi - u.lo)*invx)
+    end
+
+    @inline function ddrec{T}(x::Double{T})
+        invx = one(T)/x.hi
+        c = one(T)*invx
+        u = ddmul(c,x.hi)
+        Double(c, (one(T) -u.hi - u.lo - c*x.lo)*invx)
+    end
+
 end
 
-# x/y
-@inline function dddiv{T}(x::Double{T}, y::Double{T})
-    invy = 1/y.hi
-    c = x.hi*invy
-    u = ddmul(c, y.hi)
-    Double(c,((((x.hi - u.hi) - u.lo) + x.lo) - c*y.lo)*invy)
-end
 
-# 1/x
-@inline function ddrec{T<:FloatTypes}(x::T)
-    invx = 1/x
-    c = one(T)*invx
-    u = ddmul(c,x)
-    Double(c, (one(T) - u.hi - u.lo)*invx)
-end
 
-@inline function ddrec{T}(x::Double{T})
-    invx = 1/x.hi
-    c = one(T)*invx
-    u = ddmul(c,x.hi)
-    Double(c, (one(T) -u.hi - u.lo - c*x.lo)*invx)
-end
 
-# sqrt(x)
-@inline function ddsqrt{T}(x::Double{T})
-    c = _sqrt(x.hi)
-    u = ddsqu(c)
-    Double(c, (x.hi - u.hi - u.lo + x.lo)*T(0.5)/c)
-end
