@@ -1,3 +1,4 @@
+
 module Sleef
 
 export xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcosh, xtanh,
@@ -9,6 +10,15 @@ export xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xt
 # Alias for supported floating point types
 typealias FloatTypes Union{Float32,Float64}
 
+using Base: Math.@horner, significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
+
+function is_fma_fast end
+for T in (Float32, Float64)
+    @eval is_fma_fast(::Type{$T}) = $(muladd(nextfloat(one(T)),nextfloat(one(T)),-nextfloat(one(T),2)) != zero(T))
+end
+is_fma_fast() = is_fma_fast(Float64) && is_fma_fast(Float32)
+
+## constants
 # Split 4/pi into four parts (each is 26 bits)
 const PI4A = 0.78539816290140151978 
 const PI4B = 4.9604678871439933374e-10
@@ -27,9 +37,8 @@ const M1PI = 0.318309886183790671538 # 1/pi
 const M2PI = 0.636619772367581343076 # 2/pi
 const MPI  = 3.14159265358979323846  # pi
 
-using Base: Math.@horner, significand_bits, exponent_bits, exponent_bias, exponent_mask, @pure
 
-include("Sleef/double.jl")
+include("Sleef/double.jl") # Dekker style Double implementation
 include("Sleef/priv.jl") # private math functions
 
 # exported math functions

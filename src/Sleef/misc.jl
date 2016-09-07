@@ -21,6 +21,15 @@ function xpow(x::Float64, y::Float64)
     return result
 end
 
+let
+global xcbrt
+global xcbrt_u1
+const c6 = -0.640245898480692909870982
+const c5 = 2.96155103020039511818595
+const c4 = -5.73353060922947843636166
+const c3 = 6.03990368989458747961407
+const c2 = -3.85841935510444988821632
+const c1 = 2.2307275302496609725722
 
 function xcbrt(d::Float64) # max error 2 ulps
     q = 1.0
@@ -32,12 +41,7 @@ function xcbrt(d::Float64) # max error 2 ulps
     q = ldexpk(q, (e + 6144)÷3 - 2048)
     q = flipsign(q, d)
     d = abs(d)
-    x = -0.640245898480692909870982
-    x = x * d + 2.96155103020039511818595
-    x = x * d + -5.73353060922947843636166
-    x = x * d + 6.03990368989458747961407
-    x = x * d + -3.85841935510444988821632
-    x = x * d + 2.2307275302496609725722
+    x = @horner d c1 c2 c3 c4 c5 c6
     y = x*x
     y = y*y
     x -= (d*y - x)*(1.0/3.0)
@@ -55,12 +59,7 @@ function xcbrt_u1(d::Float64)
     q2 = (r == 2) ? Double(1.5874010519681995834, -1.0869008194197822986e-16) : q2
     q3 = Double(flipsign(q2.hi, d), flipsign(q2.lo, d))
     d = abs(d)
-    x = -0.640245898480692909870982
-    x = x * d + 2.96155103020039511818595
-    x = x * d + -5.73353060922947843636166
-    x = x * d + 6.03990368989458747961407
-    x = x * d + -3.85841935510444988821632
-    x = x * d + 2.2307275302496609725722
+    x = @horner d c1 c2 c3 c4 c5 c6
     y = x*x
     y = y*y
     x -= (d*y - x)*(1.0/3.0)
@@ -78,4 +77,5 @@ function xcbrt_u1(d::Float64)
     isinf(d) && (z = flipsign(Inf, q3.hi))
     d == 0 && (z = flipsign(0.0, q3.hi))
     return z
+end
 end

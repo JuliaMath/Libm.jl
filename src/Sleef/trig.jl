@@ -235,7 +235,7 @@ xasin(d::Float64) = flipsign(atan2k(abs(d), _sqrt((1+d)*(1-d))), d)
 
 xacos(d::Float64) = flipsign(atan2k(_sqrt((1+d)*(1-d)), abs(d)), d) + (d < 0 ? MPI/1 : 0.0)
 
-let
+let # check constants and figure out why @horner fails here
 global xatan
 const c19 = -1.88796008463073496563746e-05
 const c18 =  0.000209850076645816976906797
