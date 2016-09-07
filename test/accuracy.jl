@@ -57,8 +57,8 @@ println("Accuracy tests for $T")
     test_acc(T, fun_table, xx, tol)
 
     fun_table = Dict(xatan2 => atan2)
-    xx1 = [(y,x) for y = -10:0.05:10, x = -10:0.05:10][:]
-    xx2 = [(y,x) for y = -100:0.51:100, x = -100:0.51:100][:]
+    xx1 = [zip(-10:0.05:10, -10:0.05:10)...]
+    xx2 = [zip(-100:0.51:100, -100:0.51:100)...]
     xx = vcat(xx1, xx2)
     tol = 2.5
     test_acc(T, fun_table, xx, tol)
@@ -144,8 +144,8 @@ println("Accuracy tests for $T")
 
 
     fun_table = Dict(xpow => pow)
-    xx1 = [(x,y) for x = -100:0.2:100, y = 0.1:0.2:100][:]
-    xx2 = [(x,y) for x = 2.1, y = -1000:0.1:1000][:]
+    xx1 = [zip(-100:0.2:100, 0.1:0.2:100)...]
+    xx2 = [zip(2.1,-1000:0.1:1000)...]
     xx = vcat(xx1, xx2)
     tol = 1
     test_acc(T, fun_table, xx, tol)

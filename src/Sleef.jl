@@ -55,7 +55,8 @@ include("Sleef/misc.jl") # miscallenous math functions including pow and cbrt
 # _sign emits better native code than sign but does not properly handle the Inf/NaN cases
 @inline _sign{T<:FloatTypes}(d::T) =  flipsign(one(T), d) 
 
-@inline xrint{T<:FloatTypes}(x::T) = x < 0 ? unsafe_trunc(Int, x - T(0.5)) : unsafe_trunc(Int, x + T(0.5))
+@inline xrint{T<:FloatTypes}(x::T) = unsafe_trunc(Int, ifelse(x < 0, x - T(0.5), x + T(0.5)))
+# @inline xrintf{T<:FloatTypes}(x::T) = trunc(ifelse(x < 0, x - T(0.5), x + T(0.5)))
 
 @inline integer2float(::Type{Float64}, m::Int) = reinterpret(Float64, (m % Int64) << significand_bits(Float64))
 @inline integer2float(::Type{Float32}, m::Int) = reinterpret(Float32, (m % Int32) << significand_bits(Float32))

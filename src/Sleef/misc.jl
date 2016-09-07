@@ -17,7 +17,7 @@ function xpow(x::Float64, y::Float64)
         result = (yisodd ? _sign(x) : 1.0) * ((x == 0 ? -y : y) < 0 ? 0.0 : Inf)
     end
     (isnan(x) || isnan(y)) && (result = NaN)
-    (y == 0 || x == 1) && (result = 1.0)
+    (y == 0   || x == 1)   && (result = 1.0)
     return result
 end
 
@@ -75,7 +75,7 @@ function xcbrt_u1(d::Float64)
     v = ddmul(v, q3)
     z = ldexp(v.hi + v.lo, (e + 6144)÷3 - 2048)
     isinf(d) && (z = flipsign(Inf, q3.hi))
-    d == 0 && (z = flipsign(0.0, q3.hi))
+    d == 0   && (z = flipsign(0.0, q3.hi))
     return z
 end
 end

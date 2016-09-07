@@ -95,7 +95,7 @@ function xlog{T<:Float64}(d::T)
     x = (m-1)/(m+1)
     x2 = x*x
     t = _xlog(x2)
-    x = x*t + T(LN2) * e
+    x = muladd(x, t, T(LN2)*e)
     isinf(d) && (x =  Inf)
     d < 0    && (x =  NaN)
     d == 0   && (x = -Inf)
