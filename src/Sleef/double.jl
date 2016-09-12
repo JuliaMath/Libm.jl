@@ -23,28 +23,28 @@ end
 
 # quick-two-sum x+y
 @inline function ddadd{T<:FloatTypes}(x::T, y::T) #WARNING |x| >= |y|
-    r = x + y
-    Double(r, (x - r) + y)
+    s = x + y
+    Double(s, (x - s) + y)
 end
 
 @inline function ddadd{T<:FloatTypes}(x::T, y::Double{T}) #WARNING |x| >= |y|
-    r = x + y.hi
-    Double(r, (x - r) + y.hi + y.lo)
+    s = x + y.hi
+    Double(s, (x - s) + y.hi + y.lo)
 end
 
 @inline function ddadd{T<:FloatTypes}(x::Double{T}, y::T) #WARNING |x| >= |y|
-    r = x.hi + y
-    Double(r, (x.hi - r) + y + x.lo)
+    s = x.hi + y
+    Double(s, (x.hi - s) + y + x.lo)
 end
 
 @inline function ddadd{T}(x::Double{T}, y::Double{T}) #WARNING |x| >= |y|
-    r = x.hi + y.hi
-    Double(r, (x.hi - r) + y.hi + y.lo + x.lo)
+    s = x.hi + y.hi
+    Double(s, (x.hi - s) + y.hi + y.lo + x.lo)
 end
 
 @inline function ddsub{T}(x::Double{T}, y::Double{T}) #WARNING |x| >= |y|
-    r = x.hi - y.hi
-    Double(r, (x.hi - r) - y.hi - y.lo + x.lo)
+    s = x.hi - y.hi
+    Double(s, (x.hi - s) - y.hi - y.lo + x.lo)
 end
 
 # two-sum x+y  NO BRANCH
@@ -102,7 +102,7 @@ if is_fma_fast()
     # sqrt(x)
     @inline function ddsqrt{T}(x::Double{T})
         zhi = _sqrt(x.hi)
-        Double(zhi, (x.lo + fma(-zhi, zhi, x.hi))*T(0.5)/zhi)
+        Double(zhi, (x.lo + fma(-zhi, zhi, x.hi))/(zhi+zhi))
     end
 
     # x/y

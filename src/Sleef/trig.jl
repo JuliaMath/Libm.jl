@@ -2,15 +2,20 @@ let
 global xsin
 global xcos
 
-const c9 = -7.97255955009037868891952e-18
-const c8 =  2.81009972710863200091251e-15
-const c7 = -7.64712219118158833288484e-13
-const c6 =  1.60590430605664501629054e-10
-const c5 = -2.50521083763502045810755e-08
-const c4 =  2.75573192239198747630416e-06
-const c3 = -0.000198412698412696162806809
-const c2 =  0.00833333333333332974823815
-const c1 = -0.166666666666666657414808
+const c9d = -7.97255955009037868891952e-18
+const c8d =  2.81009972710863200091251e-15
+const c7d = -7.64712219118158833288484e-13
+const c6d =  1.60590430605664501629054e-10
+const c5d = -2.50521083763502045810755e-08
+const c4d =  2.75573192239198747630416e-06
+const c3d = -0.000198412698412696162806809
+const c2d =  0.00833333333333332974823815
+const c1d = -0.166666666666666657414808
+
+const c4f =  2.6083159809786593541503f-06
+const c3f = -0.0001981069071916863322258f0
+const c2f =  0.00833307858556509017944336f0
+const c1f = -0.166666597127914428710938f0
 
 # Argument is first reduced to the domain 0 < s < π/4
 
@@ -20,33 +25,33 @@ positive and negative q) and if this condition is true we flip the sign since
 we are now in the negative branch of sin(x). Recall that q is just the integer
 part of d/π and thus we can determine the correct sign using this information.
 """
-@inline _sincos(x::Float64) = @horner x c1 c2 c3 c4 c5 c6 c7 c8 c9
+global @inline _sincos(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d
+global @inline _sincos(x::Float32) = @horner x c1f c2f c3f c4f
 
-function xsin(x::Float64)
+function xsin{T<:FloatTypes}(x::T)
     d = abs(x)
     q = xrint(d*M1PI)
-    d = muladd(q, -PI4A*4, d)
-    d = muladd(q, -PI4B*4, d)
-    d = muladd(q, -PI4C*4, d)
-    d = muladd(q, -PI4D*4, d)
+    d = muladd(q, -PI4A(T)*4, d)
+    d = muladd(q, -PI4B(T)*4, d)
+    d = muladd(q, -PI4C(T)*4, d)
+    d = muladd(q, -PI4D(T)*4, d)
     s = d*d
     (q & 1) != 0 && (d = -d)
-    u = _sincos(s)
+    u =_sincos(s)
     u = muladd(s, u*d, d)
     return flipsign(u,x)
 end
 
-function xcos(d::Float64)
+function xcos{T<:FloatTypes}(d::T)
     q = muladd(2, xrint(d*M1PI - 0.5), 1)
-    d = muladd(q, -PI4A*2, d)
-    d = muladd(q, -PI4B*2, d)
-    d = muladd(q, -PI4C*2, d)
-    d = muladd(q, -PI4D*2, d)
+    d = muladd(q, -PI4A(T)*2, d)
+    d = muladd(q, -PI4B(T)*2, d)
+    d = muladd(q, -PI4C(T)*2, d)
+    d = muladd(q, -PI4D(T)*2, d)
     s = d*d
     (q & 2) == 0 && (d = -d)
-    u = _sincos(s)
-    u = muladd(s, u*d, d)
-    return u
+    u =_sincos(s)
+    return muladd(s, u*d, d)
 end
 end
 
@@ -65,10 +70,10 @@ const c1 =  0.00833333333333318056201922
 function xsin_u1(x::Float64)
     d = abs(x)
     q = xrint(d*M1PI)
-    s = ddadd2(d, q * (-PI4A*4))
-    s = ddadd2(s, q * (-PI4B*4))
-    s = ddadd2(s, q * (-PI4C*4))
-    s = ddadd2(s, q * (-PI4D*4))
+    s = ddadd2(d, q * (-PI4Ad*4))
+    s = ddadd2(s, q * (-PI4Bd*4))
+    s = ddadd2(s, q * (-PI4Cd*4))
+    s = ddadd2(s, q * (-PI4Dd*4))
     t = s
     s = ddsqu(s)
     u = @horner s.hi c1 c2 c3 c4 c5 c6 c7
@@ -82,10 +87,10 @@ end
 function xcos_u1(d::Float64)
     d = abs(d)
     q = muladd(2, xrint(d * M1PI - 0.5), 1)
-    s = ddadd2(d, q * (-PI4A*2))
-    s = ddadd2(s, q * (-PI4B*2))
-    s = ddadd2(s, q * (-PI4C*2))
-    s = ddadd2(s, q * (-PI4D*2))
+    s = ddadd2(d, q * (-PI4Ad*2))
+    s = ddadd2(s, q * (-PI4Bd*2))
+    s = ddadd2(s, q * (-PI4Cd*2))
+    s = ddadd2(s, q * (-PI4Dd*2))
     t = s
     s = ddsqu(s)
     u = @horner s.hi c1 c2 c3 c4 c5 c6 c7
@@ -120,10 +125,10 @@ function xsincos(x::Float64)
     d = abs(x)
     q = xrint(d*(2*M1PI))
     s = d
-    s = muladd(-q, PI4A*2, s)
-    s = muladd(-q, PI4B*2, s)
-    s = muladd(-q, PI4C*2, s)
-    s = muladd(-q, PI4D*2, s)
+    s = muladd(-q, PI4Ad*2, s)
+    s = muladd(-q, PI4Bd*2, s)
+    s = muladd(-q, PI4Cd*2, s)
+    s = muladd(-q, PI4Dd*2, s)
     t = s
     s = s*s
     u = @horner s a1 a2 a3 a4 a5 a6
@@ -141,10 +146,10 @@ end
 function xsincos_u1(x::Float64)
     d = abs(x)
     q = xrint(d*(2*M1PI))
-    s = ddadd2(d, q * (-PI4A*2))
-    s = ddadd2(s, q * (-PI4B*2))
-    s = ddadd2(s, q * (-PI4C*2))
-    s = ddadd2(s, q * (-PI4D*2))
+    s = ddadd2(d, q * (-PI4Ad*2))
+    s = ddadd2(s, q * (-PI4Bd*2))
+    s = ddadd2(s, q * (-PI4Cd*2))
+    s = ddadd2(s, q * (-PI4Dd*2))
     t = s
     s = ddsqu(s)
     sx = s.hi + s.lo
@@ -185,10 +190,10 @@ const c1  =  0.333333333333334980164153
 
 function xtan(d::Float64)
     q = xrint(d * (2*M1PI))
-    x = muladd(q, -PI4A*2, d)
-    x = muladd(q, -PI4B*2, x)
-    x = muladd(q, -PI4C*2, x)
-    x = muladd(q, -PI4D*2, x)
+    x = muladd(q, -PI4Ad*2, d)
+    x = muladd(q, -PI4Bd*2, x)
+    x = muladd(q, -PI4Cd*2, x)
+    x = muladd(q, -PI4Dd*2, x)
     s = x*x
     (q & 1) != 0 && (x = -x)
     u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15
@@ -200,10 +205,10 @@ end
 
 function xtan_u1(d::Float64)
     q = xrint(d*M2PI)
-    s = ddadd2(d, q*(-PI4A*2))
-    s = ddadd2(s, q*(-PI4B*2))
-    s = ddadd2(s, q*(-PI4C*2))
-    s = ddadd2(s, q*(-PI4D*2))
+    s = ddadd2(d, q*(-PI4Ad*2))
+    s = ddadd2(s, q*(-PI4Bd*2))
+    s = ddadd2(s, q*(-PI4Cd*2))
+    s = ddadd2(s, q*(-PI4Dd*2))
     (q & 1) != 0 && (s = ddneg(s))
     t = s
     s = ddsqu(s)
