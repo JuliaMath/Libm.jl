@@ -1,15 +1,32 @@
-@testset "Accuracy (max error in ulp) for $T" for T in (Float64, )
+@testset "Accuracy (max error in ulp) for $T" for T in (Float64, Float32)
  println("Accuracy tests for $T")
 
-    # fun_table = Dict(xlog => log)
-    # xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 2.1.^(-1000:1000)))
-    # tol = 3
-    # test_acc(T, fun_table, xx, tol)
-
-    fun_table = Dict(xatan => atan)
-    xx = vcat(-10:0.0002:10, -10000:0.2:10000) 
-    tol = 2.5
+    fun_table = Dict(xlog => log)
+    xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 2.1.^(-1000:1000)))
+    tol = 3
     test_acc(T, fun_table, xx, tol)
+
+    xx = T[]
+    for i = 1:10000
+        s = reinterpret(Float64, reinterpret(Int64, pi/4 * i) - 20)
+        e = reinterpret(Float64, reinterpret(Int64, pi/4 * i) + 20)
+        d = s
+        while d <= e 
+            append!(xx, d)
+            d = reinterpret(Float64, reinterpret(Int64, d) + 1)
+        end
+    end
+    xx = append!(xx, -10:0.0002:10)
+    xx = append!(xx, -10000000:200.1:10000000)
+
+    fun_table = Dict(xsin => sin, xcos => cos)
+    tol = 4
+    test_acc(T, fun_table, xx, tol)
+
+    # fun_table = Dict(xatan => atan)
+    # xx = vcat(-10:0.0002:10, -10000:0.2:10000) 
+    # tol = 2.5
+    # test_acc(T, fun_table, xx, tol)
     
     # xx = T[]
     # for i = 1:10000
