@@ -1,4 +1,4 @@
-@testset for llog in (Libm.log_tang,)
+@testset for llog in (Libm.Musl.log,)
     for T in (Float32, Float64)
         @test isnan(llog(T(NaN)))
         @test llog(T(Inf)) == Inf
@@ -14,7 +14,7 @@
     end
 end
 
-@testset for llog1p in (Libm.log1p_tang,)
+@testset for llog1p in (Libm.Musl.log1p,)
     for T in (Float32, Float64)
         @test isnan(llog1p(T(NaN)))
         @test llog1p(T(Inf)) == Inf

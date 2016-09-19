@@ -1,6 +1,8 @@
 The Libm.jl package is licensed under the MIT "Expat" License:
 
-> Copyright (c) 2016: Simon Byrne.
+> Copyright (c) 2016: Mustafa Mohamad, Simon Byrne, and other contributors:
+> 
+> https://github.com/JuliaMath/Libm.jl/graphs/contributors
 > 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
@@ -24,3 +26,4 @@ The Libm.jl package is licensed under the MIT "Expat" License:
 Libm.jl includes code from the following projects, which have their own licenses:
 
 - [MUSL](http://git.musl-libc.org/cgit/musl/tree/COPYRIGHT) [MIT]
+- [sleef](https://github.com/shibatch/sleef) [public domain]
