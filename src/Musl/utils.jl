@@ -17,6 +17,7 @@ end
 
 """
     highword(x::Union{Float32,Float64}) -> UInt32
+    
 Get the most significant 32 bits as a `UInt32` from `x`.
 Corresponds to `GET_HIGH_WORD` in musl
 """
@@ -26,6 +27,7 @@ Corresponds to `GET_HIGH_WORD` in musl
 
 """
     trunclo(x::Union{Float32,Float64})
+
 Truncates the lower order bits of `x` so that the result of the multiplication `trunclo(x)
 * trunclo(y)` is exact, assuming no underflow or overflow occurs.
 This relies on the following property: if `a` has `n` significant bits, and `b` has `m`
@@ -63,6 +65,7 @@ will give an incorrect result for the case `x = y = 0x1.800000e000001p+0`.
 # should probably check with LLVM, see #9855.
 """
     is_fma_fast(T)
+
 Checks if the `fma` function is fast for the floating point type `T`: typically is it a
 native instruction (`true`) or does it fall back on a software implementation (`false`).
 """

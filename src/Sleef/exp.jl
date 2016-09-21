@@ -1,4 +1,4 @@
-xldexp{T<:FloatTypes}(x::T, q::Int) = ldexpk(x, q)
+xldexp(x::FloatTypes, q::Int) = ldexpk(x, q)
 
 function xexp2(a::Float64)
     u = expk(ddmul(Double(0.69314718055994528623, 2.3190468138462995584e-17), a))
@@ -42,17 +42,17 @@ const c3f = 0.0416710823774337768554688f0
 const c2f = 0.166665524244308471679688f0
 const c1f = 0.499999850988388061523438f0
 
-# @inline _xexp(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d  
-# @inline _xexp(x::Float32) = @horner x c1f c2f c3f c4f c5f
+global @inline _xexp(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d  
+global @inline _xexp(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
-function xexp{T<:Float64}(d::T)
+function xexp{T<:FloatTypes}(d::T)
     q = xrint(d*T(LOG2E))
-    s = muladd(q,-LN2U, d)
-    s = muladd(q,-LN2L, s)
-    u = @horner s c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d 
-    u = s*s*u + s + 1
+    s = muladd(q,-LN2U(T), d)
+    s = muladd(q,-LN2L(T), s)
+    u =_xexp(s)
+    u = s*s*u +s + T(1)
     u = ldexpk(u, q)
-    d === -Inf && (u = 0.0)
+    d === -T(Inf) && (u = T(0))
     return u
 end
 end
