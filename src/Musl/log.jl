@@ -9,10 +9,10 @@
 
 
 
-# nested methods inside let blocks cause problems (#18201)
-# let
-# global log
-# global log1p
+# nested methods inside let blocks cause problems (#18201), work around to make private function global too
+let
+global log
+global log1p
 
 # Float64 lookup table.
 # to generate values:
@@ -143,7 +143,7 @@ const _log_table_Float32 = [0.0,0.007782140442054949,0.015504186535965254,0.0231
 
 
 # Procedure 1
-@inline function _log_proc1(y::Float64,mf::Float64,F::Float64,f::Float64,jp::Int)
+global @inline function _log_proc1(y::Float64,mf::Float64,F::Float64,f::Float64,jp::Int)
     ## Steps 1 and 2
     @inbounds hi,lo = _log_table_Float64[jp]
     l_hi = mf* 0.6931471805601177 + hi
@@ -171,7 +171,7 @@ const _log_table_Float32 = [0.0,0.007782140442054949,0.015504186535965254,0.0231
 end
 
 # Procedure 2
-@inline function _log_proc2(f::Float64)
+global @inline function _log_proc2(f::Float64)
     ## Step 1
     g = 1/(2+f)
     u = 2*f*g
@@ -203,7 +203,7 @@ end
 end
 
 
-@inline function _log_proc1(y::Float32,mf::Float32,F::Float32,f::Float32,jp::Int)
+global @inline function _log_proc1(y::Float32,mf::Float32,F::Float32,f::Float32,jp::Int)
     ## Steps 1 and 2
     @inbounds hi = _log_table_Float32[jp]
     l = mf*0.6931471805599453 + hi
@@ -223,7 +223,7 @@ end
     Float32(l + (u + q))
 end
 
-@inline function _log_proc2(f::Float32)
+global @inline function _log_proc2(f::Float32)
     ## Step 1
     # compute in higher precision
     u64 = Float64(2*f)/(2+Float64(f))
@@ -319,4 +319,4 @@ function log1p{T<:FloatTypes}(x::T)
         throw(DomainError())
     end
 end
-#end
+end
