@@ -17,14 +17,14 @@ In the code for ldexpk we actually use
 So that x has to be multplied by u four times `x = x*u*u*u*u` to put the value  of the offset
 exponent amount back in.
 """
-@inline split_exponent(::Type{Float64}, q::Int) = _split_exponent(q, 9, 31, 2)
-@inline split_exponent(::Type{Float32}, q::Int) = _split_exponent(q, 6, 31, 2)
 @inline function _split_exponent(q, n, v, offset)
     m = q >> v
     m = (((m + q) >> n) - m) << (n-offset)
     q = q - (m << offset)
     return m, q
 end
+@inline split_exponent(::Type{Float64}, q::Int) = _split_exponent(q, 9, 31, 2)
+@inline split_exponent(::Type{Float32}, q::Int) = _split_exponent(q, 6, 31, 2)
 
 """
     ldexpk(x::FloatTypes, n::Int) -> FloatTypes

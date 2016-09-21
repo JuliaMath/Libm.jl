@@ -30,7 +30,7 @@ global @inline _sincos(x::Float32) = @horner x c1f c2f c3f c4f
 
 function xsin{T<:FloatTypes}(x::T)
     d = abs(x)
-    q = xrint(d*M1PI)
+    q = xrint(d*T(M1PI))
     d = muladd(q, -PI4A(T)*4, d)
     d = muladd(q, -PI4B(T)*4, d)
     d = muladd(q, -PI4C(T)*4, d)
@@ -43,7 +43,7 @@ function xsin{T<:FloatTypes}(x::T)
 end
 
 function xcos{T<:FloatTypes}(d::T)
-    q = muladd(2, xrint(d*M1PI - 0.5), 1)
+    q = muladd(2, xrint(d*T(M1PI)-T(0.5)), 1)
     d = muladd(q, -PI4A(T)*2, d)
     d = muladd(q, -PI4B(T)*2, d)
     d = muladd(q, -PI4C(T)*2, d)
@@ -170,38 +170,69 @@ end
 
 let
 global xtan
-global xtan_u1
 
-const c15 =  1.01419718511083373224408e-05
-const c14 = -2.59519791585924697698614e-05
-const c13 =  5.23388081915899855325186e-05
-const c12 = -3.05033014433946488225616e-05
-const c11 =  7.14707504084242744267497e-05
-const c10 =  8.09674518280159187045078e-05
-const c9  =  0.000244884931879331847054404
-const c8  =  0.000588505168743587154904506
-const c7  =  0.00145612788922812427978848
-const c6  =  0.00359208743836906619142924
-const c5  =  0.00886323944362401618113356
-const c4  =  0.0218694882853846389592078
-const c3  =  0.0539682539781298417636002
-const c2  =  0.133333333333125941821962
-const c1  =  0.333333333333334980164153
+const c15d =  1.01419718511083373224408e-05
+const c14d = -2.59519791585924697698614e-05
+const c13d =  5.23388081915899855325186e-05
+const c12d = -3.05033014433946488225616e-05
+const c11d =  7.14707504084242744267497e-05
+const c10d =  8.09674518280159187045078e-05
+const c9d  =  0.000244884931879331847054404
+const c8d  =  0.000588505168743587154904506
+const c7d  =  0.00145612788922812427978848
+const c6d  =  0.00359208743836906619142924
+const c5d  =  0.00886323944362401618113356
+const c4d  =  0.0218694882853846389592078
+const c3d  =  0.0539682539781298417636002
+const c2d  =  0.133333333333125941821962
+const c1d  =  0.333333333333334980164153
 
-function xtan(d::Float64)
-    q = xrint(d * (2*M1PI))
-    x = muladd(q, -PI4Ad*2, d)
-    x = muladd(q, -PI4Bd*2, x)
-    x = muladd(q, -PI4Cd*2, x)
-    x = muladd(q, -PI4Dd*2, x)
+const c6f = 0.00927245803177356719970703f0
+const c5f = 0.00331984995864331722259521f0
+const c4f = 0.0242998078465461730957031f0
+const c3f = 0.0534495301544666290283203f0
+const c2f = 0.133383005857467651367188f0
+const c1f = 0.333331853151321411132812f0
+
+
+global @inline _tan(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d
+global @inline _tan(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f
+
+function xtan{T<:FloatTypes}(d::T)
+    q = xrint(d * (2*T(M1PI)))
+    x = muladd(q, -PI4A(T)*2, d)
+    x = muladd(q, -PI4B(T)*2, x)
+    x = muladd(q, -PI4C(T)*2, x)
+    x = muladd(q, -PI4D(T)*2, x)
     s = x*x
     (q & 1) != 0 && (x = -x)
-    u = @horner s c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15
+    u::T =_tan(s)  # for some reason type cannot be infered here for Float32!
     u = muladd(s, u * x, x)
-    (q & 1) != 0 && (u = 1.0/u)
+    (q & 1) != 0 && (u = T(1.0)/u)
     isinf(d) && (u = NaN)
     return u
 end
+end
+
+let
+global xtan_u1
+
+const c14d =  1.01419718511083373224408e-05
+const c13d = -2.59519791585924697698614e-05
+const c12d =  5.23388081915899855325186e-05
+const c11d = -3.05033014433946488225616e-05
+const c10d =  7.14707504084242744267497e-05
+const c9d =  8.09674518280159187045078e-05
+const c8d  =  0.000244884931879331847054404
+const c7d  =  0.000588505168743587154904506
+const c6d  =  0.00145612788922812427978848
+const c5d  =  0.00359208743836906619142924
+const c4d  =  0.00886323944362401618113356
+const c3d  =  0.0218694882853846389592078
+const c2d  =  0.0539682539781298417636002
+const c1d  =  0.133333333333125941821962
+
+global @inline _tan_u1(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d
 
 function xtan_u1(d::Float64)
     q = xrint(d*M2PI)
@@ -212,7 +243,7 @@ function xtan_u1(d::Float64)
     (q & 1) != 0 && (s = ddneg(s))
     t = s
     s = ddsqu(s)
-    u = @horner s.hi c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15
+    u =_tan_u1(s.hi)
     x = ddadd(1.0, ddmul(ddadd(0.333333333333334980164153, u * s.hi), s))
     x = ddmul(t, x)
     (q & 1) != 0 && (x = ddrec(x))
