@@ -267,9 +267,9 @@ function xatan2(y::Float64, x::Float64)
     return isnan(x) || isnan(y) ? NaN : flipsign(r, y)
 end
 
-xasin(d::Float64) = flipsign(atan2k(abs(d), _sqrt((1+d)*(1-d))), d)
+xasin{T<:FloatTypes}(x::T) = flipsign(atan2k(abs(x), _sqrt((1+x)*(1-x))), x)
 
-xacos(d::Float64) = flipsign(atan2k(_sqrt((1+d)*(1-d)), abs(d)), d) + (d < 0 ? MPI/1 : 0.0)
+xacos{T<:FloatTypes}(x::T) = flipsign(atan2k(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
 
 let # check constants and figure out why @horner fails here
 global xatan

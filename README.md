@@ -9,13 +9,13 @@ This aims to be an implementation of the functions provided by the C math librar
 
 # Usage
 
-We recommend running julia with `-O3` for maximal performance using `Libm.jl` and also to build a custom system image by running
+We recommend running julia with `-O3` for maximal performance using `Libm.jl` and to also build a custom system image by running
 ```julia
 # Pkg.add("WinRPM"); WinRPM.install("gcc")  # on Windows please first run this line
 julia> include(joinpath(dirname(JULIA_HOME),"share","julia","build_sysimg.jl"))
 julia> build_sysimg(force=true)
 ```
-and then restart your `julia` session. This will ensure you are taking advantage of hardware [FMA](https://en.wikipedia.org/wiki/FMA_instruction_set) instruction  if your CPU supports it.
+and then to restart `julia`; this will ensure you are taking full advantage of hardware [FMA](https://en.wikipedia.org/wiki/FMA_instruction_set)  if your CPU supports it.
 
 
 To use  `Libm.jl`
@@ -23,7 +23,7 @@ To use  `Libm.jl`
 julia> Pkg.clone("https://github.com/JuliaMath/Libm.jl.git")
 ```
 
-Right now most of the useful math functions are accessed with the prefix `x`, for example:
+Most of the useful math functions are accessed with the prefix `x`, for example:
 ```julia
 julia> using Libm
 
@@ -44,10 +44,10 @@ The exported functions include
 ```julia
 xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcosh, xtanh,
       xasinh, xacosh, xatanh, xcbrt, xlog, xexp, xexp2, xexp10, xexpm1, xlog10, xlog1p, xilogb, xldexp
- 
- # Higher accuracy variants (within 1 ulp). Those not listed below are already within 1 ulp.
+ ```
+ Higher accuracy exported variants (within 1 ulp) include (those not listed below are already within 1 ulp)
+ ```julia
  xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xtan_u1, xcbrt_u1, xlog_u1
 ```
-
 
 You can also access `Libm.Musl.log(x)`  for a different implementation of the logarithmic function and `Libm.Musl.erf(x)` and `Libm.Musl.erfc(x)` for the error function and the complementary error function. 
