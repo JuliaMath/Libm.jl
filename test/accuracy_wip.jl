@@ -5,7 +5,12 @@ FInt(::Type{Float64}) = Int64
 FInt(::Type{Float32}) = Int32
 
 @testset "Accuracy (max error in ulp) for $T" for T in (Float32, Float64)
- println("Accuracy tests for $T")
+    println("Accuracy tests for $T")
+
+    fun_table = Dict(xasin => asin, xacos => acos)
+    xx = map(T, vcat(-1:0.00002:1))
+    tol = 3
+    test_acc(T, fun_table, xx, tol)
 
     fun_table = Dict(xexp => exp)
     xx = map(T, vcat(-10:0.0002:10, -1000:0.1:1000))

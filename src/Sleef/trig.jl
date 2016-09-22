@@ -67,34 +67,34 @@ const c3 =  2.75573192104428224777379e-06
 const c2 = -0.000198412698412046454654947
 const c1 =  0.00833333333333318056201922
 
-function xsin_u1(x::Float64)
+function xsin_u1{T<:Float64}(x::T)
     d = abs(x)
-    q = xrint(d*M1PI)
-    s = ddadd2(d, q * (-PI4Ad*4))
-    s = ddadd2(s, q * (-PI4Bd*4))
-    s = ddadd2(s, q * (-PI4Cd*4))
-    s = ddadd2(s, q * (-PI4Dd*4))
+    q = xrint(d*T(M1PI))
+    s = ddadd2(d, q * (-PI4A(T)*4))
+    s = ddadd2(s, q * (-PI4B(T)*4))
+    s = ddadd2(s, q * (-PI4C(T)*4))
+    s = ddadd2(s, q * (-PI4D(T)*4))
     t = s
     s = ddsqu(s)
     u = @horner s.hi c1 c2 c3 c4 c5 c6 c7
-    v = ddadd(1.0, ddmul(ddadd(-0.166666666666666657414808, u*s.hi), s))
+    v = ddadd(T(1), ddmul(ddadd(-0.166666666666666657414808, u*s.hi), s))
     v = ddmul(t, v)
     u = v.hi + v.lo
     (q & 1) != 0 && (u = -u)
     return flipsign(u,x)
 end
 
-function xcos_u1(d::Float64)
+function xcos_u1{T<:Float64}(d::T)
     d = abs(d)
     q = muladd(2, xrint(d * M1PI - 0.5), 1)
-    s = ddadd2(d, q * (-PI4Ad*2))
-    s = ddadd2(s, q * (-PI4Bd*2))
-    s = ddadd2(s, q * (-PI4Cd*2))
-    s = ddadd2(s, q * (-PI4Dd*2))
+    s = ddadd2(d, q * (-PI4A(T)*2))
+    s = ddadd2(s, q * (-PI4B(T)*2))
+    s = ddadd2(s, q * (-PI4C(T)*2))
+    s = ddadd2(s, q * (-PI4D(T)*2))
     t = s
     s = ddsqu(s)
     u = @horner s.hi c1 c2 c3 c4 c5 c6 c7
-    v = ddadd(1.0, ddmul(ddadd(-0.166666666666666657414808, u*s.hi), s))
+    v = ddadd(T(1), ddmul(ddadd(-0.166666666666666657414808, u*s.hi), s))
     v = ddmul(t, v)
     u = v.hi + v.lo
     (q & 2) == 0 && (u = -u)
@@ -121,14 +121,14 @@ const b3 = -0.00138888888888714019282329
 const b2 =  0.0416666666666665519592062
 const b1 = -0.5
 
-function xsincos(x::Float64)
+function xsincos{T<:Float64}(x::T)
     d = abs(x)
     q = xrint(d*(2*M1PI))
     s = d
-    s = muladd(-q, PI4Ad*2, s)
-    s = muladd(-q, PI4Bd*2, s)
-    s = muladd(-q, PI4Cd*2, s)
-    s = muladd(-q, PI4Dd*2, s)
+    s = muladd(q, -PI4A(T)*2, s)
+    s = muladd(q, -PI4B(T)*2, s)
+    s = muladd(q, -PI4C(T)*2, s)
+    s = muladd(q, -PI4D(T)*2, s)
     t = s
     s = s*s
     u = @horner s a1 a2 a3 a4 a5 a6
@@ -143,13 +143,13 @@ function xsincos(x::Float64)
     return Double(flipsign(rx,x),ry)
 end
 
-function xsincos_u1(x::Float64)
+function xsincos_u1{T<:Float64}(x::T)
     d = abs(x)
     q = xrint(d*(2*M1PI))
-    s = ddadd2(d, q * (-PI4Ad*2))
-    s = ddadd2(s, q * (-PI4Bd*2))
-    s = ddadd2(s, q * (-PI4Cd*2))
-    s = ddadd2(s, q * (-PI4Dd*2))
+    s = ddadd2(d, q * (-PI4A(T)*2))
+    s = ddadd2(s, q * (-PI4B(T)*2))
+    s = ddadd2(s, q * (-PI4C(T)*2))
+    s = ddadd2(s, q * (-PI4D(T)*2))
     t = s
     s = ddsqu(s)
     sx = s.hi + s.lo
@@ -234,12 +234,12 @@ const c1d  =  0.133333333333125941821962
 
 global @inline _tan_u1(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d
 
-function xtan_u1(d::Float64)
+function xtan_u1{T<:Float64}(d::T)
     q = xrint(d*M2PI)
-    s = ddadd2(d, q*(-PI4Ad*2))
-    s = ddadd2(s, q*(-PI4Bd*2))
-    s = ddadd2(s, q*(-PI4Cd*2))
-    s = ddadd2(s, q*(-PI4Dd*2))
+    s = ddadd2(d, q*(-PI4A(T)*2))
+    s = ddadd2(s, q*(-PI4B(T)*2))
+    s = ddadd2(s, q*(-PI4C(T)*2))
+    s = ddadd2(s, q*(-PI4D(T)*2))
     (q & 1) != 0 && (s = ddneg(s))
     t = s
     s = ddsqu(s)
@@ -267,9 +267,9 @@ function xatan2(y::Float64, x::Float64)
     return isnan(x) || isnan(y) ? NaN : flipsign(r, y)
 end
 
-xasin(d::Float64) = flipsign(atan2k(abs(d), _sqrt((1+d)*(1-d))), d)
+xasin{T<:FloatTypes}(x::T) = flipsign(atan2k(abs(x), _sqrt((1+x)*(1-x))), x)
 
-xacos(d::Float64) = flipsign(atan2k(_sqrt((1+d)*(1-d)), abs(d)), d) + (d < 0 ? MPI/1 : 0.0)
+xacos{T<:FloatTypes}(x::T) = flipsign(atan2k(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
 
 let # check constants and figure out why @horner fails here
 global xatan

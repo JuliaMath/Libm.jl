@@ -1,9 +1,9 @@
 xldexp(x::FloatTypes, q::Int) = ldexpk(x, q)
 
-function xexp2(a::Float64)
+function xexp2{T<:Float64}(a::T)
     u = expk(ddmul(Double(0.69314718055994528623, 2.3190468138462995584e-17), a))
-    a > 1023   && (u = Inf)
-    a === -Inf && (u = 0.0)
+    a > 1023      && (u = T(Inf))
+    a === -T(Inf) && (u = T(0))
     return u
 end
 
