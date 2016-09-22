@@ -97,21 +97,22 @@ const c3  = -0.14285714266771329383765
 const c2  =  0.199999999996591265594148
 const c1  = -0.333333333333311110369124
 
-@inline function atan2k(y::Float64, x::Float64)
+@inline function atan2k{T<:FloatTypes}(y::T, x::T)
     q = 0
     if x < 0
-        x = -x; q = -2
+        x = -x
+        q = -2
     end
     if y > x
-        t = x; x = y; y = -t
+        t = x; x = y;
+        y = -t
         q += 1
     end
     s = y/x
     t = s*s
     u = @horner t c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19
     t = u*t*s + s
-    t = q*(MPI/2) + t
-    return t
+    return q*(MPI/2) + t
 end
 end
 
@@ -220,9 +221,9 @@ const c2 = 0.166666666666666740681535
 const c1 = 0.500000000000000999200722
 
 @inline function expk2{T<:Float64}(d::Double{T})
-    q = xrint((d.hi + d.lo)*LOG2E)
-    s = ddadd2(d, q*-LN2U(T))
-    s = ddadd2(s, q*-LN2L(T))
+    q = xrint((d.hi + d.lo)*T(LOG2E))
+    s = ddadd2(d, q * -LN2U(T))
+    s = ddadd2(s, q * -LN2L(T))
     u = @horner s.hi c1 c2 c3 c4 c5 c6 c7 c8 c9 c10
     t = ddadd(s, ddmul(ddsqu(s), u))
     t = ddadd(T(1.0), t)
