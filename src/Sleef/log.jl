@@ -96,9 +96,9 @@ function xlog{T<:FloatTypes}(d::T)
     x2 = x*x
     t = _xlog(x2)
     x = muladd(x, t, T(LN2)*e)
-    isinf(d) && (x =  Inf)
-    d < 0    && (x =  NaN)
-    d == 0   && (x = -Inf)
+    isinf(d) && (x =  T(Inf))
+    d < 0    && (x =  T(NaN))
+    d == 0   && (x = -T(Inf))
     return x
 end
 end
