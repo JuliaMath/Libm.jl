@@ -23,8 +23,8 @@ exponent amount back in.
     q = q - (m << offset)
     return m, q
 end
-@inline split_exponent(::Type{Float64}, q::Int) = _split_exponent(q, 9, 31, 2)
-@inline split_exponent(::Type{Float32}, q::Int) = _split_exponent(q, 6, 31, 2)
+@inline split_exponent(::Type{Float64}, q::Int) = _split_exponent(q, UInt(9), UInt(31), UInt(2))
+@inline split_exponent(::Type{Float32}, q::Int) = _split_exponent(q, UInt(6), UInt(31), UInt(2))
 
 """
     ldexpk(x::FloatTypes, n::Int) -> FloatTypes
