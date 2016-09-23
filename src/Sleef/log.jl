@@ -83,14 +83,11 @@ const c3f = 0.400005519390106201171875f0
 const c2f = 0.666666567325592041015625f0
 const c1f = 2.0f0
 
-# sqrt(2)/2
-const SQRT22 = 7.07106781186547524400844362104849039284835937688474036588339868995366239231051e-01
-
 global @inline _xlog(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
 global @inline _xlog(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 function xlog{T<:FloatTypes}(d::T)
-    e = ilogbp1(d*T(SQRT22))
+    e = ilogbp1(d*T(M1SQRT2))
     m = ldexpk(d,-e)
     x = (m-1)/(m+1)
     x2 = x*x

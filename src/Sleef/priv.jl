@@ -45,15 +45,6 @@ Computes `x \times 2^n`
     return x*u
 end
 
-"""
-    exponent = ilogbp1(x)
-
-Returns the integral part of the logarithm of `|x|`, using 2 as base for the logarithm; in other
-words this returns the binary exponent of `x` so that
-    x = significand \times 2^exponenet
-where `significand \in [0.5, 1)`
-"""
-
 # The following define threshold values for `ilogbp1`
 real_cut_offset(::Type{Float64}) = 300
 real_cut_offset(::Type{Float32}) = 64
@@ -66,6 +57,14 @@ real_cut_min(::Type{Float32}) = 5.421010862427522f-20
 real_cut_max(::Type{Float64}) = 2.037035976334486e90
 real_cut_max(::Type{Float32}) = 1.8446744073709552f19
 
+"""
+    ilogbp1(x::FloatTypes) -> Int
+
+Returns the integral part of the logarithm of `|x|`, using 2 as base for the logarithm; in other
+words this returns the binary exponent of `x` so that
+    x = significand \times 2^exponenet
+where `significand \in [0.5, 1)`
+"""
 @inline function ilogbp1{T<:FloatTypes}(d::T)
     m = d < real_cut_min(T)
     d = m ? real_cut_max(T) * d : d
@@ -173,48 +172,35 @@ end
 end
 
 let
-global logk
-const c8 = 0.134601987501262130076155
-const c7 = 0.132248509032032670243288
-const c6 = 0.153883458318096079652524
-const c5 = 0.181817427573705403298686
-const c4 = 0.222222231326187414840781
-const c3 = 0.285714285651261412873718
-const c2 = 0.400000000000222439910458
-const c1 = 0.666666666666666371239645
-
-@inline function logk{T<:Float64}(d::T)
-    e = ilogbp1(d*0.7071)
-    m = ldexpk(d,-e)
-    x = dddiv(ddadd2(-1.0, m), ddadd2(1.0, m))
-    x2 = ddsqu(x)
-    t = @horner x2.hi c1 c2 c3 c4 c5 c6 c7 c8
-    return ddadd2(ddmul(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), T(e)),
-            ddadd2(ddscale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
-end
-end
-
-let
 global expk
-const c10 = 2.51069683420950419527139e-08
-const c9 = 2.76286166770270649116855e-07
-const c8 = 2.75572496725023574143864e-06
-const c7 = 2.48014973989819794114153e-05
-const c6 = 0.000198412698809069797676111
-const c5 = 0.0013888888939977128960529
-const c4 = 0.00833333333332371417601081
-const c3 = 0.0416666666665409524128449
-const c2 = 0.166666666666666740681535
-const c1 = 0.500000000000000999200722
+const c10d = 2.51069683420950419527139e-08
+const c9d = 2.76286166770270649116855e-07
+const c8d = 2.75572496725023574143864e-06
+const c7d = 2.48014973989819794114153e-05
+const c6d = 0.000198412698809069797676111
+const c5d = 0.0013888888939977128960529
+const c4d = 0.00833333333332371417601081
+const c3d = 0.0416666666665409524128449
+const c2d = 0.166666666666666740681535
+const c1d = 0.500000000000000999200722
+
+const c5f = 0.00136324646882712841033936f0
+const c4f = 0.00836596917361021041870117f0
+const c3f = 0.0416710823774337768554688f0
+const c2f = 0.166665524244308471679688f0
+const c1f = 0.499999850988388061523438f0
+
+global @inline _expk(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d
+global @inline _expk(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 @inline function expk{T<:Float64}(d::Double{T})
-    q = xrint((d.hi + d.lo)*LOG2E)
-    s = ddadd2(d, q*-LN2U(T))
-    s = ddadd2(s, q*-LN2L(T))
+    q = xrint((d.hi + d.lo)*T(LOG2E))
+    s = ddadd2(d, q * -LN2U(T))
+    s = ddadd2(s, q * -LN2L(T))
     s = ddnormalize(s)
-    u = @horner s.hi c1 c2 c3 c4 c5 c6 c7 c8 c9 c10
+    u =_expk(s.hi)
     t = ddadd(s, ddmul(ddsqu(s), u))
-    t = ddadd(one(T), t)
+    t = ddadd(T(1.0), t)
     return ldexpk(t.hi + t.lo, q)
 end
 end
@@ -253,7 +239,7 @@ end
 end
 
 let
-global logk2
+global logk
 const c8 = 0.134601987501262130076155
 const c7 = 0.132248509032032670243288
 const c6 = 0.153883458318096079652524
@@ -263,12 +249,41 @@ const c3 = 0.285714285651261412873718
 const c2 = 0.400000000000222439910458
 const c1 = 0.666666666666666371239645
 
+@inline function logk{T<:Float64}(d::T)
+    e = ilogbp1(d*0.7071)
+    m = ldexpk(d,-e)
+    x = dddiv(ddadd2(-1.0, m), ddadd2(1.0, m))
+    x2 = ddsqu(x)
+    t = @horner x2.hi c1 c2 c3 c4 c5 c6 c7 c8
+    return ddadd2(ddmul(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), T(e)),
+            ddadd2(ddscale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
+end
+end
+
+let #fixme finish float32
+global logk2
+const c8d = 0.134601987501262130076155
+const c7d = 0.132248509032032670243288
+const c6d = 0.153883458318096079652524
+const c5d = 0.181817427573705403298686
+const c4d = 0.222222231326187414840781
+const c3d = 0.285714285651261412873718
+const c2d = 0.400000000000222439910458
+const c1d = 0.666666666666666371239645
+
+const c4f = 0.2371599674224853515625f0
+const c3f = 0.285279005765914916992188f0
+const c2f = 0.400005519390106201171875f0
+const c1f = 0.666666567325592041015625f0
+
+global @inline _logk2(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
+
 @inline function logk2{T<:Float64}(d::Double{T})
-    e = ilogbp1(d.hi * 0.7071)
+    e = ilogbp1(d.hi * T(M1SQRT2))
     m = ddscale(d, pow2i(T, -e))
     x = dddiv(ddadd2(m, T(-1.0)), ddadd2(m, T(1.0)))
     x2 = ddsqu(x)
-    t = @horner x2.hi c1 c2 c3 c4 c5 c6 c7 c8
+    t =_logk2(x2.hi)
     return ddadd2(ddmul(Double(0.693147180559945286226764, 2.319046813846299558417771e-17), T(e)),
             ddadd2(ddscale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
 end

@@ -26,6 +26,8 @@ const M2PI = 0.636619772367581343076 # 2/pi
 const MPI  = 3.14159265358979323846  # pi
 const M4PI = 1.273239544735162542821171882678754627704620361328125 # 4/pi with round down
 
+const M1SQRT2 = 7.07106781186547524400844362104849039284835937688474036588339868995366239231051e-01 # 1/sqrt(2)
+
 ## constants (dispatch)
 
 # Split 4/pi into four parts (each is 26 bits)
@@ -55,9 +57,9 @@ include("Sleef/trig.jl")   # trigonometric and inverse trigonometric functions
 include("Sleef/hyp.jl")    # hyperbolic and inverse hyperbolic functions
 include("Sleef/misc.jl")   # miscallenous math functions including pow and cbrt
 
-# utility functions used by the private math functions in priv.jl
+## utility functions mainly used by the private math functions in priv.jl
 
-@pure exponent_max{T<:FloatTypes}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
+@inline exponent_max{T<:FloatTypes}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
 # _sign emits better native code than sign but does not properly handle the Inf/NaN cases
 @inline _sign{T<:FloatTypes}(d::T) =  flipsign(one(T), d) 
@@ -73,7 +75,11 @@ include("Sleef/misc.jl")   # miscallenous math functions including pow and cbrt
 
 @inline pow2i{T<:FloatTypes}(::Type{T}, q::Int) = integer2float(T, q + exponent_bias(T))
 
-# sqrt without the domain checks that we don't need since we handle the checks ourselves
+# sqrt without the domain checks which we don't need since we handle the checks ourselves
 _sqrt{T<:FloatTypes}(x::T) = Base.box(T, Base.sqrt_llvm_fast(Base.unbox(T,x)))
+
+@inline ispinf{T<:FloatTypes}(x::T) = x ==  T(Inf)
+@inline isninf{T<:FloatTypes}(x::T) = x == -T(Inf)
+
 
 end
