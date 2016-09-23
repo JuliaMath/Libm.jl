@@ -71,8 +71,7 @@ include("Sleef/misc.jl")   # miscallenous math functions including pow and cbrt
 @inline float2integer(d::Float64) = (reinterpret(Int64, d) >> significand_bits(Float64)) % Int
 @inline float2integer(d::Float32) = (reinterpret(Int32, d) >> significand_bits(Float32)) % Int
 
-@inline pow2i(::Type{Float64}, q::Int) = integer2float(Float64, q + exponent_bias(Float64))
-@inline pow2i(::Type{Float32}, q::Int) = integer2float(Float32, q + exponent_bias(Float64))
+@inline pow2i{T<:FloatTypes}(::Type{T}, q::Int) = integer2float(T, q + exponent_bias(T))
 
 # sqrt without the domain checks that we don't need since we handle the checks ourselves
 _sqrt{T<:FloatTypes}(x::T) = Base.box(T, Base.sqrt_llvm_fast(Base.unbox(T,x)))
