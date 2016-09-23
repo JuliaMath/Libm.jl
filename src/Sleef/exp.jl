@@ -2,15 +2,15 @@ xldexp(x::FloatTypes, q::Int) = ldexpk(x, q)
 
 function xexp2{T<:Float64}(a::T)
     u = expk(ddmul(Double(0.69314718055994528623, 2.3190468138462995584e-17), a))
-    a > 1023      && (u = T(Inf))
-    a === -T(Inf) && (u = T(0))
+    a > 1023  && (u = T(Inf))
+    isninf(a) && (u = T(0.0))
     return u
 end
 
 function xexp10(a::Float64)
     u = expk(ddmul(Double(2.3025850929940459011, -2.1707562233822493508e-16), a))
-    a > 308    && (u = Inf)
-    a === -Inf && (u = 0.0)
+    a > 308   && (u = Inf)
+    isninf(a) && (u = 0.0)
     return u
 end
 
@@ -47,12 +47,12 @@ global @inline _xexp(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 function xexp{T<:FloatTypes}(d::T)
     q = xrint(d*T(LOG2E))
-    s = muladd(q,-LN2U(T), d)
-    s = muladd(q,-LN2L(T), s)
+    s = muladd(q, -LN2U(T), d)
+    s = muladd(q, -LN2L(T), s)
     u =_xexp(s)
     u = s*s*u +s + T(1)
     u = ldexpk(u, q)
-    d === -T(Inf) && (u = T(0))
+    isninf(d) && (u = T(0))
     return u
 end
 end

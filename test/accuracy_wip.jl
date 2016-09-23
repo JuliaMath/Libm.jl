@@ -7,6 +7,11 @@ FInt(::Type{Float32}) = Int32
 @testset "Accuracy (max error in ulp) for $T" for T in (Float32, Float64)
     println("Accuracy tests for $T")
 
+    fun_table = Dict(xsinh => sinh, xcosh => cosh, xtanh => tanh)
+    xx = map(T, vcat(-10:0.0002:10, -1000:0.02:1000))
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
     fun_table = Dict(xasin => asin, xacos => acos)
     xx = map(T, vcat(-1:0.00002:1))
     tol = 3
@@ -38,6 +43,18 @@ FInt(::Type{Float32}) = Int32
     fun_table = Dict(xsin => sin, xcos => cos, xtan => tan)
     tol = 4
     test_acc(T, fun_table, xx, tol)
+
+    sin_xsincos(x) = xsincos(x).hi
+    cos_xsincos(x) = xsincos(x).lo
+    fun_table = Dict(sin_xsincos => sin, cos_xsincos => cos)
+    tol = 4
+    test_acc(T, fun_table, xx, tol) 
+
+    sin_xsincos_u1(x) = xsincos_u1(x).hi
+    cos_xsincos_u1(x) = xsincos_u1(x).lo
+    fun_table = Dict(sin_xsincos_u1 => sin, cos_xsincos_u1 => cos)
+    tol = 1
+    test_acc(T, fun_table, xx, tol) 
 
 
     # fun_table = Dict(xatan => atan)
