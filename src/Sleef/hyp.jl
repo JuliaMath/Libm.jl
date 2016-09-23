@@ -1,36 +1,44 @@
-function xsinh(x::Float64)
+# overflow argument value
+_max_val_sinhcosh(::Type{Float64}) = 710.0
+_max_val_sinhcosh(::Type{Float32}) = 89f0
+
+function xsinh{T<:FloatTypes}(x::T)
     y = abs(x)
     d = expk2(Double(y))
     d = ddsub(d, ddrec(d))
-    y = (d.hi + d.lo) * 0.5
-    y = abs(x) > 710 ? Inf : y
-    y = isnan(y) ? Inf : y
+    y = (d.hi + d.lo) * T(0.5)
+    y = abs(x) > _max_val_sinhcosh(T) ? T(Inf) : y
+    y = isnan(y) ? T(Inf) : y
     y = flipsign(y, x)
-    y = isnan(x) ? NaN : y
+    y = isnan(x) ? T(NaN) : y
     return y
 end
 
-function xcosh(x::Float64)
+function xcosh{T<:FloatTypes}(x::T)
     y = abs(x)
     d = expk2(Double(y))
     d = ddadd(d, ddrec(d))
-    y = (d.hi + d.lo) * 0.5
-    y = abs(x) > 710 ? Inf : y
-    y = isnan(y) ? Inf : y
-    y = isnan(x) ? NaN : y
+    y = (d.hi + d.lo) * T(0.5)
+    y = abs(x) > _max_val_sinhcosh(T) ? T(Inf) : y
+    y = isnan(y) ? T(Inf) : y
+    y = isnan(x) ? T(NaN) : y
     return y
 end
 
-function xtanh(x::Float64)
+# overflow argument value
+_max_val_tanh(::Type{Float64}) = 18.714973875
+_max_val_tanh(::Type{Float32}) = 8.664339742f0
+
+function xtanh{T<:FloatTypes}(x::T)
     y = abs(x)
     d = expk2(Double(y))
     e = ddrec(d)
     d = dddiv(ddsub(d, e), ddadd(d, e))
     y = d.hi + d.lo
-    y = abs(x) > 18.714973875 ? 1.0 : y
-    y = isnan(y) ? 1.0 : y
+    y = abs(x) > _max_val_tanh(T) ? T(1.0) : y
+    y = isnan(y) ? T(1.0) : y
     y = flipsign(y, x)
-    y = isnan(x) ? NaN : y
+    y = isnan(x) ? T(NaN) : y
     return y
 end
 

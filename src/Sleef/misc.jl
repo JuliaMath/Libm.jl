@@ -79,3 +79,14 @@ function xcbrt_u1(d::Float64)
     return z
 end
 end
+
+# custom, not in sleef, uncomment after tests added
+# function xxhypot{T<:FloatTypes}(x::T, y::T)
+#     x = abs(x)
+#     y = abs(y)
+#     if x < y
+#        x, y = y, x
+#     end
+#     r = (x == 0) ? y : y/x
+#     return x*sqrt(one(T) + r*r)
+# end

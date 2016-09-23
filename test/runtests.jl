@@ -22,8 +22,8 @@ end
 
 # the following compares the ulp between x and y.
 # First it promotes them to the larger of the two types x,y
-infh(::Type{Float32}) = 1e+300
-infh(::Type{Float64}) = 1e+37
+infh(::Type{Float64}) = 1e+300
+infh(::Type{Float32}) = 1e+37
 function countulp(T, x::AbstractFloat, y::AbstractFloat)
     X,Y = promote(x,y)
     x, y = T(X), T(Y) # Cast to smaller type
@@ -73,12 +73,11 @@ for f in (:sin, :cos, :tan, :asin, :acos, :atan, :asinh, :acosh, :atanh, :log, :
 end
 
 strip_module_name(f::Function) = last(split(string(f), '.')) # strip module name from function f
-"""
-test the accuracy of a function where fun_table is a Dict mapping the function you want
-to test to a reference function
-xx is an array of values (which may be tuples for multiple arugment functions)
-tol is the acceptable tolerance to test against
-"""
+
+# test the accuracy of a function where fun_table is a Dict mapping the function you want
+# to test to a reference function
+# xx is an array of values (which may be tuples for multiple arugment functions)
+# tol is the acceptable tolerance to test against
 function test_acc(T, fun_table, xx, tol; debug=false, tol_debug=5)
     @testset "accuracy $(strip_module_name(xfun))" for (xfun, fun) in fun_table
         rmax = 0.0
