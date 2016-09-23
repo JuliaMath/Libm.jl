@@ -39,6 +39,18 @@ FInt(::Type{Float32}) = Int32
     tol = 4
     test_acc(T, fun_table, xx, tol)
 
+    sin_xsincos(x) = xsincos(x).hi
+    cos_xsincos(x) = xsincos(x).lo
+    fun_table = Dict(sin_xsincos => sin, cos_xsincos => cos)
+    tol = 4
+    test_acc(T, fun_table, xx, tol) 
+
+    sin_xsincos_u1(x) = xsincos_u1(x).hi
+    cos_xsincos_u1(x) = xsincos_u1(x).lo
+    fun_table = Dict(sin_xsincos_u1 => sin, cos_xsincos_u1 => cos)
+    tol = 1
+    test_acc(T, fun_table, xx, tol) 
+
 
     # fun_table = Dict(xatan => atan)
     # xx = vcat(-10:0.0002:10, -10000:0.2:10000) 

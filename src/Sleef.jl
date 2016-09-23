@@ -57,7 +57,7 @@ include("Sleef/misc.jl")   # miscallenous math functions including pow and cbrt
 
 # utility functions used by the private math functions in priv.jl
 
-@pure exponent_max{T<:AbstractFloat}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
+@pure exponent_max{T<:FloatTypes}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
 # _sign emits better native code than sign but does not properly handle the Inf/NaN cases
 @inline _sign{T<:FloatTypes}(d::T) =  flipsign(one(T), d) 

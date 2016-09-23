@@ -106,24 +106,39 @@ let
 global xsincos
 global xsincos_u1
 
-const a6 =  1.58938307283228937328511e-10
-const a5 = -2.50506943502539773349318e-08
-const a4 =  2.75573131776846360512547e-06
-const a3 = -0.000198412698278911770864914
-const a2 =  0.0083333333333191845961746
-const a1 = -0.166666666666666130709393
+const a6d =  1.58938307283228937328511e-10
+const a5d = -2.50506943502539773349318e-08
+const a4d =  2.75573131776846360512547e-06
+const a3d = -0.000198412698278911770864914
+const a2d =  0.0083333333333191845961746
+const a1d = -0.166666666666666130709393
 
-const b7 = -1.13615350239097429531523e-11
-const b6 =  2.08757471207040055479366e-09
-const b5 = -2.75573144028847567498567e-07
-const b4 =  2.48015872890001867311915e-05
-const b3 = -0.00138888888888714019282329
-const b2 =  0.0416666666666665519592062
-const b1 = -0.5
+const a3f = -0.000195169282960705459117889f0
+const a2f =  0.00833215750753879547119141f0
+const a1f = -0.166666537523269653320312f0
 
-function xsincos{T<:Float64}(x::T)
+const b7d = -1.13615350239097429531523e-11
+const b6d =  2.08757471207040055479366e-09
+const b5d = -2.75573144028847567498567e-07
+const b4d =  2.48015872890001867311915e-05
+const b3d = -0.00138888888888714019282329
+const b2d =  0.0416666666666665519592062
+const b1d = -0.5
+
+const b5f = -2.71811842367242206819355f-07
+const b4f =  2.47990446951007470488548f-05
+const b3f = -0.00138888787478208541870117f0
+const b2f =  0.0416666641831398010253906f0
+const b1f = -0.5f0
+
+global @inline _sincos_a(x::Float64) = @horner x a1d a2d a3d a4d a5d a6d
+global @inline _sincos_a(x::Float32) = @horner x a1f a2f a3f
+global @inline _sincos_b(x::Float64) = @horner x b1d b2d b3d b4d b5d b6d b7d
+global @inline _sincos_b(x::Float32) = @horner x b1f b2f b3f b4f b5f
+
+function xsincos{T<:FloatTypes}(x::T)
     d = abs(x)
-    q = xrint(d*(2*M1PI))
+    q = xrint(d*2*T(M1PI))
     s = d
     s = muladd(q, -PI4A(T)*2, s)
     s = muladd(q, -PI4B(T)*2, s)
@@ -131,21 +146,21 @@ function xsincos{T<:Float64}(x::T)
     s = muladd(q, -PI4D(T)*2, s)
     t = s
     s = s*s
-    u = @horner s a1 a2 a3 a4 a5 a6
+    u = _sincos_a(s)
     u = u * s * t
     rx = t + u
-    u = @horner s b1 b2 b3 b4 b5 b6 b7
-    ry = u * s + 1
+    u = _sincos_b(s)
+    ry = u * s + T(1)
     (q & 1) != 0     && (s = ry; ry = rx; rx = s)
     (q & 2) != 0     && (rx = -rx)
     ((q+1) & 2) != 0 && (ry = -ry)
-    isinf(d) && (rx = ry = NaN)
+    isinf(d) && (rx = ry = T(NaN))
     return Double(flipsign(rx,x),ry)
 end
 
-function xsincos_u1{T<:Float64}(x::T)
+function xsincos_u1{T<:FloatTypes}(x::T)
     d = abs(x)
-    q = xrint(d*(2*M1PI))
+    q = xrint(d*2*T(M1PI))
     s = ddadd2(d, q * (-PI4A(T)*2))
     s = ddadd2(s, q * (-PI4B(T)*2))
     s = ddadd2(s, q * (-PI4C(T)*2))
@@ -153,17 +168,17 @@ function xsincos_u1{T<:Float64}(x::T)
     t = s
     s = ddsqu(s)
     sx = s.hi + s.lo
-    u = @horner sx a1 a2 a3 a4 a5 a6
+    u = _sincos_a(sx)
     u *= sx * t.hi
     v = ddadd(t, u)
     rx = v.hi + v.lo
-    u = @horner sx b1 b2 b3 b4 b5 b6 b7
-    v = ddadd(1.0, ddmul(sx, u))
+    u = _sincos_b(sx)
+    v = ddadd(T(1), ddmul(sx, u))
     ry = v.hi + v.lo
     (q & 1) != 0     && (u = ry; ry = rx; rx = u)
     (q & 2) != 0     && (rx = -rx)
     ((q+1) & 2) != 0 && (ry = -ry)
-    isinf(d) && (rx = ry = NaN)
+    isinf(d) && (rx = ry = T(NaN))
     return Double(flipsign(rx,x),ry)
 end
 end
