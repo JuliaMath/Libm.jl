@@ -237,7 +237,7 @@ global @inline _logk(x::Float32) = @horner x c1f c2f c3f c4f
 global @inline function logk{T<:FloatTypes}(d::T)
     e  = ilogbp1(d * T(M1SQRT2))
     m  = ldexpk(d,-e)
-    x  = dddiv(ddadd2(-1.0, m), ddadd2(1.0, m))
+    x  = dddiv(ddadd2(-T(1.0), m), ddadd2(T(1.0), m))
     x2 = ddsqu(x)
     t  =_logk(x2.hi)
     ddadd2(ddmul(_logk_c0(T), T(e)), ddadd2(ddscale(x, T(2.0)), ddmul(ddmul(x2, x), t)))

@@ -42,32 +42,32 @@ function xtanh{T<:FloatTypes}(x::T)
     return y
 end
 
-function xasinh(x::Float64)
+function xasinh{T<:FloatTypes}(x::T)
     y = abs(x)
-    d = logk2(ddadd(ddsqrt(ddadd2(ddsqu(y),  1.0)), y))
+    d = logk2(ddadd(ddsqrt(ddadd2(ddsqu(y),  T(1.0))), y))
     y = d.hi + d.lo
-    y = isinf(x) || isnan(y) ? Inf : y
+    y = isinf(x) || isnan(y) ? T(Inf) : y
     y = flipsign(y, x)
-    y = isnan(x) ? NaN : y
+    y = isnan(x) ? T(NaN) : y
     return y
 end
 
-function xacosh(x::Float64)
-    d = logk2(ddadd2(ddsqrt(ddadd2(ddsqu(x), -1.0)), x))
+function xacosh{T<:FloatTypes}(x::T)
+    d = logk2(ddadd2(ddsqrt(ddadd2(ddsqu(x), -T(1.0))), x))
     y = d.hi + d.lo
-    y = isinf(x) || isnan(y) ? Inf : y
-    y = x == 1.0 ? 0.0 : y
-    y = x < 1.0  ? NaN : y
-    y = isnan(x) ? NaN : y
+    y = isinf(x) || isnan(y) ? T(Inf) : y
+    y = x == T(1.0) ? T(0.0) : y
+    y = x < T(1.0)  ? T(NaN) : y
+    y = isnan(x)    ? T(NaN) : y
     return y
 end
 
-function xatanh(x::Float64)
+function xatanh{T<:FloatTypes}(x::T)
     y = abs(x)
-    d = logk2(dddiv(ddadd2(1.0, y), ddadd2(1.0, -y)))
-    y = y > 1.0 ? NaN : (y == 1.0 ? Inf : (d.hi + d.lo) * 0.5)
-    y = isinf(x) || isnan(y) ? NaN : y
+    d = logk2(dddiv(ddadd2(T(1.0), y), ddadd2(T(1.0), -y)))
+    y = y > T(1.0) ? T(NaN) : (y == T(1.0) ? T(Inf) : (d.hi + d.lo) * T(0.5))
+    y = isinf(x) || isnan(y) ? T(NaN) : y
     y = flipsign(y, x)
-    y = isnan(x) ? NaN : y
+    y = isnan(x) ? T(NaN) : y
     return y
 end

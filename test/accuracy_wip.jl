@@ -4,57 +4,71 @@ MRANGE(::Type{Float32}) = 10000
 FInt(::Type{Float64}) = Int64
 FInt(::Type{Float32}) = Int32
 
-@testset "Accuracy (max error in ulp) for $T" for T in (Float32, Float64)
+@testset "Accuracy (max error in ulp) for $T" for T in (Float32,)
     println("Accuracy tests for $T")
 
-    fun_table = Dict(xsinh => sinh, xcosh => cosh, xtanh => tanh)
+    fun_table = Dict(xasinh => asinh, xatanh => atanh)
     xx = map(T, vcat(-10:0.0002:10, -1000:0.02:1000))
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
-    fun_table = Dict(xasin => asin, xacos => acos)
-    xx = map(T, vcat(-1:0.00002:1))
-    tol = 3
-    test_acc(T, fun_table, xx, tol)
 
-    fun_table = Dict(xexp => exp)
-    xx = map(T, vcat(-10:0.0002:10, -1000:0.1:1000))
+    fun_table = Dict(xacosh => acosh)
+    xx = map(T, vcat(1:0.0002:10, 1:0.023:1000))
     tol = 1
     test_acc(T, fun_table, xx, tol)
+    
+    # fun_table = Dict(xsinh => sinh, xcosh => cosh, xtanh => tanh)
+    # xx = map(T, vcat(-10:0.0002:10, -1000:0.02:1000))
+    # tol = 1
+    # test_acc(T, fun_table, xx, tol)
 
-    fun_table = Dict(xlog => log)
-    xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 2.1.^(-1000:1000)))
-    tol = 3
-    test_acc(T, fun_table, xx, tol)
+    # fun_table = Dict(xasin => asin, xacos => acos)
+    # xx = map(T, vcat(-1:0.00002:1))
+    # tol = 3
+    # test_acc(T, fun_table, xx, tol)
 
-    xx = T[]
-    for i = 1:10000
-        s = reinterpret(T, reinterpret(FInt(T), T(pi)/4 * i) - FInt(T)(20))
-        e = reinterpret(T, reinterpret(FInt(T), T(pi)/4 * i) + FInt(T)(20))
-        d = s
-        while d <= e 
-            append!(xx, d)
-            d = reinterpret(T, reinterpret(FInt(T), d) + FInt(T)(1))
-        end
-    end
-    xx = append!(xx, -10:0.0002:10)
-    xx = append!(xx, -MRANGE(T):200.1:MRANGE(T))
+    # fun_table = Dict(xexp => exp)
+    # xx = map(T, vcat(-10:0.0002:10, -1000:0.1:1000))
+    # tol = 1
+    # test_acc(T, fun_table, xx, tol)
 
-    fun_table = Dict(xsin => sin, xcos => cos, xtan => tan)
-    tol = 4
-    test_acc(T, fun_table, xx, tol)
+    # fun_table = Dict(xlog => log)
+    # xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 2.1.^(-1000:1000)))
+    # tol = 3
+    # test_acc(T, fun_table, xx, tol)
 
-    sin_xsincos(x) = xsincos(x).hi
-    cos_xsincos(x) = xsincos(x).lo
-    fun_table = Dict(sin_xsincos => sin, cos_xsincos => cos)
-    tol = 4
-    test_acc(T, fun_table, xx, tol) 
+    # xx = T[]
+    # for i = 1:10000
+    #     s = reinterpret(T, reinterpret(FInt(T), T(pi)/4 * i) - FInt(T)(20))
+    #     e = reinterpret(T, reinterpret(FInt(T), T(pi)/4 * i) + FInt(T)(20))
+    #     d = s
+    #     while d <= e 
+    #         append!(xx, d)
+    #         d = reinterpret(T, reinterpret(FInt(T), d) + FInt(T)(1))
+    #     end
+    # end
+    # xx = append!(xx, -10:0.0002:10)
+    # xx = append!(xx, -MRANGE(T):200.1:MRANGE(T))
 
-    sin_xsincos_u1(x) = xsincos_u1(x).hi
-    cos_xsincos_u1(x) = xsincos_u1(x).lo
-    fun_table = Dict(sin_xsincos_u1 => sin, cos_xsincos_u1 => cos)
-    tol = 1
-    test_acc(T, fun_table, xx, tol) 
+    # fun_table = Dict(xsin => sin, xcos => cos, xtan => tan)
+    # tol = 4
+    # test_acc(T, fun_table, xx, tol)
+
+    # sin_xsincos(x) = xsincos(x).hi
+    # cos_xsincos(x) = xsincos(x).lo
+    # fun_table = Dict(sin_xsincos => sin, cos_xsincos => cos)
+    # tol = 4
+    # test_acc(T, fun_table, xx, tol) 
+
+    # sin_xsincos_u1(x) = xsincos_u1(x).hi
+    # cos_xsincos_u1(x) = xsincos_u1(x).lo
+    # fun_table = Dict(sin_xsincos_u1 => sin, cos_xsincos_u1 => cos)
+    # tol = 1
+    # test_acc(T, fun_table, xx, tol) 
+
+
+
 
 
     # fun_table = Dict(xatan => atan)
