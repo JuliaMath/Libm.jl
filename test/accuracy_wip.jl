@@ -4,10 +4,17 @@ MRANGE(::Type{Float32}) = 10000
 FInt(::Type{Float64}) = Int64
 FInt(::Type{Float32}) = Int32
 
-
-
-@testset "Accuracy (max error in ulp) for $T" for T in (Float32,Float64)
+@testset "Accuracy (max error in ulp) for $T" for T in (Float32, Float64)
     println("Accuracy tests for $T")
+
+    fun_table = Dict(xpow => pow)
+    xx1 = map(Tuple{T,T}, [(x,y) for x = -100:0.20:100, y = 0.1:0.20:100])[:]
+    xx2 = map(Tuple{T,T}, [(x,y) for x = -100:0.21:100, y = 0.1:0.22:100])[:] # <1 f32
+    xx3 = map(Tuple{T,T}, [(x,y) for x = 2.1, y = -1000:0.1:1000])
+    xx = vcat(xx1, xx2, xx2)
+    tol = 1.08
+    test_acc(T, fun_table, xx, tol)
+
 
     fun_table = Dict(xcbrt => cbrt)
     xx = map(T, vcat(-10000:0.2:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))
@@ -19,34 +26,36 @@ FInt(::Type{Float32}) = Int32
     test_acc(T, fun_table, xx, tol)
 
 
-
-end
-
-
-
-
-@testset "Accuracy (max error in ulp) for $T" for T in (Float64,)
-    println("Accuracy tests for $T")
-
-    fun_table = Dict(xpow => pow)
-    xx1 = [(T(x),T(y)) for x = -100:0.2:100 , y = 0.1:0.2:100][:]
-    xx2 = [(T(x),T(y)) for x = 2.1 , y = -1000:0.1:1000][:]
-    xx = vcat(xx1, xx2)
+    fun_table = Dict(xexp => exp)
+    xx = map(T, vcat(-10:0.0002:10, -1000:0.1:1000))
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
-end
-@testset "Accuracy (max error in ulp) for $T" for T in (Float32,)
-    println("Accuracy tests for $T")
 
-    fun_table = Dict(xpow => pow)
-    xx1 = [(T(x),T(y)) for x = -100:0.21:100 , y = 0.1:0.22:100][:]
-    xx2 = [(T(x),T(y)) for x = 2.1 , y = -1000:0.1:1000][:]
-    xx = vcat(xx1, xx2)
+    fun_table = Dict(xexp2 => exp2)
+    xx = map(T, vcat(-10:0.0002:10, -120:0.023:1000, -1000:0.02:2000))
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
+
+    fun_table = Dict(xexp10 => exp10)
+    xx = map(T, vcat(-10:0.0002:10, -35:0.023:1000, -300:0.01:300))
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
+
+    fun_table = Dict(xexpm1 => expm1)
+    xx = map(T, vcat(-10:0.0002:10, -1000:0.021:1000, 
+        10.0.^(0:0.02:300), -10.0.^-(0:0.02:300), 10.0.^(0:0.021:300), -10.0.^-(0:0.021:300)))
+    tol = 2
+    test_acc(T, fun_table, xx, tol)
+
 end
+
+
+
+
+
     # fun_table = Dict(xlog => log)
     # xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 2.1.^(-1000:1000)))
     # tol = 3

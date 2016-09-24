@@ -85,16 +85,6 @@ println("Accuracy tests for $T")
     test_acc(T, fun_table, xx, tol)
 
 
-    fun_table = Dict(xcbrt => cbrt)
-    xx = vcat(-10000:0.2:10000, 2.1.^(-1000:1000))
-    tol = 2
-    test_acc(T, fun_table, xx, tol)
-
-    fun_table = Dict(xcbrt_u1 => cbrt)
-    tol = 1
-    test_acc(T, fun_table, xx, tol)
-
-
     fun_table = Dict(xexp2 => exp2)
     xx = vcat(-10:0.0002:10, -1000:0.02:2000)
     tol = 1
@@ -150,6 +140,15 @@ println("Accuracy tests for $T")
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
+    fun_table = Dict(xcbrt => cbrt)
+    xx = vcat(-10000:0.2:10000, 2.1.^(-1000:1000))
+    tol = 2
+    test_acc(T, fun_table, xx, tol)
+
+    fun_table = Dict(xcbrt_u1 => cbrt)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+    
     @testset "xilogb at arbitrary values" begin
         xd = Dict{T,Int}(T(1e-30) => -100, T(2.31e-11) => -36, T(-1.0) => 0, T(1.0) => 0, 
                     T(2.31e11) => 37,  T(1e30) => 99)
