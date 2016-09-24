@@ -23,32 +23,38 @@ function xilogb{T<:FloatTypes}(d::T)
     return e 
 end
 
-function xlog_u1(d::Float64)
+function xlog_u1{T<:FloatTypes}(d::T)
     s = logk(d)
     x = s.hi + s.lo
-    isinf(d) && (x =  Inf)
-    d < 0    && (x =  NaN)
-    d == 0   && (x = -Inf)
+    isinf(d) && (x =  T(Inf))
+    d < 0    && (x =  T(NaN))
+    d == 0   && (x = -T(Inf))
     return x
 end
 
-function xlog10(a::Float64)
-    d = ddmul(logk(a), Double(0.43429448190325176116, 6.6494347733425473126e-17))
+
+_xlog10_c0(::Type{Float32}) = Double(0.43429449200630187988f0, -1.0103050118726031315f-08)
+_xlog10_c0(::Type{Float64}) = Double(0.43429448190325176116, 6.6494347733425473126e-17)
+
+function xlog10{T<:FloatTypes}(a::T)
+    d = ddmul(logk(a), _xlog10_c0(T))
     x = d.hi + d.lo
-    isinf(a) && (x =  Inf)
-    a < 0    && (x =  NaN)
-    a == 0   && (x = -Inf)
+    isinf(a) && (x =  T(Inf))
+    a < 0    && (x =  T(NaN))
+    a == 0   && (x = -T(Inf))
     return x
 end
 
-function xlog1p(a::Float64)
-    d = logk2(ddadd2(a, 1.0))
+
+function xlog1p{T<:FloatTypes}(a::T)
+    d = logk2(ddadd2(a, T(1)))
     x = d.hi + d.lo
-    isinf(a) && (x = Inf)
-    a < -1   && (x = NaN)
-    a == -1  && (x = -Inf)
+    isinf(a) && (x =  T(Inf))
+    a < -1   && (x =  T(NaN))
+    a == -1  && (x = -T(Inf))
     return x
 end
+
 
 
 

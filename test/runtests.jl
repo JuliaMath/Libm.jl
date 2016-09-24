@@ -96,7 +96,7 @@ function test_acc(T, fun_table, xx, tol; debug=false, tol_debug=5)
         end
         rmean = rmean/length(xx)
 
-        t = @test rmax < tol
+        t = @test rmax <= tol
 
         fmtxloc = isa(xmax, Tuple) ? string('(', join((@sprintf("%.5f", x) for x in xmax), ", "), ')') : @sprintf("%.5f", xmax)
         println(rpad(strip_module_name(xfun), 15, " "), ": max ", @sprintf("%f", rmax),

@@ -243,20 +243,20 @@ end
 let
 global xtan_u1
 
-const c14d =  1.014197185110833732244080e-05
-const c13d = -2.595197915859246976986140e-05
-const c12d =  5.233880819158998553251860e-05
-const c11d = -3.050330144339464882256160e-05
-const c10d =  7.147075040842427442674970e-05
-const c9d  =  8.096745182801591870450780e-05
-const c8d  =  0.0002448849318793318470544040
-const c7d  =  0.0005885051687435871549045060
-const c6d  =  0.0014561278892281242797884800
-const c5d  =  0.0035920874383690661914292400
-const c4d  =  0.0088632394436240161811335600
-const c3d  =  0.0218694882853846389592078000
-const c2d  =  0.0539682539781298417636002000
-const c1d  =  0.1333333333331259418219620000
+const c14d =  1.01419718511083373224408e-05
+const c13d = -2.59519791585924697698614e-05
+const c12d =  5.23388081915899855325186e-05
+const c11d = -3.05033014433946488225616e-05
+const c10d =  7.14707504084242744267497e-05
+const c9d  =  8.09674518280159187045078e-05
+const c8d  =  0.000244884931879331847054404
+const c7d  =  0.000588505168743587154904506
+const c6d  =  0.001456127889228124279788480
+const c5d  =  0.003592087438369066191429240
+const c4d  =  0.008863239443624016181133560
+const c3d  =  0.021869488285384638959207800
+const c2d  =  0.053968253978129841763600200
+const c1d  =  0.133333333333125941821962000
 
 global @inline _tan_u1(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d
 
@@ -278,19 +278,19 @@ function xtan_u1{T<:Float64}(d::T)
 end
 end
 
-function xatan2(y::Float64, x::Float64)
+function xatan2{T<:FloatTypes}(y::T, x::T)
     r = atan2k(abs(y), x)
     r = flipsign(r, x)
     if isinf(x) || x == 0
-        r = MPI/2 - (isinf(x) ? (_sign(x) * (MPI/2)) : 0.0)
+        r = T(MPI)/2 - (isinf(x) ? (_sign(x) * (T(MPI)/2)) : T(0))
     end
     if isinf(y)
-        r = MPI/2 - (isinf(x) ? (_sign(x) * (MPI/4)) : 0.0)
+        r = T(MPI)/2 - (isinf(x) ? (_sign(x) * (T(MPI)/4)) : T(0))
     end
     if y == 0
-        r = (_sign(x) == -1 ? MPI/1 : 0.0)
+        r = (_sign(x) == -1 ? T(MPI) : T(0))
     end
-    return isnan(x) || isnan(y) ? NaN : flipsign(r, y)
+    return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
 end
 
 xasin{T<:FloatTypes}(x::T) = flipsign(atan2k(abs(x), _sqrt((1+x)*(1-x))), x)
@@ -356,20 +356,20 @@ function xatan(s::Float64)
 end
 end
 
-function xatan2_u1(y::Float64, x::Float64)
+function xatan2_u1{T<:Float64}(y::T, x::T)
     d = atan2k_u1(Double(abs(y)), Double(x))
     r = d.hi + d.lo
     r = flipsign(r, x)
     if isinf(x) || x == 0
-        r = MPI/2 - (isinf(x) ? (_sign(x) * (MPI/2)) : 0.0)
+        r = T(MPI/2) - (isinf(x) ? _sign(x)*T(MPI/2) : T(0))
     end
     if isinf(y)
-        r = MPI/2 - (isinf(x) ? (_sign(x) * (MPI/4)) : 0.0)
+        r = T(MPI/2) - (isinf(x) ? _sign(x)*T(MPI/4) : T(0))
     end
     if y == 0
-        r = _sign(x) == -1 ? MPI/1 : 0.0
+        r = _sign(x) == -1 ? T(MPI) : T(0)
     end
-    return isnan(x) || isnan(y) ? NaN : flipsign(r, y)
+    return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
 end
 
 function xasin_u1(d::Float64)
