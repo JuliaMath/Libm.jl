@@ -1,23 +1,21 @@
 
-function xpow(x::Float64, y::Float64)
-    yint = unsafe_trunc(Int32,y)
+function xpow{T<:FloatTypes}(x::T, y::T)
+    yint = unsafe_trunc(Int,y)
     yisint = yint == y
     yisodd = isodd(yint) && yisint
 
     result = expk(ddmul(logk(abs(x)), y))
-
-    result = isnan(result) ? Inf : result
-    result *=  (x >= 0 ? 1.0 : (!yisint ? NaN : (yisodd ? -1 : 1)));
-
+    result = isnan(result) ? T(Inf) : result
+    result *= (x >= 0 ? 1 : (!yisint ? T(NaN) : (yisodd ? -1 : 1)));
     efx = flipsign(abs(x) - 1, y)
     if isinf(y)
-        result = efx < 0 ? 0.0 : (efx == 0 ? 1.0 : Inf)
+        result = efx < 0 ? T(0) : (efx == 0 ? T(1) : T(Inf))
     end
     if isinf(x) || x == 0
-        result = (yisodd ? _sign(x) : 1.0) * ((x == 0 ? -y : y) < 0 ? 0.0 : Inf)
+        result = (yisodd ? _sign(x) : T(1)) * ((x == 0 ? -y : y) < 0 ? T(0) : T(Inf))
     end
-    (isnan(x) || isnan(y)) && (result = NaN)
-    (y == 0   || x == 1)   && (result = 1.0)
+    (isnan(x) || isnan(y)) && (result = T(NaN))
+    (y == 0   || x == 1)   && (result = T(1))
     return result
 end
 

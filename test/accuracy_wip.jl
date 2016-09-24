@@ -4,19 +4,49 @@ MRANGE(::Type{Float32}) = 10000
 FInt(::Type{Float64}) = Int64
 FInt(::Type{Float32}) = Int32
 
+
+@testset "Accuracy (max error in ulp) for $T" for T in (Float64,)
+    println("Accuracy tests for $T")
+
+    fun_table = Dict(xpow => pow)
+    xx1 = [(T(x),T(y)) for x = -100:0.2:100 , y = 0.1:0.2:100][:]
+    xx2 = [(T(x),T(y)) for x = 2.1 , y = -1000:0.1:1000][:]
+    xx = vcat(xx1, xx2)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
+end
+
 @testset "Accuracy (max error in ulp) for $T" for T in (Float32,)
     println("Accuracy tests for $T")
 
-    fun_table = Dict(xasinh => asinh, xatanh => atanh)
-    xx = map(T, vcat(-10:0.0002:10, -1000:0.02:1000))
+    fun_table = Dict(xpow => pow)
+    xx1 = [(T(x),T(y)) for x = -100:0.21:100 , y = 0.1:0.22:100][:]
+    xx2 = [(T(x),T(y)) for x = 2.1 , y = -1000:0.1:1000][:]
+    xx = vcat(xx1, xx2)
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
+end
 
-    fun_table = Dict(xacosh => acosh)
-    xx = map(T, vcat(1:0.0002:10, 1:0.023:1000))
-    tol = 1
-    test_acc(T, fun_table, xx, tol)
+    # fun_table = Dict(xlog => log)
+    # xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 2.1.^(-1000:1000)))
+    # tol = 3
+    # test_acc(T, fun_table, xx, tol)
+
+    # fun_table = Dict(xlog_u1 => log)
+    # tol = 1
+    # test_acc(T, fun_table, xx, tol)
+    # fun_table = Dict(xlog10 => log10)
+    # xx = map(T, vcat(0.0001:0.0001:10, 0.0001:0.1:10000) )
+    # tol = 1
+    # test_acc(T, fun_table, xx, tol)
+
+
+    # fun_table = Dict(xlog1p => log1p)
+    # xx = map(T, vcat(0.0001:0.0001:10, 0.0001:0.1:10000, 10.0.^(-0:0.02:300), -10.0.^(-0:0.02:300)))
+    # tol = 1
+    # test_acc(T, fun_table, xx, tol)
     
     # fun_table = Dict(xsinh => sinh, xcosh => cosh, xtanh => tanh)
     # xx = map(T, vcat(-10:0.0002:10, -1000:0.02:1000))
