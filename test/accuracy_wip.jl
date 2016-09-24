@@ -5,6 +5,26 @@ FInt(::Type{Float64}) = Int64
 FInt(::Type{Float32}) = Int32
 
 
+
+@testset "Accuracy (max error in ulp) for $T" for T in (Float32,Float64)
+    println("Accuracy tests for $T")
+
+    fun_table = Dict(xcbrt => cbrt)
+    xx = map(T, vcat(-10000:0.2:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))
+    tol = 2
+    test_acc(T, fun_table, xx, tol)
+
+    fun_table = Dict(xcbrt_u1 => cbrt)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
+
+
+end
+
+
+
+
 @testset "Accuracy (max error in ulp) for $T" for T in (Float64,)
     println("Accuracy tests for $T")
 
@@ -16,7 +36,6 @@ FInt(::Type{Float32}) = Int32
     test_acc(T, fun_table, xx, tol)
 
 end
-
 @testset "Accuracy (max error in ulp) for $T" for T in (Float32,)
     println("Accuracy tests for $T")
 
@@ -28,7 +47,6 @@ end
     test_acc(T, fun_table, xx, tol)
 
 end
-
     # fun_table = Dict(xlog => log)
     # xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 2.1.^(-1000:1000)))
     # tol = 3
@@ -142,4 +160,4 @@ end
     # test_acc(T, fun_table, xx, tol)
 
 
-end #accuracy 
+# end #accuracy 
