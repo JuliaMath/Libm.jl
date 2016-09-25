@@ -88,9 +88,9 @@ IntF(::Type{Float32}) = Int32
     tol = 4
     test_acc(T, fun_table, xx, tol)
 
-    # fun_table = Dict(xsin_u1 => sin, xcos_u1 => cos, xtan_u1 => tan)
-    # tol = 1
-    # test_acc(T, fun_table, xx, tol)
+    fun_table = Dict(xsin_u1 => sin, xcos_u1 => cos, xtan_u1 => tan)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
 
     sin_xsincos(x) = xsincos(x).hi
     cos_xsincos(x) = xsincos(x).lo
@@ -107,10 +107,10 @@ IntF(::Type{Float32}) = Int32
 
     fun_table = Dict(xpow => pow)
     xx1 = map(Tuple{T,T}, [(x,y) for x = -100:0.20:100, y = 0.1:0.20:100])[:]
-    xx2 = map(Tuple{T,T}, [(x,y) for x = -100:0.21:100, y = 0.1:0.22:100])[:] # <1 f32
+    xx2 = map(Tuple{T,T}, [(x,y) for x = -100:0.21:100, y = 0.1:0.22:100])[:]
     xx3 = map(Tuple{T,T}, [(x,y) for x = 2.1, y = -1000:0.1:1000])
     xx = vcat(xx1, xx2, xx2)
-    tol = 1.08 #WARN
+    tol = 1
     test_acc(T, fun_table, xx, tol)
 
 

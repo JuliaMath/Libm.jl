@@ -149,7 +149,7 @@ global @inline _sincos_b(x::Float32) = @horner x b1f b2f b3f b4f b5f
 
 function xsincos{T<:FloatTypes}(x::T)
     d = abs(x)
-    q = xrint(d*2*T(M1PI))
+    q = xrint(d*T(M2PI))
     s = d
     s = muladd(q, -PI4A(T)*2, s)
     s = muladd(q, -PI4B(T)*2, s)
@@ -196,6 +196,7 @@ end
 
 let
 global xtan
+global xtan_u1
 
 const c15d =  1.01419718511083373224408e-05
 const c14d = -2.59519791585924697698614e-05
@@ -213,68 +214,47 @@ const c3d  =  0.053968253978129841763600200
 const c2d  =  0.133333333333125941821962000
 const c1d  =  0.333333333333334980164153000
 
-const c6f = 0.00927245803177356719970703f0
-const c5f = 0.00331984995864331722259521f0
-const c4f = 0.02429980784654617309570310f0
-const c3f = 0.05344953015446662902832030f0
-const c2f = 0.13338300585746765136718800f0
-const c1f = 0.33333185315132141113281200f0
-
+const c7f =  0.00446636462584137916564941f0
+const c6f = -8.3920182078145444393158f-05
+const c5f =  0.0109639242291450500488281f0
+const c4f =  0.0212360303848981857299805f0
+const c3f =  0.0540687143802642822265625f0
+const c2f =  0.133325666189193725585938f0
+const c1f =  0.33333361148834228515625f0
 
 global @inline _tan(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d
-global @inline _tan(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f
+global @inline _tan(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f
 
 function xtan{T<:FloatTypes}(d::T)
-    q = xrint(d * (2*T(M1PI)))
+    q = xrint(d*T(M2PI))
     x = muladd(q, -PI4A(T)*2, d)
     x = muladd(q, -PI4B(T)*2, x)
     x = muladd(q, -PI4C(T)*2, x)
     x = muladd(q, -PI4D(T)*2, x)
-    s = x*x
     q & 1 != 0 && (x = -x)
+    s = x*x
     u =_tan(s)
     u = muladd(s, u * x, x)
     q & 1 != 0 && (u = 1/u)
     isinf(d)   && (u = T(NaN))
     return u
 end
-end
 
-let
-global xtan_u1
+global @inline _tan_u1(x::Double{Float64}) = ddadd(c1d, x.hi*(@horner x.hi c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d))
+global @inline _tan_u1(x::Double{Float32}) = ddadd(c1f, ddmul(x.hi, ddadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
 
-const c14d =  1.01419718511083373224408e-05
-const c13d = -2.59519791585924697698614e-05
-const c12d =  5.23388081915899855325186e-05
-const c11d = -3.05033014433946488225616e-05
-const c10d =  7.14707504084242744267497e-05
-const c9d  =  8.09674518280159187045078e-05
-const c8d  =  0.000244884931879331847054404
-const c7d  =  0.000588505168743587154904506
-const c6d  =  0.001456127889228124279788480
-const c5d  =  0.003592087438369066191429240
-const c4d  =  0.008863239443624016181133560
-const c3d  =  0.021869488285384638959207800
-const c2d  =  0.053968253978129841763600200
-const c1d  =  0.133333333333125941821962000
-
-global @inline _tan_u1(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d
-
-function xtan_u1{T<:Float64}(d::T)
-    q = xrint(d*M2PI)
-    s = ddadd2(d, q*(-PI4A(T)*2))
-    s = ddadd2(s, q*(-PI4B(T)*2))
-    s = ddadd2(s, q*(-PI4C(T)*2))
-    s = ddadd2(s, q*(-PI4D(T)*2))
-    q & 1 != 0 && (s = -s)
-    t = s
-    s = ddsqu(s)
-    u =_tan_u1(s.hi)
-    x = ddadd(1.0, ddmul(ddadd(0.333333333333334980164153, u * s.hi), s))
-    x = ddmul(t, x)
-    q & 1 != 0 && (x = ddrec(x))
-    u = x.hi + x.lo
-    return u
+function xtan_u1{T<:FloatTypes}(d::T)
+    q = xrint(d*T(M2PI))
+    x = ddadd2(d, q * -PI4A(T)*2)
+    x = ddadd2(x, q * -PI4B(T)*2)
+    x = ddadd2(x, q * -PI4C(T)*2)
+    x = ddadd2(x, q * -PI4D(T)*2)
+    q & 1 != 0 && (x = -x)
+    s = ddsqu(x)
+    u =_tan_u1(s)
+    u = ddmul(x, ddadd(T(1), ddmul(u, s)))
+    q & 1 != 0 && (u = ddrec(u))
+    return u.hi + u.lo
 end
 end
 

@@ -419,11 +419,11 @@ end
 
 
 @testset "denormal/nonnumber xilogb" begin
-    @test xilogb(+T(Inf))  == typemax(Int)
+    @test xilogb(+T(Inf)) == typemax(Int)
     @test xilogb(-T(Inf)) == typemax(Int)
-    @test xilogb(+T(0.0))  == typemin(Int)
+    @test xilogb(+T(0.0)) == typemin(Int)
     @test xilogb(-T(0.0)) == typemin(Int)
-    @test xilogb( T(NaN))  == typemax(Int)
+    @test xilogb( T(NaN)) == typemax(Int)
 end
 
 
