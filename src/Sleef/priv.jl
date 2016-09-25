@@ -114,78 +114,94 @@ global @inline function atan2k{T<:FloatTypes}(y::T, x::T)
         q = -2
     end
     if y > x
-        t = x; x = y;
+        t = x; x = y
         y = -t
         q += 1
     end
     s = y/x
     t = s*s
-    u = _atan2k(t)
+    u =_atan2k(t)
     t = u*t*s + s
-    return q*T(MPI/2) + t
+    return q*T(MPI2) + t
 end
 end
 
 let
-const c20 =  1.06298484191448746607415e-05
-const c19 = -0.000125620649967286867384336
-const c18 =  0.00070557664296393412389774
-const c17 = -0.00251865614498713360352999
-const c16 =  0.00646262899036991172313504
-const c15 = -0.0128281333663399031014274
-const c14 =  0.0208024799924145797902497
-const c13 = -0.0289002344784740315686289
-const c12 =  0.0359785005035104590853656
-const c11 = -0.041848579703592507506027
-const c10 =  0.0470843011653283988193763
-const c9  = -0.0524914210588448421068719
-const c8  =  0.0587946590969581003860434
-const c7  = -0.0666620884778795497194182
-const c6  =  0.0769225330296203768654095
-const c5  = -0.0909090442773387574781907
-const c4  =  0.111111108376896236538123
-const c3  = -0.142857142756268568062339
-const c2  =  0.199999999997977351284817
-const c1  = -0.333333333333317605173818
+const c20d =  1.06298484191448746607415e-05
+const c19d = -0.000125620649967286867384336
+const c18d =  0.00070557664296393412389774
+const c17d = -0.00251865614498713360352999
+const c16d =  0.00646262899036991172313504
+const c15d = -0.0128281333663399031014274
+const c14d =  0.0208024799924145797902497
+const c13d = -0.0289002344784740315686289
+const c12d =  0.0359785005035104590853656
+const c11d = -0.041848579703592507506027
+const c10d =  0.0470843011653283988193763
+const c9d  = -0.0524914210588448421068719
+const c8d  =  0.0587946590969581003860434
+const c7d  = -0.0666620884778795497194182
+const c6d  =  0.0769225330296203768654095
+const c5d  = -0.0909090442773387574781907
+const c4d  =  0.111111108376896236538123
+const c3d  = -0.142857142756268568062339
+const c2d  =  0.199999999997977351284817
+const c1d =  -0.333333333333317605173818
+
+const c9f = -0.00176397908944636583328247f0
+const c8f =  0.0107900900766253471374512f0
+const c7f = -0.0309564601629972457885742f0
+const c6f =  0.0577365085482597351074219f0
+const c5f = -0.0838950723409652709960938f0
+const c4f =  0.109463557600975036621094f0
+const c3f = -0.142626821994781494140625f0
+const c2f =  0.199983194470405578613281f0
+const c1f = -0.333332866430282592773438f0
+
+global @inline _atan2k_u1(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d c20d
+global @inline _atan2k_u1(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f c8f c9f
+
+global _atan2k_c0(::Type{Float64}) = Double(1.570796326794896557998982, 6.12323399573676603586882e-17)
+global _atan2k_c0(::Type{Float32}) = Double(1.5707963705062866211f0, -4.3711388286737928865f-08)
 
 global @inline function atan2k_u1{T<:Float64}(y::Double{T}, x::Double{T})
     q = 0
     if x.hi < 0
-        x = Double(-x.hi,-x.lo)
+        x = -x
         q = -2
     end
     if y.hi > x.hi
         t = x; x = y
-        y = Double(-t.hi,-t.lo)
+        y = -t
         q += 1
     end
     s = dddiv(y, x)
     t = ddsqu(s)
     t = ddnormalize(t)
-    u = @horner t.hi c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20
+    u =_atan2k_u1(t.hi)
     t = ddmul(t, u)
-    t = ddmul(s, ddadd(T(1.0), t))
-    return ddadd2(ddmul(Double(1.570796326794896557998982, 6.12323399573676603586882e-17), T(q)), t)
+    t = ddmul(s, ddadd(T(1), t))
+    return ddadd2(ddmul(_atan2k_c0(T), T(q)), t)
 end
 end
 
 let
 const c10d = 2.51069683420950419527139e-08
-const c9d = 2.76286166770270649116855e-07
-const c8d = 2.75572496725023574143864e-06
-const c7d = 2.48014973989819794114153e-05
-const c6d = 0.000198412698809069797676111
-const c5d = 0.0013888888939977128960529
-const c4d = 0.00833333333332371417601081
-const c3d = 0.0416666666665409524128449
-const c2d = 0.166666666666666740681535
-const c1d = 0.500000000000000999200722
+const c9d  = 2.76286166770270649116855e-07
+const c8d  = 2.75572496725023574143864e-06
+const c7d  = 2.48014973989819794114153e-05
+const c6d  = 0.000198412698809069797676111
+const c5d  = 0.001388888893997712896052900
+const c4d  = 0.008333333333323714176010810
+const c3d  = 0.041666666666540952412844900
+const c2d  = 0.166666666666666740681535000
+const c1d  = 0.500000000000000999200722000
 
 const c5f = 0.00136324646882712841033936f0
 const c4f = 0.00836596917361021041870117f0
-const c3f = 0.0416710823774337768554688f0
-const c2f = 0.166665524244308471679688f0
-const c1f = 0.499999850988388061523438f0
+const c3f = 0.04167108237743377685546880f0
+const c2f = 0.16666552424430847167968800f0
+const c1f = 0.49999985098838806152343800f0
 
 global @inline _expk(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d
 global @inline _expk(x::Float32) = @horner x c1f c2f c3f c4f c5f
@@ -228,8 +244,8 @@ const c2f = 0.400005519390106201171875f0
 const c1f = 0.666666567325592041015625f0
 
 # last coefficient val
-global @inline _logk_c0(::Type{Float64}) = Double(0.693147180559945286226764, 2.319046813846299558417771e-17)
-global @inline _logk_c0(::Type{Float32}) = Double(0.69314718246459960938f0, -1.904654323148236017f-09)
+global _logk_c0(::Type{Float64}) = Double(0.693147180559945286226764, 2.319046813846299558417771e-17)
+global _logk_c0(::Type{Float32}) = Double(0.69314718246459960938f0, -1.904654323148236017f-09)
 
 global @inline _logk(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
 global @inline _logk(x::Float32) = @horner x c1f c2f c3f c4f
@@ -246,7 +262,7 @@ end
 global @inline function logk2{T<:FloatTypes}(d::Double{T})
     e  = ilogbp1(d.hi * T(M1SQRT2))
     m  = ddscale(d, pow2i(T,-e))
-    x  = dddiv(ddadd2(m, T(-1.0)), ddadd2(m, T(1.0)))
+    x  = dddiv(ddadd2(m, -T(1.0)), ddadd2(m, T(1.0)))
     x2 = ddsqu(x)
     t  =_logk(x2.hi)
     ddadd2(ddmul(_logk_c0(T), T(e)), ddadd2(ddscale(x, T(2.0)), ddmul(ddmul(x2, x), t)))

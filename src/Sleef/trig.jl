@@ -37,7 +37,7 @@ function xsin{T<:FloatTypes}(x::T)
     d = muladd(q, -PI4C(T)*4, d)
     d = muladd(q, -PI4D(T)*4, d)
     s = d*d
-    (q & 1) != 0 && (d = -d)
+    q & 1 != 0 && (d = -d)
     u =_sincos(s)
     u = muladd(s, u*d, d)
     return flipsign(u,x)
@@ -50,7 +50,7 @@ function xcos{T<:FloatTypes}(d::T)
     d = muladd(q, -PI4C(T)*2, d)
     d = muladd(q, -PI4D(T)*2, d)
     s = d*d
-    (q & 2) == 0 && (d = -d)
+    q & 2 == 0 && (d = -d)
     u =_sincos(s)
     return muladd(s, u*d, d)
 end
@@ -87,11 +87,11 @@ function xsin_u1{T<:FloatTypes}(x::T)
     s = ddadd2(s, q * (-PI4D(T)*4))
     t = s
     s = ddsqu(s)
-    u::T =_sincos_u1(s.hi)
+    u =_sincos_u1(s.hi)
     v = ddadd(T(1), ddmul(ddadd(_sincos_u1_c0(T), u*s.hi), s))
     v = ddmul(t, v)
     u = v.hi + v.lo
-    (q & 1) != 0 && (u = -u)
+    q & 1 != 0 && (u = -u)
     return flipsign(u,x)
 end
 
@@ -104,11 +104,11 @@ function xcos_u1{T<:FloatTypes}(d::T)
     s = ddadd2(s, q * (-PI4D(T)*2))
     t = s
     s = ddsqu(s)
-    u::T =_sincos_u1(s.hi)
+    u =_sincos_u1(s.hi)
     v = ddadd(T(1), ddmul(ddadd(_sincos_u1_c0(T), u*s.hi), s))
     v = ddmul(t, v)
     u = v.hi + v.lo
-    (q & 2) == 0 && (u = -u)
+    q & 2 == 0 && (u = -u)
     return u
 end
 end
@@ -157,15 +157,15 @@ function xsincos{T<:FloatTypes}(x::T)
     s = muladd(q, -PI4D(T)*2, s)
     t = s
     s = s*s
-    u = _sincos_a(s)
+    u =_sincos_a(s)
     u = u * s * t
     rx = t + u
-    u = _sincos_b(s)
+    u =_sincos_b(s)
     ry = u * s + T(1)
-    (q & 1) != 0     && (s = ry; ry = rx; rx = s)
-    (q & 2) != 0     && (rx = -rx)
-    ((q+1) & 2) != 0 && (ry = -ry)
-    isinf(d) && (rx = ry = T(NaN))
+    q & 1 != 0     && (s = ry; ry = rx; rx = s)
+    q & 2 != 0     && (rx = -rx)
+    (q+1) & 2 != 0 && (ry = -ry)
+    isinf(d)       && (rx = ry = T(NaN))
     return Double(flipsign(rx,x),ry)
 end
 
@@ -186,10 +186,10 @@ function xsincos_u1{T<:FloatTypes}(x::T)
     u = _sincos_b(sx)
     v = ddadd(T(1), ddmul(sx, u))
     ry = v.hi + v.lo
-    (q & 1) != 0     && (u = ry; ry = rx; rx = u)
-    (q & 2) != 0     && (rx = -rx)
-    ((q+1) & 2) != 0 && (ry = -ry)
-    isinf(d) && (rx = ry = T(NaN))
+    q & 1 != 0     && (u = ry; ry = rx; rx = u)
+    q & 2 != 0     && (rx = -rx)
+    (q+1) & 2 != 0 && (ry = -ry)
+    isinf(d)       && (rx = ry = T(NaN))
     return Double(flipsign(rx,x),ry)
 end
 end
@@ -231,11 +231,11 @@ function xtan{T<:FloatTypes}(d::T)
     x = muladd(q, -PI4C(T)*2, x)
     x = muladd(q, -PI4D(T)*2, x)
     s = x*x
-    (q & 1) != 0 && (x = -x)
-    u::T =_tan(s)  # for some reason type cannot be infered here for Float32!
+    q & 1 != 0 && (x = -x)
+    u =_tan(s)
     u = muladd(s, u * x, x)
-    (q & 1) != 0 && (u = T(1.0)/u)
-    isinf(d) && (u = NaN)
+    q & 1 != 0 && (u = 1/u)
+    isinf(d)   && (u = T(NaN))
     return u
 end
 end
@@ -266,13 +266,13 @@ function xtan_u1{T<:Float64}(d::T)
     s = ddadd2(s, q*(-PI4B(T)*2))
     s = ddadd2(s, q*(-PI4C(T)*2))
     s = ddadd2(s, q*(-PI4D(T)*2))
-    (q & 1) != 0 && (s = ddneg(s))
+    q & 1 != 0 && (s = -s)
     t = s
     s = ddsqu(s)
     u =_tan_u1(s.hi)
     x = ddadd(1.0, ddmul(ddadd(0.333333333333334980164153, u * s.hi), s))
     x = ddmul(t, x)
-    (q & 1) != 0 && (x = ddrec(x))
+    q & 1 != 0 && (x = ddrec(x))
     u = x.hi + x.lo
     return u
 end
@@ -282,13 +282,13 @@ function xatan2{T<:FloatTypes}(y::T, x::T)
     r = atan2k(abs(y), x)
     r = flipsign(r, x)
     if isinf(x) || x == 0
-        r = T(MPI)/2 - (isinf(x) ? (_sign(x) * (T(MPI)/2)) : T(0))
+        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI2) : T(0))
     end
     if isinf(y)
-        r = T(MPI)/2 - (isinf(x) ? (_sign(x) * (T(MPI)/4)) : T(0))
+        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI4) : T(0))
     end
     if y == 0
-        r = (_sign(x) == -1 ? T(MPI) : T(0))
+        r = _sign(x) == -1 ? T(MPI) : T(0)
     end
     return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
 end
@@ -319,7 +319,16 @@ const c3  = -0.142857142667713293837650000
 const c2  =  0.199999999996591265594148000
 const c1  = -0.333333333333311110369124000
 
-function xatan(s::Float64)
+const c8f =  0.00282363896258175373077393f0
+const c7f = -0.01595690287649631500244140f0
+const c6f =  0.04250498861074447631835940f0
+const c5f = -0.07489009201526641845703120f0
+const c4f =  0.10634793341159820556640600f0
+const c3f = -0.14202736318111419677734400f0
+const c2f =  0.19992695748805999755859400f0
+const c1f = -0.33333101868629455566406200f0
+
+function xatan{T<:Float64}(s::T)
     q = 0
     if s < 0
         s = -s
@@ -350,8 +359,8 @@ function xatan(s::Float64)
     u = u * t + c2
     u = u * t + c1
     t = s + s*(t*u)
-    (q & 1) != 0 && (t = 1.570796326794896557998982 - t)
-    (q & 2) != 0 && (t = -t)
+    q & 1 != 0 && (t = T(MPI2) - t)
+    q & 2 != 0 && (t = -t)
     return t
 end
 end
@@ -361,10 +370,10 @@ function xatan2_u1{T<:Float64}(y::T, x::T)
     r = d.hi + d.lo
     r = flipsign(r, x)
     if isinf(x) || x == 0
-        r = T(MPI/2) - (isinf(x) ? _sign(x)*T(MPI/2) : T(0))
+        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI2) : T(0))
     end
     if isinf(y)
-        r = T(MPI/2) - (isinf(x) ? _sign(x)*T(MPI/4) : T(0))
+        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI4) : T(0))
     end
     if y == 0
         r = _sign(x) == -1 ? T(MPI) : T(0)
@@ -372,24 +381,24 @@ function xatan2_u1{T<:Float64}(y::T, x::T)
     return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
 end
 
-function xasin_u1(d::Float64)
-    d2 = atan2k_u1(Double(abs(d)), ddsqrt(ddmul(ddadd(1.0, d), ddadd(1.0,-d))))
+function xasin_u1{T<:Float64}(d::T)
+    d2 = atan2k_u1(Double(abs(d)), ddsqrt(ddmul(ddadd(T(1), d), ddadd(T(1),-d))))
     r = d2.hi + d2.lo
-    abs(d) == 1 && (r = 1.570796326794896557998982)
+    abs(d) == 1 && (r = T(MPI2))
     return flipsign(r, d)
 end
 
-function xacos_u1(d::Float64)
-    d2 = atan2k_u1(ddsqrt(ddmul(ddadd(1.0, d), ddadd(1.0,-d))), Double(abs(d)))
+function xacos_u1{T<:Float64}(d::T)
+    d2 = atan2k_u1(ddsqrt(ddmul(ddadd(T(1), d), ddadd(T(1),-d))), Double(abs(d)))
     d2 = ddscale(d2, _sign(d))
     abs(d) == 1 && (d2 = Double(0.0))
-    d < 0 && (d2 = ddadd(Double(3.141592653589793116, 1.2246467991473532072e-16), d2))
+    d < 0       && (d2 = ddadd(Double(3.141592653589793116, 1.2246467991473532072e-16), d2))
     return d2.hi + d2.lo
 end
 
-function xatan_u1(d::Float64)
-    d2 = atan2k_u1(Double(abs(d)), Double(1.0))
+function xatan_u1{T<:Float64}(d::T)
+    d2 = atan2k_u1(Double(abs(d)), Double(T(1)))
     r = d2.hi + d2.lo
-    isinf(d) && (r = 1.570796326794896557998982)
+    isinf(d) && (r = T(MPI2))
     return flipsign(r, d)
 end

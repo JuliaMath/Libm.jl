@@ -7,8 +7,27 @@ IntF(::Type{Float32}) = Int32
 @testset "Accuracy (max error in ulp) for $T" for T in (Float32, Float64)
     println("Accuracy tests for $T")
 
-    fun_table = Dict(xlog => log)
+    # xx = map(T, vcat(-1:0.00002:1)) 
+    # fun_table = Dict(xasin_u1 => asin)
+    # tol = 1
+    # test_acc(T, fun_table, xx, tol)
+
+    # xx1 = map(Tuple{T,T}, [zip(-10:0.05:10, -10:0.05:10)...])
+    # xx2 = map(Tuple{T,T}, [zip(-100:0.51:100, -100:0.51:100)...])
+    # xx3 = map(Tuple{T,T}, [zip(-10:0.051:10, -10:0.052:10)...])
+    # xx4 = map(Tuple{T,T}, [zip(-100:0.51:100, -100:0.52:100)...])
+    # xx = vcat(xx1, xx2, xx3, xx4)
+
+    # fun_table = Dict(xatan2 => atan2)
+    # tol = 2.5
+    # test_acc(T, fun_table, xx, tol)
+
+    # fun_table = Dict(xatan2_u1 => atan2)
+    # tol = 1
+    # test_acc(T, fun_table, xx, tol)
+
     xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))
+    fun_table = Dict(xlog => log)
     tol = 3
     test_acc(T, fun_table, xx, tol)
 
