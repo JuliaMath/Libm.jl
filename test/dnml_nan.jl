@@ -405,6 +405,7 @@ end
     for x in xa
         @test cmpdenorm(xlog1p(x), log1p(BigFloat(x)))
     end
+    # @test_broken cmpdenorm(xlog1p(-0.0), log1p(BigFloat(-0.0)))
 end
 
 
@@ -418,11 +419,11 @@ end
 
 
 @testset "denormal/nonnumber xilogb" begin
-    @test xilogb(T(Inf))  == typemax(Int)
-    @test xilogb(T(-Inf)) == typemax(Int)
-    @test xilogb(T(0.0))  == typemin(Int)
-    @test xilogb(T(+0.0)) == typemin(Int)
-    @test xilogb(T(NaN))  == typemax(Int)
+    @test xilogb(+T(Inf))  == typemax(Int)
+    @test xilogb(-T(Inf)) == typemax(Int)
+    @test xilogb(+T(0.0))  == typemin(Int)
+    @test xilogb(-T(0.0)) == typemin(Int)
+    @test xilogb( T(NaN))  == typemax(Int)
 end
 
 
