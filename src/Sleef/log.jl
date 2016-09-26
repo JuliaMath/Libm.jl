@@ -23,30 +23,21 @@ function xilogb{T<:FloatTypes}(d::T)
     return e 
 end
 
-function xlog_u1{T<:FloatTypes}(d::T)
-    s = logk(d)
-    x = s.hi + s.lo
-    isinf(d) && (x =  T(Inf))
-    d < 0    && (x =  T(NaN))
-    d == 0   && (x = -T(Inf))
-    return x
-end
-
 function xlog10{T<:FloatTypes}(a::T)
     d = ddmul(logk(a), MDLN10E(T))
     x = d.hi + d.lo
-    isinf(a) && (x =  T(Inf))
-    a < 0    && (x =  T(NaN))
-    a == 0   && (x = -T(Inf))
+    isinf(a) && (x = typemax(T))
+    a < 0    && (x = T(NaN))
+    a == 0   && (x = typemin(T))
     return x
 end
 
 function xlog1p{T<:FloatTypes}(a::T)
     d = logk2(ddadd2(a, T(1.0)))
     x = d.hi + d.lo
-    isinf(a) && (x =  T(Inf))
-    a < -1   && (x =  T(NaN))
-    a == -1  && (x = -T(Inf))
+    isinf(a) && (x = typemax(T))
+    a < -1   && (x = T(NaN))
+    a == -1  && (x = typemin(T))
     return copysign(x,a) # return correct sign for -0.0
 end
 
@@ -65,7 +56,8 @@ end
 # `2` and subtract 1 for the exponent `e` when `m` is less than `sqrt(2)/2`
 
 let
-global xlog
+global xlog_fast
+
 const c8d = 0.148197055177935105296783
 const c7d = 0.153108178020442575739679
 const c6d = 0.181837339521549679055568
@@ -81,19 +73,28 @@ const c3f = 0.400005519390106201171875f0
 const c2f = 0.666666567325592041015625f0
 const c1f = 2.0f0
 
-global @inline _xlog(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
-global @inline _xlog(x::Float32) = @horner x c1f c2f c3f c4f c5f
+global @inline _xlog_fast(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
+global @inline _xlog_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
-function xlog{T<:FloatTypes}(d::T)
-    e = ilogbp1(d*T(M1SQRT2))
-    m = ldexpk(d,-e)
-    x = (m-1)/(m+1)
+function xlog_fast{T<:FloatTypes}(d::T)
+    e  = ilogbp1(d*T(M1SQRT2))
+    m  = ldexpk(d,-e)
+    x  = (m-1)/(m+1)
     x2 = x*x
-    t = _xlog(x2)
-    x = muladd(x, t, T(MLN2)*e)
-    isinf(d) && (x =  T(Inf))
-    d < 0    && (x =  T(NaN))
-    d == 0   && (x = -T(Inf))
+    t  =_xlog_fast(x2)
+    x  = muladd(x, t, T(MLN2)*e)
+    isinf(d) && (x = typemax(T))
+    d < 0    && (x = T(NaN))
+    d == 0   && (x = typemin(T))
     return x
 end
+end
+
+function xlog{T<:FloatTypes}(d::T)
+    s = logk(d)
+    x = s.hi + s.lo
+    isinf(d) && (x = typemax(T))
+    d < 0    && (x = T(NaN))
+    d == 0   && (x = typemin(T))
+    return x
 end

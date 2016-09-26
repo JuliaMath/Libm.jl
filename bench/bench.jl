@@ -5,7 +5,7 @@ RETUNE = false
 VERBOSE = false
 DETAILS = false
 
-const bench = ("Base","Sleef","Sleef_u1")
+const bench = ("Base","Sleef","Sleef_fast")
 const suite = BenchmarkGroup()
 for n in bench
     suite[n] = BenchmarkGroup([n])
@@ -18,29 +18,29 @@ xx_trig = vcat(-10:0.0000125:10, -40:0.00005:40, -40_000_000:25.0125:40_000_000)
 xx_hyp  = linspace(-15, 15, 50_000_000)
 xx_cbrt = vcat(-10000:0.2:10000, 2.1.^(-1000:1000))
 
+const micros_fast = Dict(
+    "sin"   => xx_trig,
+    "cos"   => xx_trig,
+    "log"   => xx_log,
+    "tan"   => xx_trig,
+    "cbrt"  => xx_cbrt,
+    )
+
 const micros = Dict(
+    "sin"   => xx_trig,
+    "cos"   => xx_trig,
+    "log"   => xx_log,
+    "tan"   => xx_trig,
+    "cbrt"  => xx_cbrt,
     "exp"   => xx_exp,
     "exp2"  => xx_exp,
     "exp10" => xx_exp,
     "expm1" => xx_sml,
-    "log"   => xx_log,
     "log10" => xx_log,
     "log1p" => xx_sml,
-    "sin"   => xx_trig,
-    "cos"   => xx_trig,
-    "tan"   => xx_trig,
-    "cbrt"  => xx_cbrt,
     "sinh"  => xx_hyp,
     "cosh"  => xx_hyp,
     "tanh"  => xx_hyp
-    )
-
-const micros_u1 = Dict(
-    "log"   => xx_log,
-    "sin"   => xx_trig,
-    "cos"   => xx_trig,
-    "tan"   => xx_trig,
-    "cbrt"  => xx_cbrt
     )
 
 for n in ("Base","Sleef")
@@ -50,10 +50,10 @@ for n in ("Base","Sleef")
         suite[n][f] = @benchmarkable $fun.($v)
     end
 end
-for (f,v) in micros_u1
-    suite["Sleef_u1"][f] = BenchmarkGroup([f])
-    fun = Symbol("x",f,"_u1")
-    suite["Sleef_u1"][f] = @benchmarkable $fun.($v)
+for (f,v) in micros_fast
+    suite["Sleef_fast"][f] = BenchmarkGroup([f])
+    fun = Symbol("x",f,"_fast")
+    suite["Sleef_fast"][f] = @benchmarkable $fun.($v)
 end
 
 paramf = joinpath(dirname(@__FILE__), "params.jld")
@@ -84,15 +84,15 @@ for f in sort(collect(keys(micros)))
         println()
     end
 end
-for f in sort(collect(keys(micros_u1)))
+for f in sort(collect(keys(micros_fast)))
     println()
     print_with_color(:magenta, string(f, " benchmark\n"))
-    print_with_color(:blue, "median ratio Sleef_u1/Base\n")
-    println(ratio(median(results["Sleef_u1"][f]), median(results["Base"][f])))
+    print_with_color(:blue, "median ratio Sleef_fast/Base\n")
+    println(ratio(median(results["Sleef_fast"][f]), median(results["Base"][f])))
     println()
     if DETAILS
-        print_with_color(:blue, "details Sleef_u1/Base\n")
-        println(results["Sleef_u1"][f])
+        print_with_color(:blue, "details Sleef (fast)/Base\n")
+        println(results["Sleef_fast"][f])
         println(results["Base"][f])
         println()
     end

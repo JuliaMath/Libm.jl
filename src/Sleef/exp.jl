@@ -2,15 +2,15 @@ xldexp(x::FloatTypes, q::Int) = ldexpk(x, q)
 
 function xexp2{T<:FloatTypes}(a::T)
     u = expk(ddmul(MDLN2(T), a))
-    ispinf(a) && (u = T(Inf))
-    isninf(a) && (u = T(0.0))
+    ispinf(a) && (u = typemax(T))
+    isninf(a) && (u = T(0))
     return u
 end
 
 function xexp10{T<:FloatTypes}(a::T)
     u = expk(ddmul(MDLN10(T), a))
-    ispinf(a) && (u = T(Inf))
-    isninf(a) && (u = T(0.0))
+    ispinf(a) && (u = typemax(T))
+    isninf(a) && (u = T(0))
     return u
 end
 
@@ -21,10 +21,10 @@ _over_xexpm1(::Type{Float32}) =  88f0
 _undr_xexpm1(::Type{Float32}) = -0.15942385152878742116596338793538061065739925620174f2
 
 function xexpm1{T<:FloatTypes}(a::T)
-    d = ddadd2(expk2(Double(a)),-T(1.0))
+    d = ddadd2(expk2(Double(a)), -T(1))
     x = d.hi + d.lo
-    a > _over_xexpm1(T) && (x =  T(Inf))
-    a < _undr_xexpm1(T) && (x = -T(1.0))
+    a > _over_xexpm1(T) && (x =  typemax(T))
+    a < _undr_xexpm1(T) && (x = -T(1))
     return x
 end
 
@@ -56,7 +56,7 @@ function xexp{T<:FloatTypes}(d::T)
     s = muladd(q, -LN2U(T), d)
     s = muladd(q, -LN2L(T), s)
     u =_xexp(s)
-    u = s*s*u +s + T(1)
+    u = s*s*u + s + T(1)
     u = ldexpk(u, q)
     isninf(d) && (u = T(0))
     return u

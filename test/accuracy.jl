@@ -7,47 +7,48 @@ IntF(::Type{Float32}) = Int32
 @testset "Accuracy (max error in ulp) for $T" for T in (Float32, Float64)
     println("Accuracy tests for $T")
 
+    
     xx = map(T, vcat(-1:0.00002:1))
-    fun_table = Dict(xasin => asin, xacos => acos)
+    fun_table = Dict(xasin_fast => asin, xacos_fast => acos)
     tol = 3
     test_acc(T, fun_table, xx, tol)
 
-    fun_table = Dict(xasin_u1 => asin, xacos_u1 => acos)
+    fun_table = Dict(xasin => asin, xacos => acos)
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
 
     xx = map(T, vcat(-10:0.0002:10, -10000:0.2:10000, -10000:0.201:10000))
-    fun_table = Dict(xatan => atan)
+    fun_table = Dict(xatan_fast => atan)
     tol = 3
     test_acc(T, fun_table, xx, tol)
 
-    fun_table = Dict(xatan_u1 => atan)
+    fun_table = Dict(xatan => atan)
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
 
-    xx1 = map(Tuple{T,T}, [zip(-10:0.05:10, -10:0.05:10)...])
-    xx2 = map(Tuple{T,T}, [zip(-100:0.51:100, -100:0.51:100)...])
-    xx3 = map(Tuple{T,T}, [zip(-10:0.051:10, -10:0.052:10)...])
+    xx1 = map(Tuple{T,T}, [zip(-10:0.050:10, -10:0.050:10)...])
+    xx2 = map(Tuple{T,T}, [zip(-10:0.051:10, -10:0.052:10)...])
+    xx3 = map(Tuple{T,T}, [zip(-100:0.51:100, -100:0.51:100)...])
     xx4 = map(Tuple{T,T}, [zip(-100:0.51:100, -100:0.52:100)...])
     xx = vcat(xx1, xx2, xx3, xx4)
 
-    fun_table = Dict(xatan2 => atan2)
+    fun_table = Dict(xatan2_fast => atan2)
     tol = 2.5
     test_acc(T, fun_table, xx, tol)
 
-    fun_table = Dict(xatan2_u1 => atan2)
+    fun_table = Dict(xatan2 => atan2)
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
 
     xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))
-    fun_table = Dict(xlog => log)
+    fun_table = Dict(xlog_fast => log)
     tol = 3
     test_acc(T, fun_table, xx, tol)
 
-    fun_table = Dict(xlog_u1 => log)
+    fun_table = Dict(xlog => log)
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
@@ -64,17 +65,6 @@ IntF(::Type{Float32}) = Int32
     test_acc(T, fun_table, xx, tol)
 
 
-    xx1 = map(Tuple{T,T}, [zip(-10:0.050:10, -10:0.050:10)...])
-    xx2 = map(Tuple{T,T}, [zip(-10:0.051:10, -10:0.052:10)...])
-    xx3 = map(Tuple{T,T}, [zip(-100:0.51:100, -100:0.51:100)...])
-    xx4 = map(Tuple{T,T}, [zip(-100:0.51:100, -100:0.52:100)...])
-    xx = vcat(xx1, xx2, xx3, xx4)
-
-    fun_table = Dict(xatan2 => atan2)
-    tol = 2.5
-    test_acc(T, fun_table, xx, tol)
-
-
     xx = T[]
     for i = 1:10000
         s = reinterpret(T, reinterpret(IntF(T), T(pi)/4 * i) - IntF(T)(20))
@@ -88,42 +78,42 @@ IntF(::Type{Float32}) = Int32
     xx = append!(xx, -10:0.0002:10)
     xx = append!(xx, -MRANGE(T):200.1:MRANGE(T))
 
-    fun_table = Dict(xsin => sin, xcos => cos, xtan => tan)
+    fun_table = Dict(xsin_fast => sin, xcos_fast => cos, xtan_fast => tan)
     tol = 4
     test_acc(T, fun_table, xx, tol)
 
-    fun_table = Dict(xsin_u1 => sin, xcos_u1 => cos, xtan_u1 => tan)
+    fun_table = Dict(xsin => sin, xcos => cos, xtan => tan)
     tol = 1
     test_acc(T, fun_table, xx, tol)
+
+    sin_xsincos_fast(x) = xsincos_fast(x).hi
+    cos_xsincos_fast(x) = xsincos_fast(x).lo
+    fun_table = Dict(sin_xsincos_fast => sin, cos_xsincos_fast => cos)
+    tol = 4
+    test_acc(T, fun_table, xx, tol) 
 
     sin_xsincos(x) = xsincos(x).hi
     cos_xsincos(x) = xsincos(x).lo
     fun_table = Dict(sin_xsincos => sin, cos_xsincos => cos)
-    tol = 4
-    test_acc(T, fun_table, xx, tol) 
-
-    sin_xsincos_u1(x) = xsincos_u1(x).hi
-    cos_xsincos_u1(x) = xsincos_u1(x).lo
-    fun_table = Dict(sin_xsincos_u1 => sin, cos_xsincos_u1 => cos)
     tol = 1
     test_acc(T, fun_table, xx, tol) 
 
 
-    fun_table = Dict(xpow => pow)
     xx1 = map(Tuple{T,T}, [(x,y) for x = -100:0.20:100, y = 0.1:0.20:100])[:]
     xx2 = map(Tuple{T,T}, [(x,y) for x = -100:0.21:100, y = 0.1:0.22:100])[:]
     xx3 = map(Tuple{T,T}, [(x,y) for x = 2.1, y = -1000:0.1:1000])
     xx = vcat(xx1, xx2, xx2)
+    fun_table = Dict(xpow => pow)
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
 
     xx = map(T, vcat(-10000:0.2:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))
-    fun_table = Dict(xcbrt => cbrt)
+    fun_table = Dict(xcbrt_fast => cbrt)
     tol = 2
     test_acc(T, fun_table, xx, tol)
 
-    fun_table = Dict(xcbrt_u1 => cbrt)
+    fun_table = Dict(xcbrt => cbrt)
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
@@ -170,6 +160,7 @@ IntF(::Type{Float32}) = Int32
     tol = 1
     test_acc(T, fun_table, xx, tol)
  
+
      @testset "xilogb at arbitrary values" begin
         xd = Dict{T,Int}(T(1e-30) => -100, T(2.31e-11) => -36, T(-1.0) => 0, T(1.0) => 0, 
                     T(2.31e11) => 37,  T(1e30) => 99)

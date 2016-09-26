@@ -5,14 +5,14 @@ function xpow{T<:FloatTypes}(x::T, y::T)
     yisodd = isodd(yint) && yisint
 
     result = expk(ddmul(logk(abs(x)), y))
-    result = isnan(result) ? T(Inf) : result
+    result = isnan(result) ? typemax(T) : result
     result *= (x >= 0 ? 1 : (!yisint ? T(NaN) : (yisodd ? -1 : 1)));
     efx = flipsign(abs(x) - 1, y)
     if isinf(y)
-        result = efx < 0 ? T(0) : (efx == 0 ? T(1) : T(Inf))
+        result = efx < 0 ? T(0) : (efx == 0 ? T(1) : typemax(T))
     end
     if isinf(x) || x == 0
-        result = (yisodd ? _sign(x) : T(1)) * ((x == 0 ? -y : y) < 0 ? T(0) : T(Inf))
+        result = (yisodd ? _sign(x) : T(1)) * ((x == 0 ? -y : y) < 0 ? T(0) : typemax(T))
     end
     (isnan(x) || isnan(y)) && (result = T(NaN))
     (y == 0   || x == 1)   && (result = T(1))
@@ -20,8 +20,9 @@ function xpow{T<:FloatTypes}(x::T, y::T)
 end
 
 let
+global xcbrt_fast
 global xcbrt
-global xcbrt_u1
+
 const c6d = -0.640245898480692909870982
 const c5d = 2.9615510302003951181859500
 const c4d = -5.733530609229478436361660
@@ -39,7 +40,7 @@ const c1f =  2.224125623703002929687500f0
 global @inline _xcbrt(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d
 global @inline _xcbrt(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f
 
-function xcbrt{T<:FloatTypes}(d::T) # max error 2 ulps
+function xcbrt_fast{T<:FloatTypes}(d::T) # max error 2 ulps
     q  = T(1)
     e  = ilogbp1(d)
     d  = ldexpk(d, -e)
@@ -58,14 +59,14 @@ function xcbrt{T<:FloatTypes}(d::T) # max error 2 ulps
     return y
 end
 
-function xcbrt_u1{T<:FloatTypes}(d::T)
+function xcbrt{T<:FloatTypes}(d::T)
     q2 = Double(T(1))  
     e  = ilogbp1(d)
     d  = ldexpk(d, -e)
     r  = (e + 6144) % 3
     q2 = (r == 1) ? MD2P13(T) : q2
     q2 = (r == 2) ? MD2P23(T) : q2
-    q3 = Double(flipsign(q2.hi, d), flipsign(q2.lo, d))
+    q3 = flipsign(q2, d)
     d  = abs(d)
     x  =_xcbrt(d)
     y  = x*x
@@ -82,7 +83,7 @@ function xcbrt_u1{T<:FloatTypes}(d::T)
     v  = ddmul(v, d)
     v  = ddmul(v, q3)
     z  = ldexp(v.hi + v.lo, (e + 6144)÷3 - 2048)
-    isinf(d) && (z = flipsign(T(Inf), q3.hi))
+    isinf(d) && (z = flipsign(typemax(T), q3.hi))
     d == 0   && (z = flipsign(T(0), q3.hi))
     return z
 end
@@ -96,5 +97,5 @@ end
 #        x, y = y, x
 #     end
 #     r = (x == 0) ? y : y/x
-#     return x*sqrt(one(T) + r*r)
+#     return x*sqrt(T(1) + r*r)
 # end
