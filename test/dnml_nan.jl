@@ -401,11 +401,10 @@ end
 
 
 @testset "denormal/nonnumber xlog1p" begin
-    xa = T[NaN, Inf, -Inf, 0.0, -1.0, -2.0]
+    xa = T[NaN, Inf, -Inf, 0.0, -0.0, -1.0, -2.0]
     for x in xa
         @test cmpdenorm(xlog1p(x), log1p(BigFloat(x)))
     end
-    # @test_broken cmpdenorm(xlog1p(-0.0), log1p(BigFloat(-0.0)))
 end
 
 

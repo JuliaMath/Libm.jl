@@ -42,12 +42,12 @@ function xlog10{T<:FloatTypes}(a::T)
 end
 
 function xlog1p{T<:FloatTypes}(a::T)
-    d = logk2(ddadd2(a, T(1)))
+    d = logk2(ddadd2(a, T(1.0)))
     x = d.hi + d.lo
     isinf(a) && (x =  T(Inf))
     a < -1   && (x =  T(NaN))
     a == -1  && (x = -T(Inf))
-    return x
+    return copysign(x,a) # return correct sign for -0.0
 end
 
 # First we split the argument to its mantissa `m` and integer exponent `e` so that `d = m \times 2^e`,
@@ -73,7 +73,7 @@ const c5d = 0.22222194152736701733275
 const c4d = 0.285714288030134544449368
 const c3d = 0.399999999989941956712869
 const c2d = 0.666666666666685503450651
-const c1d = 2
+const c1d = 2.0
 
 const c5f = 0.2371599674224853515625f0
 const c4f = 0.285279005765914916992188f0
