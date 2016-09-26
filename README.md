@@ -54,3 +54,12 @@ xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcosh, xtan
 ```
 
 You can also access `Libm.Musl.log(x)`  for a different implementation of the logarithmic function and `Libm.Musl.erf(x)` and `Libm.Musl.erfc(x)` for the error function and the complementary error function. 
+
+# Benchmarks
+
+To benchmark performance on your machine please run (this will take some time)
+```julia
+include(joinpath(Pkg.dir("Libm"), "bench", "bench.jl"))
+```
+
+
