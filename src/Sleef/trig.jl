@@ -262,25 +262,6 @@ function xtan_u1{T<:FloatTypes}(d::T)
 end
 end
 
-function xatan2{T<:FloatTypes}(y::T, x::T)
-    r = atan2k(abs(y), x)
-    r = flipsign(r, x)
-    if isinf(x) || x == 0
-        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI2) : T(0))
-    end
-    if isinf(y)
-        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI4) : T(0))
-    end
-    if y == 0
-        r = _sign(x) == -1 ? T(MPI) : T(0)
-    end
-    return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
-end
-
-xasin{T<:FloatTypes}(x::T) = flipsign(atan2k(abs(x), _sqrt((1+x)*(1-x))), x)
-
-xacos{T<:FloatTypes}(x::T) = flipsign(atan2k(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
-
 let
 global xatan
 const c19d = -1.88796008463073496563746e-05
@@ -334,6 +315,28 @@ function xatan{T<:FloatTypes}(s::T)
 end
 end
 
+function xatan_u1{T<:FloatTypes}(d::T)
+    d2 = atan2k_u1(Double(abs(d)), Double(T(1)))
+    r = d2.hi + d2.lo
+    isinf(d) && (r = T(MPI2))
+    return flipsign(r, d)
+end
+
+function xatan2{T<:FloatTypes}(y::T, x::T)
+    r = atan2k(abs(y), x)
+    r = flipsign(r, x)
+    if isinf(x) || x == 0
+        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI2) : T(0))
+    end
+    if isinf(y)
+        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI4) : T(0))
+    end
+    if y == 0
+        r = _sign(x) == -1 ? T(MPI) : T(0)
+    end
+    return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
+end
+
 function xatan2_u1{T<:FloatTypes}(y::T, x::T)
     d = atan2k_u1(Double(abs(y)), Double(x))
     r = d.hi + d.lo
@@ -350,6 +353,8 @@ function xatan2_u1{T<:FloatTypes}(y::T, x::T)
     return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
 end
 
+xasin{T<:FloatTypes}(x::T) = flipsign(atan2k(abs(x), _sqrt((1+x)*(1-x))), x)
+
 function xasin_u1{T<:FloatTypes}(d::T)
     d2 = atan2k_u1(Double(abs(d)), ddsqrt(ddmul(ddadd(T(1), d), ddadd(T(1),-d))))
     r = d2.hi + d2.lo
@@ -357,17 +362,12 @@ function xasin_u1{T<:FloatTypes}(d::T)
     return flipsign(r, d)
 end
 
+xacos{T<:FloatTypes}(x::T) = flipsign(atan2k(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
+
 function xacos_u1{T<:FloatTypes}(d::T)
     d2 = atan2k_u1(ddsqrt(ddmul(ddadd(T(1), d), ddadd(T(1),-d))), Double(abs(d)))
     d2 = ddscale(d2, _sign(d))
     abs(d) == 1 && (d2 = Double(T(0)))
     d < 0       && (d2 = ddadd(MDPI(T), d2))
     return d2.hi + d2.lo
-end
-
-function xatan_u1{T<:FloatTypes}(d::T)
-    d2 = atan2k_u1(Double(abs(d)), Double(T(1)))
-    r = d2.hi + d2.lo
-    isinf(d) && (r = T(MPI2))
-    return flipsign(r, d)
 end
