@@ -107,12 +107,10 @@ end
 
 const pow = ^
 function runtests()
-    @testset "Libm.Sleef" begin
 
-    include("accuracy.jl")
+    @testset "Sleef" begin
     include("dnml_nan.jl")
-
-    # include("accuracy.jl")
+    include("accuracy.jl")
     end
 
     include("log.jl")

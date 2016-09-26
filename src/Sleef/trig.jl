@@ -14,6 +14,9 @@ const c3d = -0.0001984126984126961628068090
 const c2d =  0.0083333333333333297482381500
 const c1d = -0.1666666666666666574148080000
 
+# c5f is 0f0 to handle Inf32 case, Float64 doesn't need this since it comes
+# out properly (add another neg constant and remove this zero constant)
+const c5f =  0f0
 const c4f =  2.608315980978659354150300f-06
 const c3f = -0.00019810690719168633222580f0
 const c2f =  0.00833307858556509017944336f0
@@ -27,7 +30,7 @@ const c1f = -0.16666659712791442871093800f0
 # part of d/π and thus we can determine the correct sign using this information.
 
 global @inline _sincos(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d
-global @inline _sincos(x::Float32) = @horner x c1f c2f c3f c4f
+global @inline _sincos(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 function xsin{T<:FloatTypes}(x::T)
     d = abs(x)
@@ -242,6 +245,7 @@ end
 
 global @inline _tan_u1(x::Double{Float64}) = ddadd(c1d, x.hi*(@horner x.hi c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d))
 global @inline _tan_u1(x::Double{Float32}) = ddadd(c1f, ddmul(x.hi, ddadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
+# global @inline _tan_u1(x::Double{Float32}) = ddadd(c1f, ddmul(x, @horner x.hi c2f c3f c4f c5f c6f c7f))
 
 function xtan_u1{T<:FloatTypes}(d::T)
     q = xrint(d*T(M2PI))
@@ -330,7 +334,7 @@ function xatan{T<:FloatTypes}(s::T)
 end
 end
 
-function xatan2_u1{T<:Float64}(y::T, x::T)
+function xatan2_u1{T<:FloatTypes}(y::T, x::T)
     d = atan2k_u1(Double(abs(y)), Double(x))
     r = d.hi + d.lo
     r = flipsign(r, x)
@@ -346,14 +350,14 @@ function xatan2_u1{T<:Float64}(y::T, x::T)
     return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
 end
 
-function xasin_u1{T<:Float64}(d::T)
+function xasin_u1{T<:FloatTypes}(d::T)
     d2 = atan2k_u1(Double(abs(d)), ddsqrt(ddmul(ddadd(T(1), d), ddadd(T(1),-d))))
     r = d2.hi + d2.lo
     abs(d) == 1 && (r = T(MPI2))
     return flipsign(r, d)
 end
 
-function xacos_u1{T<:Float64}(d::T)
+function xacos_u1{T<:FloatTypes}(d::T)
     d2 = atan2k_u1(ddsqrt(ddmul(ddadd(T(1), d), ddadd(T(1),-d))), Double(abs(d)))
     d2 = ddscale(d2, _sign(d))
     abs(d) == 1 && (d2 = Double(T(0)))
@@ -361,7 +365,7 @@ function xacos_u1{T<:Float64}(d::T)
     return d2.hi + d2.lo
 end
 
-function xatan_u1{T<:Float64}(d::T)
+function xatan_u1{T<:FloatTypes}(d::T)
     d2 = atan2k_u1(Double(abs(d)), Double(T(1)))
     r = d2.hi + d2.lo
     isinf(d) && (r = T(MPI2))

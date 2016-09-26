@@ -12,18 +12,20 @@ IntF(::Type{Float32}) = Int32
     tol = 3
     test_acc(T, fun_table, xx, tol)
 
-    # fun_table = Dict(xasin_u1 => asin, xacos_u1 => acos)
-    # tol = 1
-    # test_acc(T, fun_table, xx, tol)
+    fun_table = Dict(xasin_u1 => asin, xacos_u1 => acos)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
 
     xx = map(T, vcat(-10:0.0002:10, -10000:0.2:10000, -10000:0.201:10000))
     fun_table = Dict(xatan => atan)
     tol = 3
     test_acc(T, fun_table, xx, tol)
 
-    # fun_table = Dict(xatan_u1 => atan)
-    # tol = 1
-    # test_acc(T, fun_table, xx, tol)
+    fun_table = Dict(xatan_u1 => atan)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
 
     xx1 = map(Tuple{T,T}, [zip(-10:0.05:10, -10:0.05:10)...])
     xx2 = map(Tuple{T,T}, [zip(-100:0.51:100, -100:0.51:100)...])
@@ -35,9 +37,10 @@ IntF(::Type{Float32}) = Int32
     tol = 2.5
     test_acc(T, fun_table, xx, tol)
 
-    # fun_table = Dict(xatan2_u1 => atan2)
-    # tol = 1
-    # test_acc(T, fun_table, xx, tol)
+    fun_table = Dict(xatan2_u1 => atan2)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
 
     xx = map(T, vcat(0.0001:0.0001:10, 0.001:0.1:10000, 1.1.^(-1000:1000), 2.1.^(-1000:1000)))
     fun_table = Dict(xlog => log)
@@ -53,6 +56,7 @@ IntF(::Type{Float32}) = Int32
     fun_table = Dict(xlog10 => log10)
     tol = 1
     test_acc(T, fun_table, xx, tol)
+
 
     xx = map(T, vcat(0.0001:0.0001:10, 0.0001:0.1:10000, 10.0.^-(0:0.02:300), -10.0.^-(0:0.02:300)))
     fun_table = Dict(xlog1p => log1p)
@@ -166,4 +170,12 @@ IntF(::Type{Float32}) = Int32
     tol = 1
     test_acc(T, fun_table, xx, tol)
  
+     @testset "xilogb at arbitrary values" begin
+        xd = Dict{T,Int}(T(1e-30) => -100, T(2.31e-11) => -36, T(-1.0) => 0, T(1.0) => 0, 
+                    T(2.31e11) => 37,  T(1e30) => 99)
+        for (i,j) in xd
+            @test xilogb(i)  === j
+        end
+    end
+    
 end

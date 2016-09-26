@@ -160,10 +160,9 @@ const c1f = -0.333332866430282592773438f0
 
 
 global @inline _atan2k_u1(x::Double{Float64}) = @horner x.hi c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d c20d
-# global @inline _atan2k_u1(x::Double{Float32}) = ddadd(c1f, ddmul(x.hi, ddadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
-# global @inline _atan2k_u1(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f c8f c9f
+global @inline _atan2k_u1(x::Double{Float32}) = ddadd(c1f, x.hi*(@horner x.hi c2f c3f c4f c5f c6f c7f c8f c9f))
 
-global @inline function atan2k_u1{T<:Float64}(y::Double{T}, x::Double{T})
+global @inline function atan2k_u1{T<:FloatTypes}(y::Double{T}, x::Double{T})
     q = 0
     if x.hi < 0
         x = -x
@@ -178,7 +177,7 @@ global @inline function atan2k_u1{T<:Float64}(y::Double{T}, x::Double{T})
     t = ddsqu(s)
     t = ddnormalize(t)
     u =_atan2k_u1(t)
-    t = ddmul(s, ddadd(T(1), ddmul(t, u)))
+    t = ddmul(s, ddadd(T(1.0), ddmul(t, u)))
     return ddadd2(ddmul(T(q), MDPI2(T)), t)
 end
 end
