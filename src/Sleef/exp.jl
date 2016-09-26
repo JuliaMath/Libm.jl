@@ -1,20 +1,14 @@
 xldexp(x::FloatTypes, q::Int) = ldexpk(x, q)
 
-_xexp2_c0(::Type{Float64}) = Double(0.69314718055994528623,    2.3190468138462995584e-17)
-_xexp2_c0(::Type{Float32}) = Double(0.69314718246459960938f0, -1.904654323148236017f-09)
-
 function xexp2{T<:FloatTypes}(a::T)
-    u = expk(ddmul(_xexp2_c0(T), a))
+    u = expk(ddmul(MDLN2(T), a))
     ispinf(a) && (u = T(Inf))
     isninf(a) && (u = T(0.0))
     return u
 end
 
-_xexp10_c0(::Type{Float64}) = Double(2.3025850929940459011,   -2.1707562233822493508e-16)
-_xexp10_c0(::Type{Float32}) = Double(2.3025851249694824219f0, -3.1975436520781386207f-08)
-
 function xexp10{T<:FloatTypes}(a::T)
-    u = expk(ddmul(_xexp10_c0(T), a))
+    u = expk(ddmul(MDLN10(T), a))
     ispinf(a) && (u = T(Inf))
     isninf(a) && (u = T(0.0))
     return u
@@ -58,7 +52,7 @@ global @inline _xexp(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d
 global @inline _xexp(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 function xexp{T<:FloatTypes}(d::T)
-    q = xrint(d*T(LOG2E))
+    q = xrint(d*T(MLN2E))
     s = muladd(q, -LN2U(T), d)
     s = muladd(q, -LN2L(T), s)
     u =_xexp(s)

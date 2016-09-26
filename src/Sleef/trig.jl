@@ -1,4 +1,4 @@
-## CLEAN CONSTANTS
+## TODO: Clean up methods / constans / add macros
 
 let
 global xsin
@@ -14,6 +14,9 @@ const c3d = -0.0001984126984126961628068090
 const c2d =  0.0083333333333333297482381500
 const c1d = -0.1666666666666666574148080000
 
+# c5f is 0f0 to handle Inf32 case, Float64 doesn't need this since it comes
+# out properly (add another neg constant and remove this zero constant)
+const c5f =  0f0
 const c4f =  2.608315980978659354150300f-06
 const c3f = -0.00019810690719168633222580f0
 const c2f =  0.00833307858556509017944336f0
@@ -27,7 +30,7 @@ const c1f = -0.16666659712791442871093800f0
 # part of d/π and thus we can determine the correct sign using this information.
 
 global @inline _sincos(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d
-global @inline _sincos(x::Float32) = @horner x c1f c2f c3f c4f
+global @inline _sincos(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 function xsin{T<:FloatTypes}(x::T)
     d = abs(x)
@@ -37,7 +40,7 @@ function xsin{T<:FloatTypes}(x::T)
     d = muladd(q, -PI4C(T)*4, d)
     d = muladd(q, -PI4D(T)*4, d)
     s = d*d
-    (q & 1) != 0 && (d = -d)
+    q & 1 != 0 && (d = -d)
     u =_sincos(s)
     u = muladd(s, u*d, d)
     return flipsign(u,x)
@@ -50,7 +53,7 @@ function xcos{T<:FloatTypes}(d::T)
     d = muladd(q, -PI4C(T)*2, d)
     d = muladd(q, -PI4D(T)*2, d)
     s = d*d
-    (q & 2) == 0 && (d = -d)
+    q & 2 == 0 && (d = -d)
     u =_sincos(s)
     return muladd(s, u*d, d)
 end
@@ -87,11 +90,11 @@ function xsin_u1{T<:FloatTypes}(x::T)
     s = ddadd2(s, q * (-PI4D(T)*4))
     t = s
     s = ddsqu(s)
-    u::T =_sincos_u1(s.hi)
+    u =_sincos_u1(s.hi)
     v = ddadd(T(1), ddmul(ddadd(_sincos_u1_c0(T), u*s.hi), s))
     v = ddmul(t, v)
     u = v.hi + v.lo
-    (q & 1) != 0 && (u = -u)
+    q & 1 != 0 && (u = -u)
     return flipsign(u,x)
 end
 
@@ -104,11 +107,11 @@ function xcos_u1{T<:FloatTypes}(d::T)
     s = ddadd2(s, q * (-PI4D(T)*2))
     t = s
     s = ddsqu(s)
-    u::T =_sincos_u1(s.hi)
+    u =_sincos_u1(s.hi)
     v = ddadd(T(1), ddmul(ddadd(_sincos_u1_c0(T), u*s.hi), s))
     v = ddmul(t, v)
     u = v.hi + v.lo
-    (q & 2) == 0 && (u = -u)
+    q & 2 == 0 && (u = -u)
     return u
 end
 end
@@ -149,7 +152,7 @@ global @inline _sincos_b(x::Float32) = @horner x b1f b2f b3f b4f b5f
 
 function xsincos{T<:FloatTypes}(x::T)
     d = abs(x)
-    q = xrint(d*2*T(M1PI))
+    q = xrint(d*T(M2PI))
     s = d
     s = muladd(q, -PI4A(T)*2, s)
     s = muladd(q, -PI4B(T)*2, s)
@@ -157,16 +160,16 @@ function xsincos{T<:FloatTypes}(x::T)
     s = muladd(q, -PI4D(T)*2, s)
     t = s
     s = s*s
-    u = _sincos_a(s)
+    u =_sincos_a(s)
     u = u * s * t
     rx = t + u
-    u = _sincos_b(s)
+    u =_sincos_b(s)
     ry = u * s + T(1)
-    (q & 1) != 0     && (s = ry; ry = rx; rx = s)
-    (q & 2) != 0     && (rx = -rx)
-    ((q+1) & 2) != 0 && (ry = -ry)
-    isinf(d) && (rx = ry = T(NaN))
-    return Double(flipsign(rx,x),ry)
+    q & 1 != 0     && (s = ry; ry = rx; rx = s)
+    q & 2 != 0     && (rx = -rx)
+    (q+1) & 2 != 0 && (ry = -ry)
+    isinf(d)       && (rx = ry = T(NaN))
+    return Double(flipsign(rx,x), ry)
 end
 
 function xsincos_u1{T<:FloatTypes}(x::T)
@@ -186,16 +189,17 @@ function xsincos_u1{T<:FloatTypes}(x::T)
     u = _sincos_b(sx)
     v = ddadd(T(1), ddmul(sx, u))
     ry = v.hi + v.lo
-    (q & 1) != 0     && (u = ry; ry = rx; rx = u)
-    (q & 2) != 0     && (rx = -rx)
-    ((q+1) & 2) != 0 && (ry = -ry)
-    isinf(d) && (rx = ry = T(NaN))
+    q & 1 != 0     && (u = ry; ry = rx; rx = u)
+    q & 2 != 0     && (rx = -rx)
+    (q+1) & 2 != 0 && (ry = -ry)
+    isinf(d)       && (rx = ry = T(NaN))
     return Double(flipsign(rx,x),ry)
 end
 end
 
 let
 global xtan
+global xtan_u1
 
 const c15d =  1.01419718511083373224408e-05
 const c14d = -2.59519791585924697698614e-05
@@ -213,113 +217,86 @@ const c3d  =  0.053968253978129841763600200
 const c2d  =  0.133333333333125941821962000
 const c1d  =  0.333333333333334980164153000
 
-const c6f = 0.00927245803177356719970703f0
-const c5f = 0.00331984995864331722259521f0
-const c4f = 0.02429980784654617309570310f0
-const c3f = 0.05344953015446662902832030f0
-const c2f = 0.13338300585746765136718800f0
-const c1f = 0.33333185315132141113281200f0
-
+const c7f =  0.00446636462584137916564941f0
+const c6f = -8.3920182078145444393158f-05
+const c5f =  0.0109639242291450500488281f0
+const c4f =  0.0212360303848981857299805f0
+const c3f =  0.0540687143802642822265625f0
+const c2f =  0.133325666189193725585938f0
+const c1f =  0.33333361148834228515625f0
 
 global @inline _tan(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d
-global @inline _tan(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f
+global @inline _tan(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f
 
 function xtan{T<:FloatTypes}(d::T)
-    q = xrint(d * (2*T(M1PI)))
+    q = xrint(d*T(M2PI))
     x = muladd(q, -PI4A(T)*2, d)
     x = muladd(q, -PI4B(T)*2, x)
     x = muladd(q, -PI4C(T)*2, x)
     x = muladd(q, -PI4D(T)*2, x)
+    q & 1 != 0 && (x = -x)
     s = x*x
-    (q & 1) != 0 && (x = -x)
-    u::T =_tan(s)  # for some reason type cannot be infered here for Float32!
+    u =_tan(s)
     u = muladd(s, u * x, x)
-    (q & 1) != 0 && (u = T(1.0)/u)
-    isinf(d) && (u = NaN)
+    q & 1 != 0 && (u = 1/u)
+    isinf(d)   && (u = T(NaN))
     return u
+end
+
+global @inline _tan_u1(x::Double{Float64}) = ddadd(c1d, x.hi*(@horner x.hi c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d))
+global @inline _tan_u1(x::Double{Float32}) = ddadd(c1f, ddmul(x.hi, ddadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
+# global @inline _tan_u1(x::Double{Float32}) = ddadd(c1f, ddmul(x, @horner x.hi c2f c3f c4f c5f c6f c7f))
+
+function xtan_u1{T<:FloatTypes}(d::T)
+    q = xrint(d*T(M2PI))
+    x = ddadd2(d, q * -PI4A(T)*2)
+    x = ddadd2(x, q * -PI4B(T)*2)
+    x = ddadd2(x, q * -PI4C(T)*2)
+    x = ddadd2(x, q * -PI4D(T)*2)
+    q & 1 != 0 && (x = -x)
+    s = ddsqu(x)
+    u =_tan_u1(s)
+    u = ddmul(x, ddadd(T(1), ddmul(u, s)))
+    q & 1 != 0 && (u = ddrec(u))
+    return u.hi + u.lo
 end
 end
 
 let
-global xtan_u1
-
-const c14d =  1.01419718511083373224408e-05
-const c13d = -2.59519791585924697698614e-05
-const c12d =  5.23388081915899855325186e-05
-const c11d = -3.05033014433946488225616e-05
-const c10d =  7.14707504084242744267497e-05
-const c9d  =  8.09674518280159187045078e-05
-const c8d  =  0.000244884931879331847054404
-const c7d  =  0.000588505168743587154904506
-const c6d  =  0.001456127889228124279788480
-const c5d  =  0.003592087438369066191429240
-const c4d  =  0.008863239443624016181133560
-const c3d  =  0.021869488285384638959207800
-const c2d  =  0.053968253978129841763600200
-const c1d  =  0.133333333333125941821962000
-
-global @inline _tan_u1(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d
-
-function xtan_u1{T<:Float64}(d::T)
-    q = xrint(d*M2PI)
-    s = ddadd2(d, q*(-PI4A(T)*2))
-    s = ddadd2(s, q*(-PI4B(T)*2))
-    s = ddadd2(s, q*(-PI4C(T)*2))
-    s = ddadd2(s, q*(-PI4D(T)*2))
-    (q & 1) != 0 && (s = ddneg(s))
-    t = s
-    s = ddsqu(s)
-    u =_tan_u1(s.hi)
-    x = ddadd(1.0, ddmul(ddadd(0.333333333333334980164153, u * s.hi), s))
-    x = ddmul(t, x)
-    (q & 1) != 0 && (x = ddrec(x))
-    u = x.hi + x.lo
-    return u
-end
-end
-
-function xatan2{T<:FloatTypes}(y::T, x::T)
-    r = atan2k(abs(y), x)
-    r = flipsign(r, x)
-    if isinf(x) || x == 0
-        r = T(MPI)/2 - (isinf(x) ? (_sign(x) * (T(MPI)/2)) : T(0))
-    end
-    if isinf(y)
-        r = T(MPI)/2 - (isinf(x) ? (_sign(x) * (T(MPI)/4)) : T(0))
-    end
-    if y == 0
-        r = (_sign(x) == -1 ? T(MPI) : T(0))
-    end
-    return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
-end
-
-xasin{T<:FloatTypes}(x::T) = flipsign(atan2k(abs(x), _sqrt((1+x)*(1-x))), x)
-
-xacos{T<:FloatTypes}(x::T) = flipsign(atan2k(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
-
-let # check constants and figure out why @horner fails here
 global xatan
-const c19 = -1.88796008463073496563746e-05
-const c18 =  0.000209850076645816976906797
-const c17 = -0.001106118314866724825634710
-const c16 =  0.003700267441887131192324030
-const c15 = -0.008898961958876554917408090
-const c14 =  0.016599329773529201970117000
-const c13 = -0.025451762493231264161686100
-const c12 =  0.033785258000135306999389700
-const c11 = -0.040762919127683650000193400
-const c10 =  0.046666715007784062563267500
-const c9  = -0.052367485230348245761611300
-const c8  =  0.058766639292667358085431300
-const c7  = -0.066657357936108052598456200
-const c6  =  0.076921953831176961835502900
-const c5  = -0.090908995008245008229153000
-const c4  =  0.111111105648261418443745000
-const c3  = -0.142857142667713293837650000
-const c2  =  0.199999999996591265594148000
-const c1  = -0.333333333333311110369124000
+const c19d = -1.88796008463073496563746e-05
+const c18d =  0.000209850076645816976906797
+const c17d = -0.001106118314866724825634710
+const c16d =  0.003700267441887131192324030
+const c15d = -0.008898961958876554917408090
+const c14d =  0.016599329773529201970117000
+const c13d = -0.025451762493231264161686100
+const c12d =  0.033785258000135306999389700
+const c11d = -0.040762919127683650000193400
+const c10d =  0.046666715007784062563267500
+const c9d  = -0.052367485230348245761611300
+const c8d  =  0.058766639292667358085431300
+const c7d  = -0.066657357936108052598456200
+const c6d  =  0.076921953831176961835502900
+const c5d  = -0.090908995008245008229153000
+const c4d  =  0.111111105648261418443745000
+const c3d  = -0.142857142667713293837650000
+const c2d  =  0.199999999996591265594148000
+const c1d  = -0.333333333333311110369124000
 
-function xatan(s::Float64)
+const c8f =  0.00282363896258175373077393f0
+const c7f = -0.01595690287649631500244140f0
+const c6f =  0.04250498861074447631835940f0
+const c5f = -0.07489009201526641845703120f0
+const c4f =  0.10634793341159820556640600f0
+const c3f = -0.14202736318111419677734400f0
+const c2f =  0.19992695748805999755859400f0
+const c1f = -0.33333101868629455566406200f0
+
+global @inline _atan(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d
+global @inline _atan(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f c8f
+
+function xatan{T<:FloatTypes}(s::T)
     q = 0
     if s < 0
         s = -s
@@ -330,41 +307,29 @@ function xatan(s::Float64)
         q |= 1
     end
     t = s*s
-    u = c19
-    u = u * t + c18
-    u = u * t + c17
-    u = u * t + c16
-    u = u * t + c15
-    u = u * t + c14
-    u = u * t + c13
-    u = u * t + c12
-    u = u * t + c11
-    u = u * t + c10
-    u = u * t + c9
-    u = u * t + c8
-    u = u * t + c7
-    u = u * t + c6
-    u = u * t + c5
-    u = u * t + c4
-    u = u * t + c3
-    u = u * t + c2
-    u = u * t + c1
-    t = s + s*(t*u)
-    (q & 1) != 0 && (t = 1.570796326794896557998982 - t)
-    (q & 2) != 0 && (t = -t)
+    u =_atan(t)
+    t = s + s*t*u
+    q & 1 != 0 && (t = T(MPI2) - t)
+    q & 2 != 0 && (t = -t)
     return t
 end
 end
 
-function xatan2_u1{T<:Float64}(y::T, x::T)
-    d = atan2k_u1(Double(abs(y)), Double(x))
-    r = d.hi + d.lo
+function xatan_u1{T<:FloatTypes}(d::T)
+    d2 = atan2k_u1(Double(abs(d)), Double(T(1)))
+    r = d2.hi + d2.lo
+    isinf(d) && (r = T(MPI2))
+    return flipsign(r, d)
+end
+
+function xatan2{T<:FloatTypes}(y::T, x::T)
+    r = atan2k(abs(y), x)
     r = flipsign(r, x)
     if isinf(x) || x == 0
-        r = T(MPI/2) - (isinf(x) ? _sign(x)*T(MPI/2) : T(0))
+        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI2) : T(0))
     end
     if isinf(y)
-        r = T(MPI/2) - (isinf(x) ? _sign(x)*T(MPI/4) : T(0))
+        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI4) : T(0))
     end
     if y == 0
         r = _sign(x) == -1 ? T(MPI) : T(0)
@@ -372,24 +337,37 @@ function xatan2_u1{T<:Float64}(y::T, x::T)
     return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
 end
 
-function xasin_u1(d::Float64)
-    d2 = atan2k_u1(Double(abs(d)), ddsqrt(ddmul(ddadd(1.0, d), ddadd(1.0,-d))))
+function xatan2_u1{T<:FloatTypes}(y::T, x::T)
+    d = atan2k_u1(Double(abs(y)), Double(x))
+    r = d.hi + d.lo
+    r = flipsign(r, x)
+    if isinf(x) || x == 0
+        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI2) : T(0))
+    end
+    if isinf(y)
+        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI4) : T(0))
+    end
+    if y == 0
+        r = _sign(x) == -1 ? T(MPI) : T(0)
+    end
+    return isnan(x) || isnan(y) ? T(NaN) : flipsign(r, y)
+end
+
+xasin{T<:FloatTypes}(x::T) = flipsign(atan2k(abs(x), _sqrt((1+x)*(1-x))), x)
+
+function xasin_u1{T<:FloatTypes}(d::T)
+    d2 = atan2k_u1(Double(abs(d)), ddsqrt(ddmul(ddadd(T(1), d), ddadd(T(1),-d))))
     r = d2.hi + d2.lo
-    abs(d) == 1 && (r = 1.570796326794896557998982)
+    abs(d) == 1 && (r = T(MPI2))
     return flipsign(r, d)
 end
 
-function xacos_u1(d::Float64)
-    d2 = atan2k_u1(ddsqrt(ddmul(ddadd(1.0, d), ddadd(1.0,-d))), Double(abs(d)))
+xacos{T<:FloatTypes}(x::T) = flipsign(atan2k(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
+
+function xacos_u1{T<:FloatTypes}(d::T)
+    d2 = atan2k_u1(ddsqrt(ddmul(ddadd(T(1), d), ddadd(T(1),-d))), Double(abs(d)))
     d2 = ddscale(d2, _sign(d))
-    abs(d) == 1 && (d2 = Double(0.0))
-    d < 0 && (d2 = ddadd(Double(3.141592653589793116, 1.2246467991473532072e-16), d2))
+    abs(d) == 1 && (d2 = Double(T(0)))
+    d < 0       && (d2 = ddadd(MDPI(T), d2))
     return d2.hi + d2.lo
-end
-
-function xatan_u1(d::Float64)
-    d2 = atan2k_u1(Double(abs(d)), Double(1.0))
-    r = d2.hi + d2.lo
-    isinf(d) && (r = 1.570796326794896557998982)
-    return flipsign(r, d)
 end

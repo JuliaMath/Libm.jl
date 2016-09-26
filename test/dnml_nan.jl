@@ -1,15 +1,15 @@
-@testset "denormal/nonnumber $T" for T in (Float64,)
+@testset "denormal/nonnumber $T" for T in (Float32, Float64)
 
 @testset "denormal/nonnumber $xatan2" for xatan2 in (xatan2, xatan2_u1)
 
-    @test xatan2(T(0.0), T(-0.0))  ===  T(pi)
+    @test xatan2(T(0.0),  T(-0.0)) === T(pi)
     @test xatan2(T(-0.0), T(-0.0)) === -T(pi)
     @test ispzero(xatan2(T(0.0), T(0.0)))
     @test isnzero(xatan2(T(-0.0), T(0.0)))
-    @test xatan2(T(Inf), T(-Inf))  ===  T(3*pi/4)
-    @test xatan2(T(-Inf), T(-Inf)) ===  T(-3*pi/4)
-    @test xatan2(T(Inf), T(Inf))   ===  T(pi/4)
-    @test xatan2(T(-Inf), T(Inf))  ===  T(-pi/4)
+    @test xatan2( T(Inf), -T(Inf)) === T(3*pi/4)
+    @test xatan2(-T(Inf), -T(Inf)) === T(-3*pi/4)
+    @test xatan2( T(Inf),  T(Inf))  === T(pi/4)
+    @test xatan2(-T(Inf),  T(Inf))  === T(-pi/4)
     
 
     y = T(0.0)
@@ -99,7 +99,7 @@ end # denormal/nonumber atan2
     end
 
 
-    x = NaN
+    x = T(NaN)
     ya = T[-100000.5, -100000, -3, -2.5, -2, -1.5, -1.0, -0.5, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 100000, 100000.5]
     for y in ya
         @test isnan(xpow(x,y))
@@ -107,7 +107,7 @@ end # denormal/nonumber atan2
 
 
     xa = T[-100000.5, -100000, -3, -2.5, -2, -1.5, -1.0, -0.5, -0.0, +0.0, 0.5, 1.5, 2.0, 2.5, 3.0, 100000, 100000.5]
-    y = NaN
+    y = T(NaN)
     for x in xa
         @test isnan(xpow(x,y))
     end
@@ -127,7 +127,7 @@ end # denormal/nonumber atan2
     end
 
 
-    xa = T[T(0.0), T(-0.0)]
+    xa = T[0.0, -0.0]
     ya = T[0.5, 1.5, 2.0, 2.5, 4.0, 100000, 100000.5]
     for x in xa, y in ya
         @test ispzero(xpow(x,y))
@@ -236,7 +236,7 @@ end # denormal/nonumber pow
 
 fun_table = Dict(xsin => sin, xsin_u1 => sin)
 @testset "denormal/nonnumber $xtrig" for (xtrig, trig) in fun_table
-    xa = T[NaN, T(-0.0), T(0.0), Inf, -Inf]
+    xa = T[NaN, -0.0, 0.0, Inf, -Inf]
     for x in xa
         @test cmpdenorm(xtrig(x), trig(BigFloat(x)))
     end
@@ -253,7 +253,7 @@ end
 
 
 @testset "denormal/nonnumber sin in $xsincos"for xsincos in (xsincos, xsincos_u1)
-    xa = T[NaN, T(-0.0), T(0.0), Inf, -Inf]
+    xa = T[NaN, -0.0, 0.0, Inf, -Inf]
     for x in xa
         q = xsincos(x)
         @test cmpdenorm(q.hi, sin(BigFloat(x)))
@@ -401,7 +401,7 @@ end
 
 
 @testset "denormal/nonnumber xlog1p" begin
-    xa = T[NaN, Inf, -Inf, 0.0, -1.0, -2.0]
+    xa = T[NaN, Inf, -Inf, 0.0, -0.0, -1.0, -2.0]
     for x in xa
         @test cmpdenorm(xlog1p(x), log1p(BigFloat(x)))
     end
@@ -418,11 +418,11 @@ end
 
 
 @testset "denormal/nonnumber xilogb" begin
-    @test xilogb(T(Inf))  == typemax(Int)
-    @test xilogb(T(-Inf)) == typemax(Int)
-    @test xilogb(T(0.0))  == typemin(Int)
-    @test xilogb(T(+0.0)) == typemin(Int)
-    @test xilogb(T(NaN))  == typemax(Int)
+    @test xilogb(+T(Inf)) == typemax(Int)
+    @test xilogb(-T(Inf)) == typemax(Int)
+    @test xilogb(+T(0.0)) == typemin(Int)
+    @test xilogb(-T(0.0)) == typemin(Int)
+    @test xilogb( T(NaN)) == typemax(Int)
 end
 
 

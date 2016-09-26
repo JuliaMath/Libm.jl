@@ -32,12 +32,8 @@ function xlog_u1{T<:FloatTypes}(d::T)
     return x
 end
 
-
-_xlog10_c0(::Type{Float32}) = Double(0.43429449200630187988f0, -1.0103050118726031315f-08)
-_xlog10_c0(::Type{Float64}) = Double(0.43429448190325176116, 6.6494347733425473126e-17)
-
 function xlog10{T<:FloatTypes}(a::T)
-    d = ddmul(logk(a), _xlog10_c0(T))
+    d = ddmul(logk(a), MDLN10E(T))
     x = d.hi + d.lo
     isinf(a) && (x =  T(Inf))
     a < 0    && (x =  T(NaN))
@@ -45,25 +41,21 @@ function xlog10{T<:FloatTypes}(a::T)
     return x
 end
 
-
 function xlog1p{T<:FloatTypes}(a::T)
-    d = logk2(ddadd2(a, T(1)))
+    d = logk2(ddadd2(a, T(1.0)))
     x = d.hi + d.lo
     isinf(a) && (x =  T(Inf))
     a < -1   && (x =  T(NaN))
     a == -1  && (x = -T(Inf))
-    return x
+    return copysign(x,a) # return correct sign for -0.0
 end
-
-
-
 
 # First we split the argument to its mantissa `m` and integer exponent `e` so that `d = m \times 2^e`,
 # where `m \in [0.5, 1)` then we apply the polynomial approximant on this reduced argument `m` before
 # putting back the exponent in. This first part is done with the help of the private function
 # `ilogbp1(x)` and we put the exponent back using
 
-#     `\log(m \times 2^e) = \log(m) + \log 2^e =  \log(m) + e\times LN2
+#     `\log(m \times 2^e) = \log(m) + \log 2^e =  \log(m) + e\times MLN2
 
 # The polynomial we evaluate is based on coefficients from
 
@@ -81,7 +73,7 @@ const c5d = 0.22222194152736701733275
 const c4d = 0.285714288030134544449368
 const c3d = 0.399999999989941956712869
 const c2d = 0.666666666666685503450651
-const c1d = 2
+const c1d = 2.0
 
 const c5f = 0.2371599674224853515625f0
 const c4f = 0.285279005765914916992188f0
@@ -98,7 +90,7 @@ function xlog{T<:FloatTypes}(d::T)
     x = (m-1)/(m+1)
     x2 = x*x
     t = _xlog(x2)
-    x = muladd(x, t, T(LN2)*e)
+    x = muladd(x, t, T(MLN2)*e)
     isinf(d) && (x =  T(Inf))
     d < 0    && (x =  T(NaN))
     d == 0   && (x = -T(Inf))

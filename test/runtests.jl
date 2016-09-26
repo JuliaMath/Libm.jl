@@ -96,7 +96,7 @@ function test_acc(T, fun_table, xx, tol; debug=false, tol_debug=5)
         end
         rmean = rmean/length(xx)
 
-        t = @test rmax <= tol
+        t = @test trunc(rmax,1) <= tol
 
         fmtxloc = isa(xmax, Tuple) ? string('(', join((@sprintf("%.5f", x) for x in xmax), ", "), ')') : @sprintf("%.5f", xmax)
         println(rpad(strip_module_name(xfun), 15, " "), ": max ", @sprintf("%f", rmax),
@@ -107,16 +107,13 @@ end
 
 const pow = ^
 function runtests()
-    # @testset "Libm.Sleef" begin
-    include("accuracy_wip.jl")
+    @testset "Sleef" begin
     include("dnml_nan.jl")
     include("accuracy.jl")
-    # end
+    end
 
     include("log.jl")
     include("erf.jl")
-
-    # include("accuracy_base.jl") # uncomment to benchmark base
 end
 
 runtests()

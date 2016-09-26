@@ -1,3 +1,5 @@
+import Base: -
+
 immutable Double{T<:FloatTypes}
     hi::T
     lo::T
@@ -19,7 +21,7 @@ end
 
 @inline ddscale{T<:FloatTypes}(x::Double{T}, s::T) = Double(s*x.hi, s*x.lo)
 
-@inline ddneg{T}(x::Double{T}) = Double(-x.hi,-x.lo)
+@inline -{T}(x::Double{T}) = Double(-x.hi,-x.lo)
 
 # quick-two-sum x+y
 @inline function ddadd{T<:FloatTypes}(x::T, y::T) #WARNING |x| >= |y|
