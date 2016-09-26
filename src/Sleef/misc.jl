@@ -39,19 +39,13 @@ const c1f =  2.224125623703002929687500f0
 global @inline _xcbrt(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d
 global @inline _xcbrt(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f
 
-global _xcbrt_u1_a0(::Type{Float64}) = Double(1.2599210498948731907,   -2.5899333753005069177e-17)
-global _xcbrt_u1_a1(::Type{Float64}) = Double(1.5874010519681995834,   -1.0869008194197822986e-16)
-global _xcbrt_u1_a0(::Type{Float32}) = Double(1.2599210739135742188f0, -2.4018701694217270415f-08)
-global _xcbrt_u1_a1(::Type{Float32}) = Double(1.5874010324478149414f0,  1.9520385308169352356f-08)
-
-
 function xcbrt{T<:FloatTypes}(d::T) # max error 2 ulps
     q  = T(1)
     e  = ilogbp1(d)
     d  = ldexpk(d, -e)
     r  = (e + 6144) % 3
-    q  = (r == 1) ? T(1.2599210498948731647672106) : q
-    q  = (r == 2) ? T(1.5874010519681994747517056) : q
+    q  = (r == 1) ? T(M2P13) : q
+    q  = (r == 2) ? T(M2P23) : q
     q  = ldexpk(q, (e + 6144)÷3 - 2048)
     q  = flipsign(q, d)
     d  = abs(d)
@@ -69,8 +63,8 @@ function xcbrt_u1{T<:FloatTypes}(d::T)
     e  = ilogbp1(d)
     d  = ldexpk(d, -e)
     r  = (e + 6144) % 3
-    q2 = (r == 1) ? _xcbrt_u1_a0(T) : q2
-    q2 = (r == 2) ? _xcbrt_u1_a1(T) : q2
+    q2 = (r == 1) ? MD2P13(T) : q2
+    q2 = (r == 2) ? MD2P23(T) : q2
     q3 = Double(flipsign(q2.hi, d), flipsign(q2.lo, d))
     d  = abs(d)
     x  =_xcbrt(d)
