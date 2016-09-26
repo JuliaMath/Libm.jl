@@ -75,58 +75,6 @@ end
 
 
 let
-const c19d = -1.88796008463073496563746e-05
-const c18d =  0.000209850076645816976906797
-const c17d = -0.00110611831486672482563471
-const c16d =  0.00370026744188713119232403
-const c15d = -0.00889896195887655491740809
-const c14d =  0.016599329773529201970117
-const c13d = -0.0254517624932312641616861
-const c12d =  0.0337852580001353069993897
-const c11d = -0.0407629191276836500001934
-const c10d =  0.0466667150077840625632675
-const c9d  = -0.0523674852303482457616113
-const c8d  =  0.0587666392926673580854313
-const c7d  = -0.0666573579361080525984562
-const c6d  =  0.0769219538311769618355029
-const c5d  = -0.090908995008245008229153
-const c4d  =  0.111111105648261418443745
-const c3d  = -0.14285714266771329383765
-const c2d  =  0.199999999996591265594148
-const c1d  = -0.333333333333311110369124
-
-const c8f =  0.00282363896258175373077393f0
-const c7f = -0.0159569028764963150024414f0
-const c6f =  0.0425049886107444763183594f0
-const c5f = -0.0748900920152664184570312f0
-const c4f =  0.106347933411598205566406f0
-const c3f = -0.142027363181114196777344f0
-const c2f =  0.199926957488059997558594f0
-const c1f = -0.333331018686294555664062f0
-
-global @inline _atan2k(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d
-global @inline _atan2k(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f c8f
-
-global @inline function atan2k{T<:FloatTypes}(y::T, x::T)
-    q = 0
-    if x < 0
-        x = -x
-        q = -2
-    end
-    if y > x
-        t = x; x = y
-        y = -t
-        q += 1
-    end
-    s = y/x
-    t = s*s
-    u =_atan2k(t)
-    t = u*t*s + s
-    return q*T(MPI2) + t
-end
-end
-
-let
 const c20d =  1.06298484191448746607415e-05
 const c19d = -0.000125620649967286867384336
 const c18d =  0.00070557664296393412389774
@@ -158,6 +106,26 @@ const c3f = -0.142626821994781494140625f0
 const c2f =  0.199983194470405578613281f0
 const c1f = -0.333332866430282592773438f0
 
+global @inline _atan2k(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d c20d
+global @inline _atan2k(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f c8f c9f
+
+global @inline function atan2k{T<:FloatTypes}(y::T, x::T)
+    q = 0
+    if x < 0
+        x = -x
+        q = -2
+    end
+    if y > x
+        t = x; x = y
+        y = -t
+        q += 1
+    end
+    s = y/x
+    t = s*s
+    u =_atan2k(t)
+    t = u*t*s + s
+    return q*T(MPI2) + t
+end
 
 global @inline _atan2k_u1(x::Double{Float64}) = @horner x.hi c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d c20d
 global @inline _atan2k_u1(x::Double{Float32}) = ddadd(c1f, x.hi*(@horner x.hi c2f c3f c4f c5f c6f c7f c8f c9f))
