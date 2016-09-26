@@ -1,6 +1,6 @@
 using Libm
-using JLD
 using BenchmarkTools
+using JLD, DataStructures
 
 RETUNE  = false
 VERBOSE = true
@@ -56,7 +56,7 @@ for f in (:atanh,)
     end
 end
 
-const micros = Dict(
+const micros = OrderedDict(
     "sin"   => x_trig,
     "cos"   => x_trig,
     "tan"   => x_trig,
@@ -105,7 +105,7 @@ warmup(suite,VERBOSE)
 println("Running micro benchmarks...")
 results = run(suite; verbose=VERBOSE)
 
-for f in sort(collect(keys(micros)))
+for f in keys(micros)
     for T in test_types
         println()
         print_with_color(:magenta, string(f, " ", T, " benchmark\n"))
