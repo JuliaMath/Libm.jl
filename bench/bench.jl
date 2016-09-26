@@ -49,6 +49,7 @@ x_trigh{T<:FloatTypes}(::Type{T})      = map(T, vcat(-10:0.0002:10, -1000:0.02:1
 x_asinhatanh{T<:FloatTypes}(::Type{T}) = map(T, vcat(-10:0.0002:10, -1000:0.02:1000))
 x_acosh{T<:FloatTypes}(::Type{T})      = map(T, vcat(1:0.0002:10, 1:0.02:1000))
 
+import Base.atanh
 for f in (:atanh,)
     @eval begin
         ($f)(x::Float64) = ccall(($(string(f)),Base.libm_name), Float64, (Float64,), x)
