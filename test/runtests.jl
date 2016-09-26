@@ -107,7 +107,6 @@ end
 
 const pow = ^
 function runtests()
-
     @testset "Sleef" begin
     include("dnml_nan.jl")
     include("accuracy.jl")
@@ -115,8 +114,6 @@ function runtests()
 
     include("log.jl")
     include("erf.jl")
-
-    # include("accuracy_base.jl") # uncomment to benchmark base
 end
 
 runtests()
