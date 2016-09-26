@@ -1,4 +1,4 @@
-## CLEAN CONSTANTS
+## TODO: Clean up methods / constans / add macros
 
 let
 global xsin
@@ -166,7 +166,7 @@ function xsincos{T<:FloatTypes}(x::T)
     q & 2 != 0     && (rx = -rx)
     (q+1) & 2 != 0 && (ry = -ry)
     isinf(d)       && (rx = ry = T(NaN))
-    return Double(flipsign(rx,x),ry)
+    return Double(flipsign(rx,x), ry)
 end
 
 function xsincos_u1{T<:FloatTypes}(x::T)
@@ -277,7 +277,7 @@ xasin{T<:FloatTypes}(x::T) = flipsign(atan2k(abs(x), _sqrt((1+x)*(1-x))), x)
 
 xacos{T<:FloatTypes}(x::T) = flipsign(atan2k(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
 
-let # check constants and figure out why @horner fails here
+let
 global xatan
 const c19d = -1.88796008463073496563746e-05
 const c18d =  0.000209850076645816976906797
@@ -356,8 +356,8 @@ end
 function xacos_u1{T<:Float64}(d::T)
     d2 = atan2k_u1(ddsqrt(ddmul(ddadd(T(1), d), ddadd(T(1),-d))), Double(abs(d)))
     d2 = ddscale(d2, _sign(d))
-    abs(d) == 1 && (d2 = Double(0.0))
-    d < 0       && (d2 = ddadd(Double(3.141592653589793116, 1.2246467991473532072e-16), d2))
+    abs(d) == 1 && (d2 = Double(T(0)))
+    d < 0       && (d2 = ddadd(MDPI(T), d2))
     return d2.hi + d2.lo
 end
 
