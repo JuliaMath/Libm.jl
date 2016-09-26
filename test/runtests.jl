@@ -99,7 +99,7 @@ function test_acc(T, fun_table, xx, tol; debug=false, tol_debug=5)
         t = @test trunc(rmax,1) <= tol
 
         fmtxloc = isa(xmax, Tuple) ? string('(', join((@sprintf("%.5f", x) for x in xmax), ", "), ')') : @sprintf("%.5f", xmax)
-        println(rpad(strip_module_name(xfun), 15, " "), ": max ", @sprintf("%f", rmax),
+        println(rpad(strip_module_name(xfun), 18, " "), ": max ", @sprintf("%f", rmax),
             rpad(" at x = "*fmtxloc, 40, " "),
             ": mean ", @sprintf("%f", rmean))
     end

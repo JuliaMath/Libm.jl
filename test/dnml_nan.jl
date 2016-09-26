@@ -1,6 +1,6 @@
 @testset "denormal/nonnumber $T" for T in (Float32, Float64)
 
-@testset "denormal/nonnumber $xatan2" for xatan2 in (xatan2, xatan2_u1)
+@testset "denormal/nonnumber $xatan2" for xatan2 in (xatan2_fast, xatan2)
 
     @test xatan2(T(0.0),  T(-0.0)) === T(pi)
     @test xatan2(T(-0.0), T(-0.0)) === -T(pi)
@@ -234,7 +234,7 @@ end # denormal/nonumber atan2
 end # denormal/nonumber pow
 
 
-fun_table = Dict(xsin => sin, xsin_u1 => sin)
+fun_table = Dict(xsin_fast => sin, xsin => sin)
 @testset "denormal/nonnumber $xtrig" for (xtrig, trig) in fun_table
     xa = T[NaN, -0.0, 0.0, Inf, -Inf]
     for x in xa
@@ -243,7 +243,7 @@ fun_table = Dict(xsin => sin, xsin_u1 => sin)
 end
 
 
-fun_table = Dict(xcos => cos, xcos_u1 => cos)
+fun_table = Dict(xcos_fast => cos, xcos => cos)
 @testset "denormal/nonnumber $xtrig" for (xtrig, trig) in fun_table
     xa = T[NaN, Inf, -Inf]
     for x in xa
@@ -252,7 +252,7 @@ fun_table = Dict(xcos => cos, xcos_u1 => cos)
 end
 
 
-@testset "denormal/nonnumber sin in $xsincos"for xsincos in (xsincos, xsincos_u1)
+@testset "denormal/nonnumber sin in $xsincos"for xsincos in (xsincos_fast, xsincos)
     xa = T[NaN, -0.0, 0.0, Inf, -Inf]
     for x in xa
         q = xsincos(x)
@@ -261,7 +261,7 @@ end
 end
 
 
-@testset "denormal/nonnumber cos in $xsincos"for xsincos in (xsincos, xsincos_u1)
+@testset "denormal/nonnumber cos in $xsincos"for xsincos in (xsincos_fast, xsincos)
     xa = T[NaN, Inf, -Inf]
     for x in xa
         q = xsincos(x)
@@ -270,7 +270,7 @@ end
 end
 
 
-@testset "denormal/nonnumber $xtan" for xtan in (xtan, xtan_u1)
+@testset "denormal/nonnumber $xtan" for xtan in (xtan_fast, xtan)
     xa = T[NaN, Inf, -Inf, pi/2, -pi/2]
     for x in xa
         @test cmpdenorm(xtan(x), tan(BigFloat(x)))
@@ -278,7 +278,7 @@ end
 end
 
 
-fun_table = Dict(xasin => asin, xasin_u1 => asin, xacos => acos, xacos_u1 => acos)
+fun_table = Dict(xasin => asin, xasin_fast => asin, xacos => acos, xacos_fast => acos)
 @testset "denormal/nonnumber $xatrig" for (xatrig, atrig) in fun_table
     xa = T[NaN, Inf, -Inf, 2, -2, 1, -1]
     for x in xa
@@ -287,7 +287,7 @@ fun_table = Dict(xasin => asin, xasin_u1 => asin, xacos => acos, xacos_u1 => aco
 end
 
 
-@testset "denormal/nonnumber $xatan" for xatan in (xatan, xatan_u1)
+@testset "denormal/nonnumber $xatan" for xatan in (xatan, xatan_fast)
     xa = T[NaN, Inf, -Inf]
     for x in xa
         @test cmpdenorm(xatan(x), atan(BigFloat(x)))
@@ -296,7 +296,7 @@ end
 
 
 
-@testset "denormal/nonnumber $xlog" for xlog in (xlog, xlog_u1)
+@testset "denormal/nonnumber $xlog" for xlog in (xlog, xlog_fast)
     xa = T[NaN, Inf, -Inf, 0, -1]
     for x in xa
         @test cmpdenorm(xlog(x), log(BigFloat(x)))
@@ -360,7 +360,7 @@ end
 end
 
 
-@testset "denormal/nonnumber $xcbrt" for xcbrt = (xcbrt, xcbrt_u1)
+@testset "denormal/nonnumber $xcbrt" for xcbrt = (xcbrt, xcbrt_fast)
     xa = T[NaN, Inf, -Inf, 0.0, -0.0]
     for x in xa
         @test cmpdenorm(xcbrt(x), cbrt(BigFloat(x)))

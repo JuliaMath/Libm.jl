@@ -2,8 +2,8 @@ module Sleef
 
 export xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcosh, xtanh,
     xasinh, xacosh, xatanh, xcbrt, xlog, xexp, xexp2, xexp10, xexpm1, xlog10, xlog1p, xilogb, xldexp
-# Higher accuracy functions
-export xatan2_u1, xasin_u1, xacos_u1, xatan_u1, xsin_u1, xcos_u1, xsincos_u1, xtan_u1, xcbrt_u1, xlog_u1
+# fast variants (not within 1ulp)
+export xatan2_fast, xasin_fast, xacos_fast, xatan_fast, xsin_fast, xcos_fast, xsincos_fast, xtan_fast, xcbrt_fast, xlog_fast
 
 # Alias for supported floating point types
 typealias FloatTypes Union{Float32,Float64}
