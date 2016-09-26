@@ -87,7 +87,7 @@ include("Sleef/misc.jl")   # miscallenous math functions including pow and cbrt
 @inline exponent_max{T<:FloatTypes}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
 # _sign emits better native code than sign but does not properly handle the Inf/NaN cases
-@inline _sign{T<:FloatTypes}(d::T) =  flipsign(one(T), d) 
+@inline _sign{T<:FloatTypes}(d::T) =  flipsign(T(1), d) 
 
 @inline xrint{T<:FloatTypes}(x::T) = unsafe_trunc(Int, ifelse(x < 0, x - T(0.5), x + T(0.5)))
 # @inline xrintf{T<:FloatTypes}(x::T) = trunc(ifelse(x < 0, x - T(0.5), x + T(0.5)))
@@ -103,8 +103,8 @@ include("Sleef/misc.jl")   # miscallenous math functions including pow and cbrt
 # sqrt without the domain checks which we don't need since we handle the checks ourselves
 _sqrt{T<:FloatTypes}(x::T) = Base.box(T, Base.sqrt_llvm_fast(Base.unbox(T,x)))
 
-@inline ispinf{T<:FloatTypes}(x::T) = x ==  T(Inf)
-@inline isninf{T<:FloatTypes}(x::T) = x == -T(Inf)
+@inline ispinf{T<:FloatTypes}(x::T) = x == typemax(T)
+@inline isninf{T<:FloatTypes}(x::T) = x == typemin(T)
 
 
 end

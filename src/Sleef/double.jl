@@ -1,4 +1,4 @@
-import Base: -
+import Base: -, flipsign, normalize, scale
 
 immutable Double{T<:FloatTypes}
     hi::T
@@ -14,12 +14,14 @@ Double{T}(x::T) = Double(x, zero(T))
     hx, x-hx
 end
 
-@inline function ddnormalize{T}(x::Double{T})
+@inline function normalize{T}(x::Double{T})
     r = x.hi + x.lo
     Double(r, (x.hi - r) + x.lo)
 end
 
-@inline ddscale{T<:FloatTypes}(x::Double{T}, s::T) = Double(s*x.hi, s*x.lo)
+@inline flipsign{T<:FloatTypes}(x::Double{T}, y::T) = Double(flipsign(x.hi, y), flipsign(x.lo, y))
+
+@inline scale{T<:FloatTypes}(x::Double{T}, s::T) = Double(s*x.hi, s*x.lo)
 
 @inline -{T}(x::Double{T}) = Double(-x.hi,-x.lo)
 
@@ -116,13 +118,13 @@ if is_fma_fast()
 
     # 1/x
     @inline function ddrec{T<:FloatTypes}(x::T)
-        zhi = one(T)/x
-        Double(zhi, fma(-zhi, x, one(T))*zhi)
+        zhi = T(1)/x
+        Double(zhi, fma(-zhi, x, T(1))*zhi)
     end
 
     @inline function ddrec{T}(x::Double{T})
-        zhi = one(T)/x.hi
-        Double(zhi, (fma(-zhi, x.hi, one(T)) + -zhi*x.lo)*zhi)
+        zhi = T(1)/x.hi
+        Double(zhi, (fma(-zhi, x.hi, T(1)) + -zhi*x.lo)*zhi)
     end
 
 else
@@ -173,7 +175,7 @@ else
 
     # x/y
     @inline function dddiv{T}(x::Double{T}, y::Double{T})
-        invy = one(T)/y.hi
+        invy = T(1)/y.hi
         c = x.hi*invy
         u = ddmul(c, y.hi)
         Double(c,((((x.hi - u.hi) - u.lo) + x.lo) - c*y.lo)*invy)
@@ -181,17 +183,15 @@ else
 
     # 1/x
     @inline function ddrec{T<:FloatTypes}(x::T)
-        invx = one(T)/x
-        c = one(T)*invx
+        c = T(1)/x
         u = ddmul(c,x)
-        Double(c, (one(T) - u.hi - u.lo)*invx)
+        Double(c, (T(1) - u.hi - u.lo)*c)
     end
 
     @inline function ddrec{T}(x::Double{T})
-        invx = one(T)/x.hi
-        c = one(T)*invx
+        c = T(1)/x.hi
         u = ddmul(c,x.hi)
-        Double(c, (one(T) -u.hi - u.lo - c*x.lo)*invx)
+        Double(c, (T(1) -u.hi - u.lo - c*x.lo)*c)
     end
 
 end

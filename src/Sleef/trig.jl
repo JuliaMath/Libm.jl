@@ -83,10 +83,10 @@ global @inline _sincos_u1(x::Double{Float32}) = ddadd(c1f, x.hi*(@horner x.hi c2
 function xsin_u1{T<:FloatTypes}(x::T)
     d = abs(x)
     q = xrint(d*T(M1PI))
-    s = ddadd2(d, q * (-PI4A(T)*4))
-    s = ddadd2(s, q * (-PI4B(T)*4))
-    s = ddadd2(s, q * (-PI4C(T)*4))
-    s = ddadd2(s, q * (-PI4D(T)*4))
+    s = ddadd2(d, q * -PI4A(T)*4)
+    s = ddadd2(s, q * -PI4B(T)*4)
+    s = ddadd2(s, q * -PI4C(T)*4)
+    s = ddadd2(s, q * -PI4D(T)*4)
     t = s
     s = ddsqu(s)
     w =_sincos_u1(s)
@@ -99,10 +99,10 @@ end
 function xcos_u1{T<:FloatTypes}(x::T)
     x = abs(x)
     q = muladd(2, xrint(x*T(M1PI) - T(0.5)), 1)
-    s = ddadd2(x, q * (-PI4A(T)*2))
-    s = ddadd2(s, q * (-PI4B(T)*2))
-    s = ddadd2(s, q * (-PI4C(T)*2))
-    s = ddadd2(s, q * (-PI4D(T)*2))
+    s = ddadd2(x, q * -PI4A(T)*2)
+    s = ddadd2(s, q * -PI4B(T)*2)
+    s = ddadd2(s, q * -PI4C(T)*2)
+    s = ddadd2(s, q * -PI4D(T)*2)
     t = s
     s = ddsqu(s)
     w =_sincos_u1(s)
@@ -148,17 +148,17 @@ global @inline _sincos_b(x::Float64) = @horner x b1d b2d b3d b4d b5d b6d b7d
 global @inline _sincos_b(x::Float32) = @horner x b1f b2f b3f b4f b5f
 
 function xsincos{T<:FloatTypes}(x::T)
-    d = abs(x)
-    q = xrint(d*T(M2PI))
-    s = d
-    s = muladd(q, -PI4A(T)*2, s)
-    s = muladd(q, -PI4B(T)*2, s)
-    s = muladd(q, -PI4C(T)*2, s)
-    s = muladd(q, -PI4D(T)*2, s)
-    t = s
-    s = s*s
-    u =_sincos_a(s)
-    u = u * s * t
+    d  = abs(x)
+    q  = xrint(d*T(M2PI))
+    s  = d
+    s  = muladd(q, -PI4A(T)*2, s)
+    s  = muladd(q, -PI4B(T)*2, s)
+    s  = muladd(q, -PI4C(T)*2, s)
+    s  = muladd(q, -PI4D(T)*2, s)
+    t  = s
+    s  = s*s
+    u  =_sincos_a(s)
+    u  = u * s * t
     rx = t + u
     u =_sincos_b(s)
     ry = u * s + T(1)
@@ -170,18 +170,18 @@ function xsincos{T<:FloatTypes}(x::T)
 end
 
 function xsincos_u1{T<:FloatTypes}(x::T)
-    d = abs(x)
-    q = xrint(d*2*T(M1PI))
-    s = ddadd2(d, q * (-PI4A(T)*2))
-    s = ddadd2(s, q * (-PI4B(T)*2))
-    s = ddadd2(s, q * (-PI4C(T)*2))
-    s = ddadd2(s, q * (-PI4D(T)*2))
-    t = s
-    s = ddsqu(s)
+    d  = abs(x)
+    q  = xrint(d*2*T(M1PI))
+    s  = ddadd2(d, q * -PI4A(T)*2)
+    s  = ddadd2(s, q * -PI4B(T)*2)
+    s  = ddadd2(s, q * -PI4C(T)*2)
+    s  = ddadd2(s, q * -PI4D(T)*2)
+    t  = s
+    s  = ddsqu(s)
     sx = s.hi + s.lo
-    u = _sincos_a(sx)
+    u  =_sincos_a(sx)
     u *= sx * t.hi
-    v = ddadd(t, u)
+    v  = ddadd(t, u)
     rx = v.hi + v.lo
     u = _sincos_b(sx)
     v = ddadd(T(1), ddmul(sx, u))
@@ -363,7 +363,7 @@ xacos{T<:FloatTypes}(x::T) = flipsign(atan2k(_sqrt((1+x)*(1-x)), abs(x)), x) + (
 
 function xacos_u1{T<:FloatTypes}(x::T)
     x2 = atan2k_u1(ddsqrt(ddmul(ddadd(T(1), x), ddadd(T(1),-x))), Double(abs(x)))
-    x2 = ddscale(x2, _sign(x))
+    x2 = scale(x2, _sign(x))
     abs(x) == 1 && (x2 = Double(T(0)))
     x < 0       && (x2 = ddadd(MDPI(T), x2))
     return x2.hi + x2.lo

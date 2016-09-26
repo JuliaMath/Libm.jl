@@ -86,10 +86,10 @@ end # denormal/nonumber atan2
 
 @testset "denormal/nonnumber xpow" begin
 
-    @test xpow(one(T),T(NaN))  === one(T)
-    @test xpow(T(NaN),zero(T)) === one(T)
-    @test xpow(T(-1),T(Inf))   === one(T)
-    @test xpow(T(-1),T(-Inf))  === one(T)
+    @test xpow(T(1), T(NaN))   === T(1)
+    @test xpow( T(NaN), T(0))  === T(1)
+    @test xpow(-T(1), T(Inf))  === T(1)
+    @test xpow(-T(1), T(-Inf)) === T(1)
     
 
     xa = T[-100000.5, -100000, -3, -2.5, -2, -1.5, -1.0, -0.5]

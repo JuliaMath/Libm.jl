@@ -7,6 +7,14 @@ IntF(::Type{Float32}) = Int32
 @testset "Accuracy (max error in ulp) for $T" for T in (Float32, Float64)
     println("Accuracy tests for $T")
 
+    # xx = map(T, vcat(-10:0.0002:10, -1000:0.021:1000, -1000:0.023:1000, 
+    #     10.0.^-(0:0.02:300), -10.0.^-(0:0.02:300), 10.0.^(0:0.021:300), -10.0.^-(0:0.021:300)))
+    # fun_table = Dict(xexpm1 => expm1)
+    # tol = 2
+    # test_acc(T, fun_table, xx, tol)
+
+    # ###
+    
     xx = map(T, vcat(-1:0.00002:1))
     fun_table = Dict(xasin => asin, xacos => acos)
     tol = 3
@@ -109,11 +117,11 @@ IntF(::Type{Float32}) = Int32
     test_acc(T, fun_table, xx, tol) 
 
 
-    fun_table = Dict(xpow => pow)
     xx1 = map(Tuple{T,T}, [(x,y) for x = -100:0.20:100, y = 0.1:0.20:100])[:]
     xx2 = map(Tuple{T,T}, [(x,y) for x = -100:0.21:100, y = 0.1:0.22:100])[:]
     xx3 = map(Tuple{T,T}, [(x,y) for x = 2.1, y = -1000:0.1:1000])
     xx = vcat(xx1, xx2, xx2)
+    fun_table = Dict(xpow => pow)
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
@@ -170,6 +178,7 @@ IntF(::Type{Float32}) = Int32
     tol = 1
     test_acc(T, fun_table, xx, tol)
  
+
      @testset "xilogb at arbitrary values" begin
         xd = Dict{T,Int}(T(1e-30) => -100, T(2.31e-11) => -36, T(-1.0) => 0, T(1.0) => 0, 
                     T(2.31e11) => 37,  T(1e30) => 99)
