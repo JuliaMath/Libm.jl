@@ -171,18 +171,18 @@ global @inline _expk(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d
 global @inline _expk(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 global @inline function expk{T<:FloatTypes}(d::Double{T})
-    q = xrint((d.hi + d.lo)*T(MLN2E))
+    q = xrint(T(d)*T(MLN2E))
     s = ddadd2(d, q * -LN2U(T))
     s = ddadd2(s, q * -LN2L(T))
     s = normalize(s)
     u =_expk(s.hi)
     t = ddadd(s, ddmul(ddsqu(s), u))
     t = ddadd(T(1), t)
-    ldexpk(t.hi + t.lo, q)
+    ldexpk(T(t), q)
 end
 
 global @inline function expk2{T<:FloatTypes}(d::Double{T})
-    q = xrint((d.hi + d.lo)*T(MLN2E))
+    q = xrint(T(d)*T(MLN2E))
     s = ddadd2(d, q * -LN2U(T))
     s = ddadd2(s, q * -LN2L(T))
     u =_expk(s.hi)

@@ -25,7 +25,7 @@ end
 
 function xlog10{T<:FloatTypes}(a::T)
     d = ddmul(logk(a), MDLN10E(T))
-    x = d.hi + d.lo
+    x = T(d)
     isinf(a) && (x = typemax(T))
     a < 0    && (x = T(NaN))
     a == 0   && (x = typemin(T))
@@ -34,7 +34,7 @@ end
 
 function xlog1p{T<:FloatTypes}(a::T)
     d = logk2(ddadd2(a, T(1.0)))
-    x = d.hi + d.lo
+    x = T(d)
     isinf(a) && (x = typemax(T))
     a < -1   && (x = T(NaN))
     a == -1  && (x = typemin(T))
@@ -92,7 +92,7 @@ end
 
 function xlog{T<:FloatTypes}(d::T)
     s = logk(d)
-    x = s.hi + s.lo
+    x = T(s)
     isinf(d) && (x = typemax(T))
     d < 0    && (x = T(NaN))
     d == 0   && (x = typemin(T))

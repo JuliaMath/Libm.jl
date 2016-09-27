@@ -77,7 +77,7 @@ function xcbrt{T<:FloatTypes}(d::T)
     u  = ddmul(u, u)
     u  = ddmul(u, d)
     u  = ddadd2(u, -x)
-    y  = u.hi + u.lo
+    y  = T(u)
     y  = -(T(2)/T(3))*y*z
     v  = ddadd2(ddmul(z, z), y)
     v  = ddmul(v, d)

@@ -22,7 +22,7 @@ _undr_xexpm1(::Type{Float32}) = -0.159423851528787421165963387935380610657399256
 
 function xexpm1{T<:FloatTypes}(a::T)
     d = ddadd2(expk2(Double(a)), -T(1))
-    x = d.hi + d.lo
+    x = T(d)
     a > _over_xexpm1(T) && (x =  typemax(T))
     a < _undr_xexpm1(T) && (x = -T(1))
     return x

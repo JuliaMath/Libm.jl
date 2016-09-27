@@ -1,10 +1,13 @@
-import Base: -, flipsign, normalize, scale
+import Base: -, flipsign, normalize, scale, convert
 
 immutable Double{T<:FloatTypes}
     hi::T
     lo::T
 end
 Double{T}(x::T) = Double(x, zero(T))
+
+convert{T<:FloatTypes}(::Type{T}, x::Double) = x.hi + x.lo
+
 
 @inline trunclo(x::Float64) = reinterpret(Float64, reinterpret(UInt64, x) & 0xffff_ffff_f800_0000) # clear lower 27 bits (leave upper 26 bits)
 @inline trunclo(x::Float32) = reinterpret(Float32, reinterpret(UInt32, x) & 0xffff_f000) # clear lowest 12 bits (leave upper 12 bits)

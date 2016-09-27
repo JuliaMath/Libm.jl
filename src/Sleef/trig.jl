@@ -91,7 +91,7 @@ function xsin{T<:FloatTypes}(x::T)
     s = ddsqu(s)
     w =_sincos(s)
     v = ddmul(t, ddadd(T(1), ddmul(w, s)))
-    u = v.hi + v.lo
+    u = T(v)
     q & 1 != 0 && (u = -u)
     return flipsign(u,x)
 end
@@ -107,7 +107,7 @@ function xcos{T<:FloatTypes}(x::T)
     s = ddsqu(s)
     w =_sincos(s)
     v = ddmul(t, ddadd(T(1), ddmul(w, s)))
-    u = v.hi + v.lo
+    u = T(v)
     q & 2 == 0 && (u = -u)
     return u
 end
@@ -178,19 +178,19 @@ function xsincos{T<:FloatTypes}(x::T)
     s  = ddadd2(s, q * -PI4D(T)*2)
     t  = s
     s  = ddsqu(s)
-    sx = s.hi + s.lo
+    sx = T(s)
     u  =_sincos_a(sx)
     u *= sx * t.hi
     v  = ddadd(t, u)
-    rx = v.hi + v.lo
-    u = _sincos_b(sx)
-    v = ddadd(T(1), ddmul(sx, u))
-    ry = v.hi + v.lo
-    q & 1 != 0     && (u = ry; ry = rx; rx = u)
+    rx = T(v)
+    u  =_sincos_b(sx)
+    v  = ddadd(T(1), ddmul(sx, u))
+    ry = T(v)
+    q & 1 != 0     && (u  =  ry; ry = rx; rx = u)
     q & 2 != 0     && (rx = -rx)
     (q+1) & 2 != 0 && (ry = -ry)
-    isinf(d)       && (rx = ry = T(NaN))
-    return Double(flipsign(rx,x),ry)
+    isinf(d)       && (rx =  ry = T(NaN))
+    return Double(flipsign(rx, x), ry)
 end
 end
 
@@ -255,7 +255,7 @@ function xtan{T<:FloatTypes}(d::T)
     u =_tan(s)
     u = ddmul(x, ddadd(T(1), ddmul(u, s)))
     q & 1 != 0 && (u = ddrec(u))
-    return u.hi + u.lo
+    return T(u)
 end
 end
 
@@ -315,7 +315,7 @@ end
 
 function xatan{T<:FloatTypes}(x::T)
     x2 = atan2k(Double(abs(x)), Double(T(1)))
-    r = x2.hi + x2.lo
+    r = T(x2)
     isinf(x) && (r = T(MPI2))
     return flipsign(r, x)
 end
@@ -337,7 +337,7 @@ end
 
 function xatan2{T<:FloatTypes}(y::T, x::T)
     d = atan2k(Double(abs(y)), Double(x))
-    r = d.hi + d.lo
+    r = T(d)
     r = flipsign(r, x)
     if isinf(x) || x == 0
         r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI2) : T(0))
@@ -355,7 +355,7 @@ xasin_fast{T<:FloatTypes}(x::T) = flipsign(atan2k_fast(abs(x), _sqrt((1+x)*(1-x)
 
 function xasin{T<:FloatTypes}(x::T)
     x2 = atan2k(Double(abs(x)), ddsqrt(ddmul(ddadd(T(1), x), ddadd(T(1),-x))))
-    r = x2.hi + x2.lo
+    r = T(x2)
     abs(x) == 1 && (r = T(MPI2))
     return flipsign(r, x)
 end
@@ -367,5 +367,5 @@ function xacos{T<:FloatTypes}(x::T)
     x2 = scale(x2, _sign(x))
     abs(x) == 1 && (x2 = Double(T(0)))
     x < 0       && (x2 = ddadd(MDPI(T), x2))
-    return x2.hi + x2.lo
+    return T(x2)
 end
