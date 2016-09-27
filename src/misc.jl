@@ -1,5 +1,5 @@
 
-function xpow{T<:FloatTypes}(x::T, y::T)
+function pow{T<:FloatTypes}(x::T, y::T)
     yint = unsafe_trunc(Int,y)
     yisint = yint == y
     yisodd = isodd(yint) && yisint
@@ -17,8 +17,8 @@ function xpow{T<:FloatTypes}(x::T, y::T)
 end
 
 let
-global xcbrt_fast
-global xcbrt
+global cbrt_fast
+global cbrt
 
 const c6d = -0.640245898480692909870982
 const c5d = 2.9615510302003951181859500
@@ -34,12 +34,12 @@ const c3f =  5.898262500762939453125000f0
 const c2f = -3.809541702270507812500000f0
 const c1f =  2.224125623703002929687500f0
 
-global @inline _xcbrt(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d
-global @inline _xcbrt(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f
+global @inline _cbrt(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d
+global @inline _cbrt(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f
 
-function xcbrt_fast{T<:FloatTypes}(d::T) # max error 2 ulps
+function cbrt_fast{T<:FloatTypes}(d::T) # max error 2 ulps
     q  = T(1)
-    e  = ilogbp1(d)
+    e  = ilog2k(d)
     d  = ldexpk(d, -e)
     r  = (e + 6144) % 3
     q  = (r == 1) ? T(M2P13) : q
@@ -47,7 +47,7 @@ function xcbrt_fast{T<:FloatTypes}(d::T) # max error 2 ulps
     q  = ldexpk(q, (e + 6144)÷3 - 2048)
     q  = flipsign(q, d)
     d  = abs(d)
-    x  =_xcbrt(d)
+    x  =_cbrt(d)
     y  = x*x
     y  = y*y
     x -= (d*y - x)*T(1/3)
@@ -56,16 +56,16 @@ function xcbrt_fast{T<:FloatTypes}(d::T) # max error 2 ulps
     return y
 end
 
-function xcbrt{T<:FloatTypes}(d::T)
+function cbrt{T<:FloatTypes}(d::T)
     q2 = Double(T(1))  
-    e  = ilogbp1(d)
+    e  = ilog2k(d)
     d  = ldexpk(d, -e)
     r  = (e + 6144) % 3
     q2 = (r == 1) ? MD2P13(T) : q2
     q2 = (r == 2) ? MD2P23(T) : q2
     q2 = flipsign(q2, d)
     d  = abs(d)
-    x  =_xcbrt(d)
+    x  =_cbrt(d)
     y  = x*x
     y  = y*y
     x -= (d*y - x)*T(1/3)

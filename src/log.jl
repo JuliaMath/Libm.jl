@@ -1,7 +1,7 @@
-# This file includes the exported function xilogb, xlog_u1, xlog1p, and xlog
+# This file includes the exported function xilog2, xlog_u1, xlog1p, and xlog
 
 """
-    xilogb(x::FloatTypes) -> FloatTypes
+    ilog2(x::FloatTypes) -> FloatTypes
 
 Returns the integral part of the logarithm of `abs(x)`, using base 2 for the logarithm; in other
 words this returns the binary exponent of `x` so that
@@ -15,15 +15,15 @@ where `significand \in [1, 2)`
     * `x = Inf`  returns `typemax(Int)`
     * `x = NaN`  returns `typemax(Int)`
 """
-function xilogb{T<:FloatTypes}(d::T)
-    e = ilogbp1(abs(d)) - 1
+function ilog2{T<:FloatTypes}(d::T)
+    e = ilog2k(abs(d)) - 1
     e = d == 0   ? typemin(Int) : e
     e = isinf(d) ? typemax(Int) : e
     e = isnan(d) ? typemax(Int) : e
     return e 
 end
 
-function xlog10{T<:FloatTypes}(a::T)
+function log10{T<:FloatTypes}(a::T)
     d = ddmul(logk(a), MDLN10E(T))
     x = T(d)
     isinf(a) && (x = typemax(T))
@@ -32,7 +32,7 @@ function xlog10{T<:FloatTypes}(a::T)
     return x
 end
 
-function xlog1p{T<:FloatTypes}(a::T)
+function log1p{T<:FloatTypes}(a::T)
     d = logk2(ddadd2(a, T(1.0)))
     x = T(d)
     isinf(a) && (x = typemax(T))
@@ -44,7 +44,7 @@ end
 # First we split the argument to its mantissa `m` and integer exponent `e` so that `d = m \times 2^e`,
 # where `m \in [0.5, 1)` then we apply the polynomial approximant on this reduced argument `m` before
 # putting back the exponent in. This first part is done with the help of the private function
-# `ilogbp1(x)` and we put the exponent back using
+# `ilog2k(x)` and we put the exponent back using
 
 #     `\log(m \times 2^e) = \log(m) + \log 2^e =  \log(m) + e\times MLN2
 
@@ -56,7 +56,7 @@ end
 # `2` and subtract 1 for the exponent `e` when `m` is less than `sqrt(2)/2`
 
 let
-global xlog_fast
+global log_fast
 
 const c8d = 0.148197055177935105296783
 const c7d = 0.153108178020442575739679
@@ -73,15 +73,15 @@ const c3f = 0.400005519390106201171875f0
 const c2f = 0.666666567325592041015625f0
 const c1f = 2.0f0
 
-global @inline _xlog_fast(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
-global @inline _xlog_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f
+global @inline _log_fast(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
+global @inline _log_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
-function xlog_fast{T<:FloatTypes}(d::T)
-    e  = ilogbp1(d*T(M1SQRT2))
+function log_fast{T<:FloatTypes}(d::T)
+    e  = ilog2k(d*T(M1SQRT2))
     m  = ldexpk(d,-e)
     x  = (m-1)/(m+1)
     x2 = x*x
-    t  =_xlog_fast(x2)
+    t  =_log_fast(x2)
     x  = muladd(x, t, T(MLN2)*e)
     isinf(d) && (x = typemax(T))
     d < 0    && (x = T(NaN))
@@ -90,7 +90,7 @@ function xlog_fast{T<:FloatTypes}(d::T)
 end
 end
 
-function xlog{T<:FloatTypes}(d::T)
+function log{T<:FloatTypes}(d::T)
     s = logk(d)
     x = T(s)
     isinf(d) && (x = typemax(T))

@@ -27,29 +27,28 @@ Most of the useful math functions are accessed with the prefix `x`, for example:
 ```julia
 julia> using Libm
 
-julia> xsin(2.3)
+julia> Libm.sin(2.3)
 0.7457052121767203
 
-julia> xsin(2.3f0)
+julia> Libm.sin(2.3f0)
 0.74570525f0
 
-julia> xexp(3.0)
+julia> Libm.exp(3.0)
 20.085536923187668
 
-julia> xexp(3f0)
+julia> Libm.exp(3f0)
 20.085537f0
 ```
 
 The exported functions include (within 1 ulp)
 ```julia
-xsin, xcos, xtan, xasin, xacos, xatan, xatan2, xsincos, xsinh, xcosh, xtanh,
-    xasinh, xacosh, xatanh, xlog, xlog10, xlog1p, xilogb, xexp, xexp2, xexp10, xexpm1, xldexp, xcbrt, xpow
+sin, cos, tan, asin, acos, atan, atan2, sincos, sinh, cosh, tanh,
+    asinh, acosh, atanh, log, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
  ```
  Faster variants include (within 4 ulp)
 
  ```julia
-xsin_fast, xcos_fast, xtan_fast, xsincos_fast, xasin_fast, xacos_fast, xatan_fast,
-    xatan2_fast, xlog_fast, xcbrt_fast
+sin_fast, cos_fast, tan_fast, sincos_fast, asin_fast, acos_fast, atan_fast, atan2_fast, log_fast, cbrt_fast
 ```
 
 You can also access `Libm.Musl.log(x)`  for a different implementation of the logarithmic function and `Libm.Musl.erf(x)` and `Libm.Musl.erfc(x)` for the error function and the complementary error function. 
