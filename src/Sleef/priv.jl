@@ -70,7 +70,6 @@ where `significand \in [0.5, 1)`
     d = m ? real_cut_max(T) * d : d
     q = float2integer(d) & exponent_max(T)
     q = m ? q - (real_cut_offset(T) + exponent_bias(T) - 1) : q - (exponent_bias(T) - 1) # we subtract 1 since we want 2^q
-    return q
 end
 
 
@@ -124,7 +123,7 @@ global @inline function atan2k_fast{T<:FloatTypes}(y::T, x::T)
     t = s*s
     u =_atan2k_fast(t)
     t = u*t*s + s
-    return q*T(MPI2) + t
+    q*T(MPI2) + t
 end
 
 global @inline _atan2k(x::Double{Float64}) = @horner x.hi c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d c20d
@@ -174,8 +173,7 @@ global @inline function expk{T<:FloatTypes}(d::Double{T})
     q = xrint(T(d)*T(MLN2E))
     s = ddadd2(d, q * -LN2U(T))
     s = ddadd2(s, q * -LN2L(T))
-    s = normalize(s)
-    u =_expk(s.hi)
+    u =_expk(T(s))
     t = ddadd(s, ddmul(ddsqu(s), u))
     t = ddadd(T(1), t)
     ldexpk(T(t), q)
