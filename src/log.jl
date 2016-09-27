@@ -6,9 +6,9 @@
 Returns the integral part of the logarithm of `abs(x)`, using base 2 for the logarithm; in other
 words this returns the binary exponent of `x` so that
 
-    x = significand \times 2^exponent,
+    x = significand × 2^exponent,
 
-where `significand \in [1, 2)`
+where `significand ∈ [1, 2)`
 
 * Exceptional cases (where `Int` is the wordsize, which is either `Int64` or `Int32`)
     * `x = 0`    returns `typemin(Int)`

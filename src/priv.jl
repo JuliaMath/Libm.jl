@@ -144,7 +144,7 @@ global @inline function atan2k{T<:FloatTypes}(y::Double{T}, x::Double{T})
     t = ddsqu(s)
     u =_atan2k(t)
     t = ddmul(s, ddadd(T(1), ddmul(t, u)))
-    ddadd2(ddmul(T(q), MDPI2(T)), t)
+    ddadd(ddmul(T(q), MDPI2(T)), t)
 end
 end
 
