@@ -42,15 +42,14 @@ julia> xexp(3f0)
 
 The exported functions include (within 1 ulp)
 ```julia
-xatan2, xasin, xacos, xatan, xsin, xcos, xsincos, xtan, xpow, xsinh, xcosh, xtanh,
-	xasinh, xacosh, xatanh, xcbrt, xlog, xexp, xexp2, xexp10, xexpm1, xlog10, xlog1p, xilogb, xldexp
+xsin, xcos, xtan, xasin, xacos, xatan, xatan2, xsincos, xsinh, xcosh, xtanh,
+    xasinh, xacosh, xatanh, xlog, xlog10, xlog1p, xilogb, xexp, xexp2, xexp10, xexpm1, xldexp, xcbrt, xpow
  ```
  Faster variants include (within 4 ulp)
 
  ```julia
-
- xatan2_fast, xasin_fast, xacos_fast, xatan_fast, xsin_fast, xcos_fast, xsincos_fast,
- 	 xtan_fast, xcbrt_fast, xlog_fast
+xsin_fast, xcos_fast, xtan_fast, xsincos_fast, xasin_fast, xacos_fast, xatan_fast,
+    xatan2_fast, xlog_fast, xcbrt_fast
 ```
 
 You can also access `Libm.Musl.log(x)`  for a different implementation of the logarithmic function and `Libm.Musl.erf(x)` and `Libm.Musl.erfc(x)` for the error function and the complementary error function. 

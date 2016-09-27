@@ -53,9 +53,9 @@ function xcbrt_fast{T<:FloatTypes}(d::T) # max error 2 ulps
     x  =_xcbrt(d)
     y  = x*x
     y  = y*y
-    x -= (d*y - x)*(T(1)/T(3))
+    x -= (d*y - x)*T(1/3)
     y  = d*x*x
-    y  = (y - (T(2)/T(3))*y*(y*x - 1))*q
+    y  = (y - T(2/3)*y*(y*x - 1))*q
     return y
 end
 
@@ -71,18 +71,18 @@ function xcbrt{T<:FloatTypes}(d::T)
     x  =_xcbrt(d)
     y  = x*x
     y  = y*y
-    x -= (d*y - x)*(T(1)/T(3))
+    x -= (d*y - x)*T(1/3)
     z  = x
     u  = ddmul(x, x)
     u  = ddmul(u, u)
     u  = ddmul(u, d)
     u  = ddadd2(u, -x)
-    y  = u.hi + u.lo
-    y  = -(T(2)/T(3))*y*z
+    y  = T(u)
+    y  = -T(2/3)*y*z
     v  = ddadd2(ddmul(z, z), y)
     v  = ddmul(v, d)
     v  = ddmul(v, q3)
-    z  = ldexp(v.hi + v.lo, (e + 6144)÷3 - 2048)
+    z  = ldexp(T(v), (e + 6144)÷3 - 2048)
     isinf(d) && (z = flipsign(typemax(T), q3.hi))
     d == 0   && (z = flipsign(T(0), q3.hi))
     return z

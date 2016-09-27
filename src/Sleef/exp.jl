@@ -1,30 +1,35 @@
 xldexp(x::FloatTypes, q::Int) = ldexpk(x, q)
 
+# overflow argument values
+overflow_xexp2(::Type{Float64}) = 1024
+overflow_xexp2(::Type{Float32}) = 128f0
 function xexp2{T<:FloatTypes}(a::T)
     u = expk(ddmul(MDLN2(T), a))
-    ispinf(a) && (u = typemax(T))
+    a > overflow_xexp2(T) && (u = typemax(T))
     isninf(a) && (u = T(0))
     return u
 end
 
+# overflow argument values
+overflow_xexp10(::Type{Float64}) = 308
+overflow_xexp10(::Type{Float32}) = 38f0
 function xexp10{T<:FloatTypes}(a::T)
     u = expk(ddmul(MDLN10(T), a))
-    ispinf(a) && (u = typemax(T))
+    a > overflow_xexp10(T) && (u = typemax(T))
     isninf(a) && (u = T(0))
     return u
 end
 
-# over/under flow argument values
-_over_xexpm1(::Type{Float64}) =  700.0
-_undr_xexpm1(::Type{Float64}) = -0.36043653389117156089696070315825181539851971360337e2
-_over_xexpm1(::Type{Float32}) =  88f0
-_undr_xexpm1(::Type{Float32}) = -0.15942385152878742116596338793538061065739925620174f2
-
+# overflow/underflow argument values
+overflow_xexpm1(::Type{Float64}) =  700.0
+overflow_xexpm1(::Type{Float32}) =  88f0
+underflow_xexpm1(::Type{Float64}) = -0.36043653389117156089696070315825181539851971360337e2
+underflow_xexpm1(::Type{Float32}) = -0.15942385152878742116596338793538061065739925620174f2
 function xexpm1{T<:FloatTypes}(a::T)
     d = ddadd2(expk2(Double(a)), -T(1))
-    x = d.hi + d.lo
-    a > _over_xexpm1(T) && (x =  typemax(T))
-    a < _undr_xexpm1(T) && (x = -T(1))
+    x = T(d)
+    a > overflow_xexpm1(T)  && (x =  typemax(T))
+    a < underflow_xexpm1(T) && (x = -T(1))
     return x
 end
 
