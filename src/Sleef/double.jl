@@ -121,13 +121,13 @@ if is_fma_fast()
 
     # 1/x
     @inline function ddrec{T<:FloatTypes}(x::T)
-        zhi = T(1)/x
-        Double(zhi, fma(-zhi, x, T(1))*zhi)
+        zhi = 1/x
+        Double(zhi, fma(-zhi, x, one(T))*zhi)
     end
 
     @inline function ddrec{T}(x::Double{T})
-        zhi = T(1)/x.hi
-        Double(zhi, (fma(-zhi, x.hi, T(1)) + -zhi*x.lo)*zhi)
+        zhi = 1/x.hi
+        Double(zhi, (fma(-zhi, x.hi, one(T)) + -zhi*x.lo)*zhi)
     end
 
 else
@@ -173,12 +173,12 @@ else
     @inline function ddsqrt{T}(x::Double{T})
         c = _sqrt(x.hi)
         u = ddsqu(c)
-        Double(c, (x.hi - u.hi - u.lo + x.lo)*T(0.5)/c)
+        Double(c, (x.hi - u.hi - u.lo + x.lo)/(c+c))
     end
 
     # x/y
     @inline function dddiv{T}(x::Double{T}, y::Double{T})
-        invy = T(1)/y.hi
+        invy = 1/y.hi
         c = x.hi*invy
         u = ddmul(c, y.hi)
         Double(c,((((x.hi - u.hi) - u.lo) + x.lo) - c*y.lo)*invy)
@@ -186,15 +186,15 @@ else
 
     # 1/x
     @inline function ddrec{T<:FloatTypes}(x::T)
-        c = T(1)/x
+        c = 1/x
         u = ddmul(c,x)
-        Double(c, (T(1) - u.hi - u.lo)*c)
+        Double(c, (one(T) - u.hi - u.lo)*c)
     end
 
     @inline function ddrec{T}(x::Double{T})
-        c = T(1)/x.hi
+        c = 1/x.hi
         u = ddmul(c,x.hi)
-        Double(c, (T(1) -u.hi - u.lo - c*x.lo)*c)
+        Double(c, (one(T) - u.hi - u.lo - c*x.lo)*c)
     end
 
 end

@@ -3,20 +3,17 @@ function xpow{T<:FloatTypes}(x::T, y::T)
     yint = unsafe_trunc(Int,y)
     yisint = yint == y
     yisodd = isodd(yint) && yisint
-
-    result = expk(ddmul(logk(abs(x)), y))
-    result = isnan(result) ? typemax(T) : result
-    result *= (x >= 0 ? 1 : (!yisint ? T(NaN) : (yisodd ? -1 : 1)));
+    z = expk(ddmul(logk(abs(x)), y))
+    z = isnan(z) ? typemax(T) : z
+    z *= (x >= 0 ? 1 : (!yisint ? T(NaN) : (yisodd ? -1 : 1)));
     efx = flipsign(abs(x) - 1, y)
-    if isinf(y)
-        result = efx < 0 ? T(0) : (efx == 0 ? T(1) : typemax(T))
-    end
+    isinf(y) && (z = efx < 0 ? T(0) : (efx == 0 ? T(1) : typemax(T)))
     if isinf(x) || x == 0
-        result = (yisodd ? _sign(x) : T(1)) * ((x == 0 ? -y : y) < 0 ? T(0) : typemax(T))
+        z = (yisodd ? _sign(x) : T(1)) * ((x == 0 ? -y : y) < 0 ? T(0) : typemax(T))
     end
-    (isnan(x) || isnan(y)) && (result = T(NaN))
-    (y == 0   || x == 1)   && (result = T(1))
-    return result
+    (isnan(x) || isnan(y)) && (z = T(NaN))
+    (y == 0   || x == 1)   && (z = T(1))
+    return z
 end
 
 let
@@ -66,25 +63,25 @@ function xcbrt{T<:FloatTypes}(d::T)
     r  = (e + 6144) % 3
     q2 = (r == 1) ? MD2P13(T) : q2
     q2 = (r == 2) ? MD2P23(T) : q2
-    q3 = flipsign(q2, d)
+    q2 = flipsign(q2, d)
     d  = abs(d)
     x  =_xcbrt(d)
     y  = x*x
     y  = y*y
     x -= (d*y - x)*T(1/3)
     z  = x
-    u  = ddmul(x, x)
-    u  = ddmul(u, u)
+    u  = ddsqu(x)
+    u  = ddsqu(u)
     u  = ddmul(u, d)
     u  = ddadd2(u, -x)
     y  = T(u)
     y  = -T(2/3)*y*z
-    v  = ddadd2(ddmul(z, z), y)
+    v  = ddadd2(ddsqu(z), y)
     v  = ddmul(v, d)
-    v  = ddmul(v, q3)
+    v  = ddmul(v, q2)
     z  = ldexp(T(v), (e + 6144)÷3 - 2048)
-    isinf(d) && (z = flipsign(typemax(T), q3.hi))
-    d == 0   && (z = flipsign(T(0), q3.hi))
+    isinf(d) && (z = flipsign(typemax(T), q2.hi))
+    d == 0   && (z = flipsign(T(0), q2.hi))
     return z
 end
 end
