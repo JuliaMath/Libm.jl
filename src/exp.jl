@@ -34,7 +34,7 @@ function expm1{T<:FloatTypes}(a::T)
 end
 
 let
-global xexp
+global exp
 const c11d = 2.08860621107283687536341e-09
 const c10d = 2.51112930892876518610661e-08
 const c9d  = 2.75573911234900471893338e-07
