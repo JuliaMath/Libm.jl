@@ -84,8 +84,7 @@ for n in ("Base","Libm")
     for (f,x) in micros
         suite[n][f] = BenchmarkGroup([f])
         for T in test_types
-            n == "Libm" ? fun = Symbol("x",f) : fun = Symbol(f)
-            suite[n][f][string(T)] = @benchmarkable bench_reduce($fun, $(x(T)))
+            suite[n][f][string(T)] = @benchmarkable bench_reduce(eval(Expr(:.,Symbol($n),QuoteNode(Symbol($f)))), $(x(T)))
         end
     end
 end

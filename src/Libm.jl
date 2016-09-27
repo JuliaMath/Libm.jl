@@ -4,11 +4,11 @@ module Libm
 include("Musl/Musl.jl")
 using .Musl
 
-export xsin, xcos, xtan, xasin, xacos, xatan, xatan2, xsincos, xsinh, xcosh, xtanh,
-        xasinh, xacosh, xatanh, xlog, xlog10, xlog1p, xilogb, xexp, xexp2, xexp10, xexpm1, xldexp, xcbrt, xpow
+export sin, cos, tan, asin, acos, atan, atan2, sincos, sinh, cosh, tanh,
+        asinh, acosh, atanh, log, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
 
 # fast variants (not within 1ulp)
-export xsin_fast, xcos_fast, xtan_fast, xsincos_fast, xasin_fast, xacos_fast, xatan_fast, xatan2_fast, xlog_fast, xcbrt_fast
+export sin_fast, cos_fast, tan_fast, sincos_fast, asin_fast, acos_fast, atan_fast, atan2_fast, log_fast, cbrt_fast
             
 # Alias for supported floating point types
 typealias FloatTypes Union{Float32,Float64}
