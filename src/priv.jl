@@ -45,7 +45,7 @@ Computes `x \times 2^n`
     return x*u
 end
 
-# The following define threshold values for `ilogbp1`
+# The following define threshold values for `ilog2k`
 real_cut_offset(::Type{Float64}) = 300
 real_cut_offset(::Type{Float32}) = 64
 
@@ -58,14 +58,14 @@ real_cut_max(::Type{Float64}) = 2.037035976334486e90
 real_cut_max(::Type{Float32}) = 1.8446744073709552f19
 
 """
-    ilogbp1(x::FloatTypes) -> Int
+    ilog2k(x::FloatTypes) -> Int
 
 Returns the integral part of the logarithm of `|x|`, using 2 as base for the logarithm; in other
 words this returns the binary exponent of `x` so that
     x = significand \times 2^exponenet
 where `significand \in [0.5, 1)`
 """
-@inline function ilogbp1{T<:FloatTypes}(d::T)
+@inline function ilog2k{T<:FloatTypes}(d::T)
     m = d < real_cut_min(T)
     d = m ? real_cut_max(T) * d : d
     q = float2integer(d) & exponent_max(T)
@@ -170,7 +170,7 @@ global @inline _expk(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d
 global @inline _expk(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 global @inline function expk{T<:FloatTypes}(d::Double{T})
-    q = xrint(T(d)*T(MLN2E))
+    q = rint(T(d)*T(MLN2E))
     s = ddadd2(d, q * -LN2U(T))
     s = ddadd2(s, q * -LN2L(T))
     u =_expk(T(s))
@@ -180,7 +180,7 @@ global @inline function expk{T<:FloatTypes}(d::Double{T})
 end
 
 global @inline function expk2{T<:FloatTypes}(d::Double{T})
-    q = xrint(T(d)*T(MLN2E))
+    q = rint(T(d)*T(MLN2E))
     s = ddadd2(d, q * -LN2U(T))
     s = ddadd2(s, q * -LN2L(T))
     u =_expk(s.hi)
@@ -209,7 +209,7 @@ global @inline _logk(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
 global @inline _logk(x::Float32) = @horner x c1f c2f c3f c4f
 
 global @inline function logk{T<:FloatTypes}(d::T)
-    e  = ilogbp1(d * T(M1SQRT2))
+    e  = ilog2k(d * T(M1SQRT2))
     m  = ldexpk(d,-e)
     x  = dddiv(ddadd2(-T(1), m), ddadd2(T(1), m))
     x2 = ddsqu(x)
@@ -218,7 +218,7 @@ global @inline function logk{T<:FloatTypes}(d::T)
 end
 
 global @inline function logk2{T<:FloatTypes}(d::Double{T})
-    e  = ilogbp1(d.hi * T(M1SQRT2))
+    e  = ilog2k(d.hi * T(M1SQRT2))
     m  = scale(d, pow2i(T,-e))
     x  = dddiv(ddadd2(m, -T(1)), ddadd2(m, T(1)))
     x2 = ddsqu(x)

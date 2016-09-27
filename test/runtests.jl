@@ -105,13 +105,11 @@ function test_acc(T, fun_table, xx, tol; debug=false, tol_debug=5)
     end
 end
 
-const pow = ^
 function runtests()
     @testset "Sleef" begin
     include("dnml_nan.jl")
     include("accuracy.jl")
     end
-
     include("log.jl")
     include("erf.jl")
 end

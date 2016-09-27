@@ -1,35 +1,35 @@
-xldexp(x::FloatTypes, q::Int) = ldexpk(x, q)
+ldexp(x::FloatTypes, q::Int) = ldexpk(x, q)
 
 # overflow argument values
-overflow_xexp2(::Type{Float64}) = 1024
-overflow_xexp2(::Type{Float32}) = 128f0
-function xexp2{T<:FloatTypes}(a::T)
+overflow_exp2(::Type{Float64}) = 1024
+overflow_exp2(::Type{Float32}) = 128f0
+function exp2{T<:FloatTypes}(a::T)
     u = expk(ddmul(MDLN2(T), a))
-    a > overflow_xexp2(T) && (u = typemax(T))
+    a > overflow_exp2(T) && (u = typemax(T))
     isninf(a) && (u = T(0))
     return u
 end
 
 # overflow argument values
-overflow_xexp10(::Type{Float64}) = 308
-overflow_xexp10(::Type{Float32}) = 38f0
-function xexp10{T<:FloatTypes}(a::T)
+overflow_exp10(::Type{Float64}) = 308
+overflow_exp10(::Type{Float32}) = 38f0
+function exp10{T<:FloatTypes}(a::T)
     u = expk(ddmul(MDLN10(T), a))
-    a > overflow_xexp10(T) && (u = typemax(T))
+    a > overflow_exp10(T) && (u = typemax(T))
     isninf(a) && (u = T(0))
     return u
 end
 
 # overflow/underflow argument values
-overflow_xexpm1(::Type{Float64}) =  700.0
-overflow_xexpm1(::Type{Float32}) =  88f0
-underflow_xexpm1(::Type{Float64}) = -0.36043653389117156089696070315825181539851971360337e2
-underflow_xexpm1(::Type{Float32}) = -0.15942385152878742116596338793538061065739925620174f2
-function xexpm1{T<:FloatTypes}(a::T)
+overflow_expm1(::Type{Float64}) =  700.0
+overflow_expm1(::Type{Float32}) =  88f0
+underflow_expm1(::Type{Float64}) = -0.36043653389117156089696070315825181539851971360337e2
+underflow_expm1(::Type{Float32}) = -0.15942385152878742116596338793538061065739925620174f2
+function expm1{T<:FloatTypes}(a::T)
     d = ddadd2(expk2(Double(a)), -T(1))
     x = T(d)
-    a > overflow_xexpm1(T)  && (x =  typemax(T))
-    a < underflow_xexpm1(T) && (x = -T(1))
+    a > overflow_expm1(T)  && (x =  typemax(T))
+    a < underflow_expm1(T) && (x = -T(1))
     return x
 end
 
@@ -53,14 +53,14 @@ const c3f = 0.04167108237743377685546880f0
 const c2f = 0.16666552424430847167968800f0
 const c1f = 0.49999985098838806152343800f0
 
-global @inline _xexp(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d  
-global @inline _xexp(x::Float32) = @horner x c1f c2f c3f c4f c5f
+global @inline _exp(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d  
+global @inline _exp(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
-function xexp{T<:FloatTypes}(d::T)
-    q = xrint(d*T(MLN2E))
+function exp{T<:FloatTypes}(d::T)
+    q = rint(d*T(MLN2E))
     s = muladd(q, -LN2U(T), d)
     s = muladd(q, -LN2L(T), s)
-    u =_xexp(s)
+    u =_exp(s)
     u = s*s*u + s + T(1)
     u = ldexpk(u, q)
     isninf(d) && (u = T(0))

@@ -8,7 +8,7 @@ DETAILS = false
 
 test_types = (Float64, Float32) # Which types do you want to bench?
 
-const bench = ("Base","Sleef")
+const bench = ("Base","Libm")
 const suite = BenchmarkGroup()
 for n in bench
     suite[n] = BenchmarkGroup([n])
@@ -80,12 +80,11 @@ const micros = OrderedDict(
     "cbrt"  => x_cbrt
     )
 
-for n in ("Base","Sleef")
+for n in ("Base","Libm")
     for (f,x) in micros
         suite[n][f] = BenchmarkGroup([f])
         for T in test_types
-            n == "Sleef" ? fun = Symbol("x",f) : fun = Symbol(f)
-            suite[n][f][string(T)] = @benchmarkable bench_reduce($fun, $(x(T)))
+            suite[n][f][string(T)] = @benchmarkable bench_reduce(eval(Expr(:.,Symbol($n),QuoteNode(Symbol($f)))), $(x(T)))
         end
     end
 end
@@ -110,12 +109,12 @@ for f in keys(micros)
     for T in test_types
         println()
         print_with_color(:magenta, string(f, " ", T, " benchmark\n"))
-        print_with_color(:blue, "median ratio Sleef/Base\n")
-        println(ratio(median(results["Sleef"][f][string(T)]), median(results["Base"][f][string(T)])))
+        print_with_color(:blue, "median ratio Libm/Base\n")
+        println(ratio(median(results["Libm"][f][string(T)]), median(results["Base"][f][string(T)])))
         println()
         if DETAILS
-            print_with_color(:blue, "details Sleef/Base\n")
-            println(results["Sleef"][f][string(T)])
+            print_with_color(:blue, "details Libm/Base\n")
+            println(results["Libm"][f][string(T)])
             println(results["Base"][f][string(T)])
             println()
         end
