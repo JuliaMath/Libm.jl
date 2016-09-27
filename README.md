@@ -62,7 +62,7 @@ include(joinpath(Pkg.dir("Libm"), "bench", "bench.jl"))
 Note this will take some time to run for the first time (subsequent runs will be much faster). Please ensure you run the benchmarks under `-O3` and that you are not concurrently running other cpu intensive tasks.
 **Feel free to post your benchmark results at https://github.com/JuliaMath/Libm.jl/issues/34**
 
-Sample benchmark results (commit 8f94cd59f889f6a2b3e3261b968b08befb02c27e)
+Sample benchmark results (commit 1074d479c469e2afcf0d7608ebcbbad7e8aa0a77)
 ```julia
 julia> versioninfo()
 Julia Version 0.5.0
@@ -76,445 +76,85 @@ Platform Info:
   LIBM: libopenlibm
   LLVM: libLLVM-3.7.1 (ORCJIT, haswell)
 
-
-sin Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.724478749152101
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-sin Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             2.0660158150716432
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-cos Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.8298133873989108
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-cos Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.965634706162522
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-tan Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.5934151370641908
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-tan Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.5630016222797585
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-asin Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.974368513869543
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-asin Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             2.7409145092624554
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-acos Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             3.0264286752944596
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-acos Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             3.8988122562997662
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-atan Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.894613021513685
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-atan Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.9915863839607135
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-exp Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.730954081954134
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-exp Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.9217641503739673
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-exp2 Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             3.5466096642613647
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-exp2 Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             6.151655164381461
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-exp10 Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.2731525331576639
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-exp10 Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.42726460397916943
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-expm1 Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             2.2397109747611195
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-expm1 Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             3.4715335767109927
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-log Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             2.107198508628489
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-log Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             2.557703574314746
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-log10 Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.6103944827840706
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-log10 Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             2.03563702141266
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-log1p Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.637500045965252
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-log1p Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.8174605250823508
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-sinh Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.9475434340518644
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-sinh Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.9066813703625617
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-cosh Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.2877508008507996
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-cosh Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.3711669042945702
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-tanh Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.061682173979117
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-tanh Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.157153334024712
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-asinh Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.1062075995080625
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-asinh Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             1.3047918978255537
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-acosh Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.9450953383642957
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-acosh Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             0.985581942322126
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-atanh Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             2.2603209470598804
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-atanh Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             2.526866168660497
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-cbrt Float64 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             3.125712719213493
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
-
-
-cbrt Float32 benchmark
-median ratio Sleef/Base
-BenchmarkTools.TrialRatio:
-  time:             4.947953664071938
-  gctime:           1.0
-  memory:           1.0
-  allocs:           1.0
-  time tolerance:   5.00%
-  memory tolerance: 1.00%
+sin
+time: 0.75 Float64
+time: 2.00 Float32
+
+cos
+time: 0.82 Float64
+time: 2.18 Float32
+
+tan
+time: 1.01 Float64
+time: 1.94 Float32
+
+asin
+time: 2.32 Float64
+time: 2.80 Float32
+
+acos
+time: 2.96 Float64
+time: 3.74 Float32
+
+atan
+time: 2.05 Float64
+time: 2.30 Float32
+
+exp
+time: 1.26 Float64
+time: 1.57 Float32
+
+exp2
+time: 3.26 Float64
+time: 5.69 Float32
+
+exp10
+time: 0.25 Float64
+time: 0.41 Float32
+
+expm1
+time: 2.34 Float64
+time: 3.70 Float32
+
+log
+time: 1.86 Float64
+time: 2.22 Float32
+
+log10
+time: 1.61 Float64
+time: 1.98 Float32
+
+log1p
+time: 1.50 Float64
+time: 1.52 Float32
+
+sinh
+time: 0.96 Float64
+time: 1.02 Float32
+
+cosh
+time: 1.30 Float64
+time: 1.46 Float32
+
+tanh
+time: 1.84 Float64
+time: 1.14 Float32
+
+asinh
+time: 1.15 Float64
+time: 1.27 Float32
+
+acosh
+time: 1.09 Float64
+time: 1.09 Float32
+
+atanh
+time: 2.11 Float64
+time: 2.37 Float32
+
+cbrt
+time: 2.38 Float64
+time: 3.79 Float32
 
 ```
 
