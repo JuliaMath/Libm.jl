@@ -27,9 +27,9 @@ end
 @inline split_exponent(::Type{Float32}, q::Int) = _split_exponent(q, UInt(6), UInt(31), UInt(2))
 
 """
-    ldexpk(x::FloatTypes, n::Int) -> FloatTypes
+    ldexpk(a::FloatTypes, n::Int) -> FloatTypes
 
-Computes `x \times 2^n`
+Computes `a × 2^n`
 """
 @inline function ldexpk{T<:FloatTypes}(x::T, q::Int)
     bias = exponent_bias(T)
@@ -171,8 +171,8 @@ global @inline _expk(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 global @inline function expk{T<:FloatTypes}(d::Double{T})
     q = rint(T(d)*T(MLN2E))
-    s = ddadd2(d, q * -LN2U(T))
-    s = ddadd2(s, q * -LN2L(T))
+    s = ddadd(d, q * -LN2U(T))
+    s = ddadd(s, q * -LN2L(T))
     u =_expk(T(s))
     t = ddadd(s, ddmul(ddsqu(s), u))
     t = ddadd(T(1), t)
@@ -181,8 +181,8 @@ end
 
 global @inline function expk2{T<:FloatTypes}(d::Double{T})
     q = rint(T(d)*T(MLN2E))
-    s = ddadd2(d, q * -LN2U(T))
-    s = ddadd2(s, q * -LN2L(T))
+    s = ddadd(d, q * -LN2U(T))
+    s = ddadd(s, q * -LN2L(T))
     u =_expk(s.hi)
     t = ddadd(s, ddmul(ddsqu(s), u))
     t = ddadd(T(1), t)
@@ -214,7 +214,7 @@ global @inline function logk{T<:FloatTypes}(d::T)
     x  = dddiv(ddadd2(-T(1), m), ddadd2(T(1), m))
     x2 = ddsqu(x)
     t  =_logk(x2.hi)
-    ddadd2(ddmul(MDLN2(T), T(e)), ddadd2(scale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
+    ddadd(ddmul(MDLN2(T), T(e)), ddadd(scale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
 end
 
 global @inline function logk2{T<:FloatTypes}(d::Double{T})
@@ -223,6 +223,6 @@ global @inline function logk2{T<:FloatTypes}(d::Double{T})
     x  = dddiv(ddadd2(m, -T(1)), ddadd2(m, T(1)))
     x2 = ddsqu(x)
     t  =_logk(x2.hi)
-    ddadd2(ddmul(MDLN2(T), T(e)), ddadd2(scale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
+    ddadd(ddmul(MDLN2(T), T(e)), ddadd(scale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
 end
 end

@@ -7,7 +7,7 @@ using .Musl
 export sin, cos, tan, asin, acos, atan, atan2, sincos, sinh, cosh, tanh,
         asinh, acosh, atanh, log, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
 
-# fast variants (not within 1ulp)
+# fast variants (within 3 ulp)
 export sin_fast, cos_fast, tan_fast, sincos_fast, asin_fast, acos_fast, atan_fast, atan2_fast, log_fast, cbrt_fast
             
 # Alias for supported floating point types
@@ -15,7 +15,7 @@ typealias FloatTypes Union{Float32,Float64}
 
 using Base: Math.@horner, significand_bits, exponent_bits, exponent_bias, exponent_mask
 
-## constants (refactor lator)
+## constants (refactor later to all use dispatch)
 
 const MLN2  = 6.931471805599453094172321214581765680755001343602552541206800094933936219696955e-01 # log(2)
 const MLN2E = 1.442695040888963407359924681001892137426645954152985934135449406931109219181187     # log2(e)

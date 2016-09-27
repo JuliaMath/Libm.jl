@@ -100,18 +100,18 @@ else
     loadparams!(suite, load(tune_params, "suite"), :evals, :samples)
 end
 
-println("Warming up...")
-warmup(suite,VERBOSE)
 println("Running micro benchmarks...")
 results = run(suite; verbose=VERBOSE)
 
+print_with_color(:blue, "Benchmarks: median ratio Libm/Base\n")
 for f in keys(micros)
+    print_with_color(:magenta, string(f))
     for T in test_types
         println()
-        print_with_color(:magenta, string(f, " ", T, " benchmark\n"))
-        print_with_color(:blue, "median ratio Libm/Base\n")
-        println(ratio(median(results["Libm"][f][string(T)]), median(results["Base"][f][string(T)])))
-        println()
+        print("time: ", )
+        tratio = ratio(median(results["Libm"][f][string(T)]), median(results["Base"][f][string(T)])).time
+        tcolor = tratio > 2.5 ? :red : tratio < 1 ? :green : :blue
+        print_with_color(tcolor, @sprintf("%.2f",tratio), " ", string(T))
         if DETAILS
             print_with_color(:blue, "details Libm/Base\n")
             println(results["Libm"][f][string(T)])
@@ -119,4 +119,5 @@ for f in keys(micros)
             println()
         end
     end
+    println("\n")
 end

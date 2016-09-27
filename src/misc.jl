@@ -38,12 +38,11 @@ global @inline _cbrt(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d
 global @inline _cbrt(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f
 
 function cbrt_fast{T<:FloatTypes}(d::T) # max error 2 ulps
-    q  = T(1)
     e  = ilog2k(d)
     d  = ldexpk(d, -e)
     r  = (e + 6144) % 3
-    q  = (r == 1) ? T(M2P13) : q
-    q  = (r == 2) ? T(M2P23) : q
+    q  = r == 1 ? T(M2P13) : T(1)
+    q  = r == 2 ? T(M2P23) : q
     q  = ldexpk(q, (e + 6144)÷3 - 2048)
     q  = flipsign(q, d)
     d  = abs(d)
@@ -57,12 +56,11 @@ function cbrt_fast{T<:FloatTypes}(d::T) # max error 2 ulps
 end
 
 function cbrt{T<:FloatTypes}(d::T)
-    q2 = Double(T(1))  
     e  = ilog2k(d)
     d  = ldexpk(d, -e)
     r  = (e + 6144) % 3
-    q2 = (r == 1) ? MD2P13(T) : q2
-    q2 = (r == 2) ? MD2P23(T) : q2
+    q2 = r == 1 ? MD2P13(T) : Double(T(1))
+    q2 = r == 2 ? MD2P23(T) : q2
     q2 = flipsign(q2, d)
     d  = abs(d)
     x  =_cbrt(d)
@@ -73,10 +71,10 @@ function cbrt{T<:FloatTypes}(d::T)
     u  = ddsqu(x)
     u  = ddsqu(u)
     u  = ddmul(u, d)
-    u  = ddadd2(u, -x)
+    u  = ddadd(u, -x)
     y  = T(u)
     y  = -T(2/3)*y*z
-    v  = ddadd2(ddsqu(z), y)
+    v  = ddadd(ddsqu(z), y)
     v  = ddmul(v, d)
     v  = ddmul(v, q2)
     z  = ldexp(T(v), (e + 6144)÷3 - 2048)

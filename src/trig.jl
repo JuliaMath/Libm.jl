@@ -241,8 +241,8 @@ function tan_fast{T<:FloatTypes}(d::T)
 end
 
 global @inline _tan(x::Double{Float64}) = ddadd(c1d, x.hi*(@horner x.hi c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d))
-global @inline _tan(x::Double{Float32}) = ddadd(c1f, ddmul(x.hi, ddadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
-# global @inline _tan(x::Double{Float32}) = ddadd(c1f, ddmul(x, @horner x.hi c2f c3f c4f c5f c6f c7f))
+global @inline _tan(x::Double{Float32}) = ddadd(c1f, ddmul(x, @horner x.hi c2f c3f c4f c5f c6f c7f))
+# global @inline _tan(x::Double{Float32}) = ddadd(c1f, ddmul(x.hi, ddadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
 
 function tan{T<:FloatTypes}(d::T)
     q = rint(d*T(M2PI))
