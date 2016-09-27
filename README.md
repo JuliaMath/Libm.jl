@@ -45,7 +45,7 @@ The exported functions include (within 1 ulp)
 sin, cos, tan, asin, acos, atan, atan2, sincos, sinh, cosh, tanh,
     asinh, acosh, atanh, log, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
  ```
- Faster variants include (within 4 ulp)
+ Faster variants include (within 3 ulp)
 
  ```julia
 sin_fast, cos_fast, tan_fast, sincos_fast, asin_fast, acos_fast, atan_fast, atan2_fast, log_fast, cbrt_fast

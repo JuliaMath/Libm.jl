@@ -7,6 +7,40 @@ IntF(::Type{Float32}) = Int32
 @testset "Accuracy (max error in ulp) for $T" for T in (Float32, Float64)
     println("Accuracy tests for $T")
 
+    xx = T[]
+    for i = 1:10000
+        s = reinterpret(T, reinterpret(IntF(T), T(pi)/4 * i) - IntF(T)(20))
+        e = reinterpret(T, reinterpret(IntF(T), T(pi)/4 * i) + IntF(T)(20))
+        d = s
+        while d <= e 
+            append!(xx, d)
+            d = reinterpret(T, reinterpret(IntF(T), d) + IntF(T)(1))
+        end
+    end
+    xx = append!(xx, -10:0.0002:10)
+    xx = append!(xx, -MRANGE(T):200.1:MRANGE(T))
+
+    fun_table = Dict(Libm.sin => Base.sin, Libm.cos => Base.cos, Libm.tan => Base.tan)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
+    fun_table = Dict(Libm.sin_fast => Base.sin, Libm.cos_fast => Base.cos, Libm.tan_fast => Base.tan)
+    tol = 4
+    test_acc(T, fun_table, xx, tol)
+
+
+    sin_sincos_fast(x) = Libm.sincos_fast(x).hi
+    cos_sincos_fast(x) = Libm.sincos_fast(x).lo
+    fun_table = Dict(sin_sincos_fast => Base.sin, cos_sincos_fast => Base.cos)
+    tol = 4
+    test_acc(T, fun_table, xx, tol) 
+
+    sin_sincos(x) = Libm.sincos(x).hi
+    cos_sincos(x) = Libm.sincos(x).lo
+    fun_table = Dict(sin_sincos => Base.sin, cos_sincos => Base.cos)
+    tol = 1
+    test_acc(T, fun_table, xx, tol) 
+    
     
     xx = map(T, vcat(-1:0.00002:1))
     fun_table = Dict(Libm.asin_fast => Base.asin, Libm.acos_fast => Base.acos)
@@ -63,40 +97,6 @@ IntF(::Type{Float32}) = Int32
     fun_table = Dict(Libm.log1p => Base.log1p)
     tol = 1
     test_acc(T, fun_table, xx, tol)
-
-
-    xx = T[]
-    for i = 1:10000
-        s = reinterpret(T, reinterpret(IntF(T), T(pi)/4 * i) - IntF(T)(20))
-        e = reinterpret(T, reinterpret(IntF(T), T(pi)/4 * i) + IntF(T)(20))
-        d = s
-        while d <= e 
-            append!(xx, d)
-            d = reinterpret(T, reinterpret(IntF(T), d) + IntF(T)(1))
-        end
-    end
-    xx = append!(xx, -10:0.0002:10)
-    xx = append!(xx, -MRANGE(T):200.1:MRANGE(T))
-
-    fun_table = Dict(Libm.sin_fast => Base.sin, Libm.cos_fast => Base.cos, Libm.tan_fast => Base.tan)
-    tol = 4
-    test_acc(T, fun_table, xx, tol)
-
-    fun_table = Dict(Libm.sin => Base.sin, Libm.cos => Base.cos, Libm.tan => Base.tan)
-    tol = 1
-    test_acc(T, fun_table, xx, tol)
-
-    sin_sincos_fast(x) = Libm.sincos_fast(x).hi
-    cos_sincos_fast(x) = Libm.sincos_fast(x).lo
-    fun_table = Dict(sin_sincos_fast => Base.sin, cos_sincos_fast => Base.cos)
-    tol = 4
-    test_acc(T, fun_table, xx, tol) 
-
-    sin_sincos(x) = Libm.sincos(x).hi
-    cos_sincos(x) = Libm.sincos(x).lo
-    fun_table = Dict(sin_sincos => Base.sin, cos_sincos => Base.cos)
-    tol = 1
-    test_acc(T, fun_table, xx, tol) 
 
 
     xx1 = map(Tuple{T,T}, [(x,y) for x = -100:0.20:100, y = 0.1:0.20:100])[:]
