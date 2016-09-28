@@ -4,8 +4,22 @@ MRANGE(::Type{Float32}) = 10000
 IntF(::Type{Float64}) = Int64
 IntF(::Type{Float32}) = Int32
 
+
 @testset "Accuracy (max error in ulp) for $T" for T in (Float32, Float64)
     println("Accuracy tests for $T")
+
+
+    xx = map(T, vcat(-10:0.0002:10, -1000:0.02:1000))
+    fun_table = Dict(Libm.asinh => Base.asinh, Libm.atanh => Base.atanh)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
+
+    xx = map(T, vcat(1:0.0002:10, 1:0.02:1000))
+    fun_table = Dict(Libm.acosh => Base.acosh)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
 
     xx = T[]
     for i = 1:10000
@@ -29,14 +43,14 @@ IntF(::Type{Float32}) = Int32
     test_acc(T, fun_table, xx, tol)
 
 
-    sin_sincos_fast(x) = Libm.sincos_fast(x).hi
-    cos_sincos_fast(x) = Libm.sincos_fast(x).lo
+    sin_sincos_fast(x) = Libm.sincos_fast(x)[1]
+    cos_sincos_fast(x) = Libm.sincos_fast(x)[2]
     fun_table = Dict(sin_sincos_fast => Base.sin, cos_sincos_fast => Base.cos)
     tol = 4
     test_acc(T, fun_table, xx, tol) 
 
-    sin_sincos(x) = Libm.sincos(x).hi
-    cos_sincos(x) = Libm.sincos(x).lo
+    sin_sincos(x) = Libm.sincos(x)[1]
+    cos_sincos(x) = Libm.sincos(x)[2]
     fun_table = Dict(sin_sincos => Base.sin, cos_sincos => Base.cos)
     tol = 1
     test_acc(T, fun_table, xx, tol) 
@@ -149,17 +163,6 @@ IntF(::Type{Float32}) = Int32
     test_acc(T, fun_table, xx, tol)
 
 
-    xx = map(T, vcat(-10:0.0002:10, -1000:0.02:1000))
-    fun_table = Dict(Libm.asinh => Base.asinh, Libm.atanh => Base.atanh)
-    tol = 1
-    test_acc(T, fun_table, xx, tol)
-
-
-    xx = map(T, vcat(1:0.0002:10, 1:0.02:1000))
-    fun_table = Dict(Libm.acosh => Base.acosh)
-    tol = 1
-    test_acc(T, fun_table, xx, tol)
- 
 
      @testset "xilog2 at arbitrary values" begin
         xd = Dict{T,Int}(T(1e-30) => -100, T(2.31e-11) => -36, T(-1.0) => 0, T(1.0) => 0, 

@@ -255,8 +255,8 @@ end
 @testset "denormal/nonnumber sin in $xsincos"for xsincos in (Libm.sincos_fast, Libm.sincos)
     xa = T[NaN, -0.0, 0.0, Inf, -Inf]
     for x in xa
-        q = xsincos(x)
-        @test cmpdenorm(q.hi, Base.sin(BigFloat(x)))
+        q = xsincos(x)[1]
+        @test cmpdenorm(q, Base.sin(BigFloat(x)))
     end
 end
 
@@ -264,8 +264,8 @@ end
 @testset "denormal/nonnumber cos in $xsincos"for xsincos in (Libm.sincos_fast, Libm.sincos)
     xa = T[NaN, Inf, -Inf]
     for x in xa
-        q = xsincos(x)
-        @test cmpdenorm(q.lo, Base.cos(BigFloat(x)))
+        q = xsincos(x)[2]
+        @test cmpdenorm(q, Base.cos(BigFloat(x)))
     end
 end
 

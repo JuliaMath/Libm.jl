@@ -40,8 +40,8 @@ function exp10{T<:FloatTypes}(x::T)
 end
 
 
-over_em1(::Type{Float64}) =  700.0
-over_em1(::Type{Float32}) =  88f0
+over_em1(::Type{Float64}) = 700.0
+over_em1(::Type{Float32}) = 88f0
 under_em1(::Type{Float64}) = -0.36043653389117156089696070315825181539851971360337e2
 under_em1(::Type{Float32}) = -0.15942385152878742116596338793538061065739925620174f2
 
@@ -52,8 +52,8 @@ Compute `eˣ- 1` accurately for small values of `x`.
 """
 function expm1{T<:FloatTypes}(x::T)
     u = T(dadd2(expk2(Double(x)), -T(1)))
-    x > over_em1(T)  && (u =  T(Inf))
-    x < under_em1(T) && (u =  T(-1))
+    x > over_em1(T)  && (u = T(Inf))
+    x < under_em1(T) && (u = -T(1))
     return u
 end
 

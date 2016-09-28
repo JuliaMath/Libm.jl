@@ -44,6 +44,11 @@ const c1f =  2.2241256237030029296875f0
 global @inline _cbrt(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d
 global @inline _cbrt(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f
 
+"""
+    cbrt_fast(x)
+
+Return `x^{1/3}`.
+"""
 function cbrt_fast{T<:FloatTypes}(d::T)
     e  = ilog2k(d)
     d  = ldexpk(d,-e)
@@ -59,7 +64,6 @@ function cbrt_fast{T<:FloatTypes}(d::T)
     x -= (d*y - x)*T(1/3)
     y  = d*x*x
     y  = (y - T(2/3)*y*(y*x - 1))*q
-    return y
 end
 
 """
@@ -80,13 +84,13 @@ function cbrt{T<:FloatTypes}(d::T)
     y  = y*y
     x -= (d*y - x)*T(1/3)
     z  = x
-    u  = ddsqu(x)
-    u  = ddsqu(u)
+    u  = dsqu(x)
+    u  = dsqu(u)
     u  = dmul(u, d)
     u  = dsub(u,x)
     y  = T(u)
     y  = -T(2/3)*y*z
-    v  = dadd(ddsqu(z), y)
+    v  = dadd(dsqu(z), y)
     v  = dmul(v,d)
     v  = dmul(v,q2)
     z  = ldexp(T(v), (e + 6144) ÷ 3 - 2048)

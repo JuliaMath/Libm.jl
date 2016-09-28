@@ -1,4 +1,4 @@
-import Base: -, flipsign, normalize, scale, convert, <, copysign
+import Base: -, <, copysign, flipsign, normalize, scale, convert
 
 immutable Double{T<:FloatTypes} <: Number
     hi::T
@@ -7,6 +7,7 @@ end
 Double{T}(x::T) = Double(x, zero(T))
 
 convert{T<:FloatTypes}(::Type{T}, x::Double) = x.hi + x.lo
+convert{T<:FloatTypes}(::Type{Tuple{T,T}}, x::Double{T}) = (x.hi, x.lo)
 
 
 @inline trunclo(x::Float64) = reinterpret(Float64, reinterpret(UInt64, x) & 0xffff_ffff_f800_0000) # clear lower 27 bits (leave upper 26 bits)
@@ -116,7 +117,11 @@ end
     Double(s, (x - (s - v)) + (-y.hi - v) - y.lo)
 end
 
-@inline dsub2{T<:FloatTypes}(x::Double{T}, y::T) = dsub2(y,-x)
+@inline function dsub2{T<:FloatTypes}(x::Double{T}, y::T)
+    s = x.hi - y
+    v = s - x.hi
+    Double(s,(x.hi - (s - v)) + (-y - v) + x.lo)
+end
 
 @inline function dsub2{T}(x::Double{T}, y::Double{T})
     s = x.hi - y.hi
@@ -147,12 +152,12 @@ if is_fma_fast()
     end
 
     # x^2
-    @inline function ddsqu{T<:FloatTypes}(x::T)
+    @inline function dsqu{T<:FloatTypes}(x::T)
         z = x*x
         Double(z, fma(x,x,-z))
     end
 
-    @inline function ddsqu{T}(x::Double{T})
+    @inline function dsqu{T}(x::Double{T})
         z = x.hi*x.hi
         Double(z, fma(x.hi, x.hi, -z) + x.hi*(x.lo+x.lo))
     end
@@ -168,6 +173,12 @@ if is_fma_fast()
         invy = 1/y.hi
         zhi = x.hi*invy
         Double(zhi, (fma(-zhi, y.hi, x.hi) + fma(-zhi, y.lo, x.lo))*invy)
+    end
+
+    @inline function ddiv{T<:FloatTypes}(x::T, y::T)
+        ry = 1/y
+        r = x*ry
+        Double(r, fma(-r,y,x)*ry)
     end
 
     # 1/x
@@ -208,13 +219,13 @@ else
     end
 
     # x^2
-    @inline function ddsqu{T<:FloatTypes}(x::T)
+    @inline function dsqu{T<:FloatTypes}(x::T)
         hx, lx = splitprec(x)
         z = x*x
         Double(z, (hx*hx-z) + lx*(hx + hx) + lx*lx)
     end
 
-    @inline function ddsqu{T}(x::Double{T})
+    @inline function dsqu{T}(x::Double{T})
         hx, lx = splitprec(x.hi)
         z = x.hi*x.hi
         Double(z, (hx*hx-z) + lx*(hx+hx) + lx*lx + x.hi*(x.lo+x.lo))
@@ -223,7 +234,7 @@ else
     # sqrt(x)
     @inline function dsqrt{T}(x::Double{T})
         c = _sqrt(x.hi)
-        u = ddsqu(c)
+        u = dsqu(c)
         Double(c, (x.hi - u.hi - u.lo + x.lo)/(c+c))
     end
 
@@ -234,6 +245,15 @@ else
         u = dmul(c, y.hi)
         Double(c,((((x.hi - u.hi) - u.lo) + x.lo) - c*y.lo)*invy)
     end
+
+    @inline function ddiv{T<:FloatTypes}(x::T, y::T)
+        ry = 1/y
+        r = x*ry
+        hx, lx = splitprec(r)
+        hy, ly = splitprec(y)
+        Double(r, (((-hx*hy+r*y) - lx*hy - hx*ly) - lx*ly)*ry)
+    end
+
 
     # 1/x
     @inline function ddrec{T<:FloatTypes}(x::T)

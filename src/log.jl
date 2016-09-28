@@ -124,9 +124,9 @@ function log_fast{T<:FloatTypes}(x::T)
     u2 = u*u
     t  =_log_fast(u2)
     u  = muladd(u, t, T(MLN2)*e)
-    isinf(d) && (u = T(Inf))
-    d < 0    && (u = T(NaN))
-    d == 0   && (u = T(-Inf))
+    isinf(x) && (u = T(Inf))
+    x < 0    && (u = T(NaN))
+    x == 0   && (u = T(-Inf))
     return u
 end
 end

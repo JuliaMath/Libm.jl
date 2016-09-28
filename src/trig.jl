@@ -4,23 +4,23 @@ let
 global sin_fast
 global cos_fast
 
-const c9d = -7.972559550090378688919520e-18
-const c8d =  2.810099727108632000912510e-15
-const c7d = -7.647122191181588332884840e-13
-const c6d =  1.605904306056645016290540e-10
-const c5d = -2.505210837635020458107550e-08
-const c4d =  2.755731922391987476304160e-06
-const c3d = -0.0001984126984126961628068090
-const c2d =  0.0083333333333333297482381500
-const c1d = -0.1666666666666666574148080000
+const c9d = -7.97255955009037868891952e-18
+const c8d =  2.81009972710863200091251e-15
+const c7d = -7.64712219118158833288484e-13
+const c6d =  1.60590430605664501629054e-10
+const c5d = -2.50521083763502045810755e-08
+const c4d =  2.75573192239198747630416e-06
+const c3d = -0.000198412698412696162806809
+const c2d =  0.00833333333333332974823815
+const c1d = -0.166666666666666657414808
 
 # c5f is 0f0 to handle Inf32 case, Float64 doesn't need this since it comes
 # out properly (add another neg constant and remove this zero constant)
 const c5f =  0f0
-const c4f =  2.608315980978659354150300f-06
-const c3f = -0.00019810690719168633222580f0
+const c4f =  2.6083159809786593541503f-06
+const c3f = -0.0001981069071916863322258f0
 const c2f =  0.00833307858556509017944336f0
-const c1f = -0.16666659712791442871093800f0
+const c1f = -0.166666597127914428710938f0
 
 # Argument is first reduced to the domain 0 < s < π/4
 
@@ -68,14 +68,14 @@ global cos
 const c8d =  2.72052416138529567917983e-15
 const c7d = -7.64292594113954471900203e-13
 const c6d =  1.60589370117277896211623e-10
-const c5d = -2.50521068148431233593680e-08
+const c5d = -2.5052106814843123359368e-08
 const c4d =  2.75573192104428224777379e-06
 const c3d = -0.000198412698412046454654947
-const c2d =  0.008333333333333180562019220
+const c2d =  0.00833333333333318056201922
 const c1d = -0.166666666666666657414808
 
-const c4f =  2.608315980978659354150300f-06
-const c3f = -0.00019810690719168633222580f0
+const c4f =  2.6083159809786593541503f-06
+const c3f = -0.0001981069071916863322258f0
 const c2f =  0.00833307858556509017944336f0
 const c1f = -0.166666597127914428710938f0
 
@@ -90,9 +90,9 @@ function sin{T<:FloatTypes}(x::T)
     s = dadd2(s, q * -PI4C(T)*4)
     s = dadd2(s, q * -PI4D(T)*4)
     t = s
-    s = ddsqu(s)
+    s = dsqu(s)
     w =_sincos(s)
-    v = dmul(t, dadd(T(1), dmul(w, s)))
+    v = dmul(t, dadd(T(1), dmul(w,s)))
     u = T(v)
     q & 1 != 0 && (u = -u)
     return flipsign(u,x)
@@ -107,9 +107,9 @@ function cos{T<:FloatTypes}(x::T)
     s = dadd2(s, q * -PI4C(T)*2)
     s = dadd2(s, q * -PI4D(T)*2)
     t = s
-    s = ddsqu(s)
+    s = dsqu(s)
     w =_sincos(s)
-    v = dmul(t, dadd(T(1), dmul(w, s)))
+    v = dmul(t, dadd(T(1), dmul(w,s)))
     u = T(v)
     q & 2 == 0 && (u = -u)
     return u
@@ -125,26 +125,26 @@ const a6d =  1.58938307283228937328511e-10
 const a5d = -2.50506943502539773349318e-08
 const a4d =  2.75573131776846360512547e-06
 const a3d = -0.000198412698278911770864914
-const a2d =  0.008333333333319184596174600
-const a1d = -0.166666666666666130709393000
+const a2d =  0.0083333333333191845961746
+const a1d = -0.166666666666666130709393
 
 const a3f = -0.000195169282960705459117889f0
-const a2f =  0.008332157507538795471191410f0
-const a1f = -0.166666537523269653320312000f0
+const a2f =  0.00833215750753879547119141f0
+const a1f = -0.166666537523269653320312f0
 
 const b7d = -1.13615350239097429531523e-11
 const b6d =  2.08757471207040055479366e-09
 const b5d = -2.75573144028847567498567e-07
 const b4d =  2.48015872890001867311915e-05
-const b3d = -0.001388888888887140192823290
-const b2d =  0.041666666666666551959206200
-const b1d = -0.500000000000000000000000000
+const b3d = -0.00138888888888714019282329
+const b2d =  0.0416666666666665519592062
+const b1d = -0.50
 
-const b5f = -2.7181184236724220681935500f-07
-const b4f =  2.4799044695100747048854800f-05
-const b3f = -0.001388887874782085418701170f0
-const b2f =  0.041666664183139801025390600f0
-const b1f = -0.500000000000000000000000000f0
+const b5f = -2.71811842367242206819355f-07
+const b4f =  2.47990446951007470488548f-05
+const b3f = -0.00138888787478208541870117f0
+const b2f =  0.0416666641831398010253906f0
+const b1f = -0.5f0
 
 global @inline _sincos_a(x::Float64) = @horner x a1d a2d a3d a4d a5d a6d
 global @inline _sincos_a(x::Float32) = @horner x a1f a2f a3f
@@ -166,11 +166,11 @@ function sincos_fast{T<:FloatTypes}(x::T)
     rx = t + u
     u =_sincos_b(s)
     ry = u * s + T(1)
-    q & 1 != 0     && (s = ry; ry = rx; rx = s)
-    q & 2 != 0     && (rx = -rx)
+    q & 1 != 0 && (s = ry; ry = rx; rx = s)
+    q & 2 != 0 && (rx = -rx)
     (q+1) & 2 != 0 && (ry = -ry)
-    isinf(d)       && (rx = ry = T(NaN))
-    return Double(flipsign(rx,x), ry)
+    isinf(d) && (rx = ry = T(NaN))
+    Tuple{T,T}(Double(flipsign(rx,x), ry))
 end
 
 
@@ -182,7 +182,7 @@ function sincos{T<:FloatTypes}(x::T)
     s  = dadd2(s, q * -PI4C(T)*2)
     s  = dadd2(s, q * -PI4D(T)*2)
     t  = s
-    s  = ddsqu(s)
+    s  = dsqu(s)
     sx = T(s)
     u  =_sincos_a(sx)
     u *= sx * t.hi
@@ -195,7 +195,7 @@ function sincos{T<:FloatTypes}(x::T)
     q & 2 != 0     && (rx = -rx)
     (q+1) & 2 != 0 && (ry = -ry)
     isinf(d)       && (rx =  ry = T(NaN))
-    return Double(flipsign(rx, x), ry)
+    Tuple{T,T}(Double(flipsign(rx, x), ry))
 end
 end
 
@@ -240,9 +240,9 @@ function tan_fast{T<:FloatTypes}(d::T)
     q & 1 != 0 && (x = -x)
     s = x*x
     u =_tan_fast(s)
-    u = muladd(s, u * x, x)
+    u = muladd(s, u*x, x)
     q & 1 != 0 && (u = 1/u)
-    isinf(d)   && (u = T(NaN))
+    isinf(d) && (u = T(NaN))
     return u
 end
 
@@ -257,7 +257,7 @@ function tan{T<:FloatTypes}(d::T)
     x = dadd2(x, q * -PI4C(T)*2)
     x = dadd2(x, q * -PI4D(T)*2)
     q & 1 != 0 && (x = -x)
-    s = ddsqu(x)
+    s = dsqu(x)
     u =_tan(s)
     u = dmul(x, dadd(T(1), dmul(u, s)))
     q & 1 != 0 && (u = ddrec(u))
@@ -271,32 +271,32 @@ global atan_fast
 
 const c19d = -1.88796008463073496563746e-05
 const c18d =  0.000209850076645816976906797
-const c17d = -0.001106118314866724825634710
-const c16d =  0.003700267441887131192324030
-const c15d = -0.008898961958876554917408090
-const c14d =  0.016599329773529201970117000
-const c13d = -0.025451762493231264161686100
-const c12d =  0.033785258000135306999389700
-const c11d = -0.040762919127683650000193400
-const c10d =  0.046666715007784062563267500
-const c9d  = -0.052367485230348245761611300
-const c8d  =  0.058766639292667358085431300
-const c7d  = -0.066657357936108052598456200
-const c6d  =  0.076921953831176961835502900
-const c5d  = -0.090908995008245008229153000
-const c4d  =  0.111111105648261418443745000
-const c3d  = -0.142857142667713293837650000
-const c2d  =  0.199999999996591265594148000
-const c1d  = -0.333333333333311110369124000
+const c17d = -0.00110611831486672482563471
+const c16d =  0.00370026744188713119232403
+const c15d = -0.00889896195887655491740809
+const c14d =  0.016599329773529201970117
+const c13d = -0.0254517624932312641616861
+const c12d =  0.0337852580001353069993897
+const c11d = -0.0407629191276836500001934
+const c10d =  0.0466667150077840625632675
+const c9d  = -0.0523674852303482457616113
+const c8d  =  0.0587666392926673580854313
+const c7d  = -0.0666573579361080525984562
+const c6d  =  0.0769219538311769618355029
+const c5d  = -0.090908995008245008229153
+const c4d  =  0.111111105648261418443745
+const c3d  = -0.14285714266771329383765
+const c2d  =  0.199999999996591265594148
+const c1d  = -0.333333333333311110369124
 
 const c8f =  0.00282363896258175373077393f0
-const c7f = -0.01595690287649631500244140f0
-const c6f =  0.04250498861074447631835940f0
-const c5f = -0.07489009201526641845703120f0
-const c4f =  0.10634793341159820556640600f0
-const c3f = -0.14202736318111419677734400f0
-const c2f =  0.19992695748805999755859400f0
-const c1f = -0.33333101868629455566406200f0
+const c7f = -0.0159569028764963150024414f0
+const c6f =  0.0425049886107444763183594f0
+const c5f = -0.0748900920152664184570312f0
+const c4f =  0.106347933411598205566406f0
+const c3f = -0.142027363181114196777344f0
+const c2f =  0.199926957488059997558594f0
+const c1f = -0.333331018686294555664062f0
 
 global @inline _atan_fast(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d
 global @inline _atan_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f c8f
@@ -308,7 +308,7 @@ function atan_fast{T<:FloatTypes}(x::T)
         q = 2
     end
     if x > 1
-        x = 1.0/x
+        x = 1/x
         q |= 1
     end
     t = x*x
@@ -322,64 +322,66 @@ end
 
 
 function atan{T<:FloatTypes}(x::T)
-    x2 = atan2k(Double(abs(x)), Double(T(1)))
-    r = T(x2)
-    isinf(x) && (r = T(MPI2))
-    return flipsign(r, x)
-end
-
-
-function atan2_fast{T<:FloatTypes}(y::T, x::T)
-    r = atan2k_fast(abs(y), x)
-    r = flipsign(r,x)
-    if isinf(x) || x == 0
-        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI2) : T(0))
-    end
-    if isinf(y)
-        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI4) : T(0))
-    end
-    if y == 0
-        r = _sign(x) == -1 ? T(MPI) : T(0)
-    end
-    return isnan(x) || isnan(y) ? T(NaN) : flipsign(r,y)
-end
-
-
-function atan2{T<:FloatTypes}(y::T, x::T)
-    d = atan2k(Double(abs(y)), Double(x))
-    r = T(d)
-    r = flipsign(r, x)
-    if isinf(x) || x == 0
-        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI2) : T(0))
-    end
-    if isinf(y)
-        r = T(MPI2) - (isinf(x) ? _sign(x)*T(MPI4) : T(0))
-    end
-    if y == 0
-        r = _sign(x) == -1 ? T(MPI) : T(0)
-    end
-    return isnan(x) || isnan(y) ? T(NaN) : flipsign(r,y)
-end
-
-
-asin_fast{T<:FloatTypes}(x::T) = flipsign(atan2k_fast(abs(x), _sqrt((1+x)*(1-x))), x)
-
-
-function asin{T<:FloatTypes}(x::T)
-    x2 = atan2k(Double(abs(x)), dsqrt(dmul(dadd(T(1), x), dadd(T(1),-x))))
-    u = T(x2)
-    abs(x) == 1 && (u = T(MPI2))
+    u = T(atan2k(Double(abs(x)), Double(T(1))))
+    isinf(x) && (u = T(MPI2))
     return flipsign(u,x)
 end
 
 
-acos_fast{T<:FloatTypes}(x::T) = flipsign(atan2k_fast(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
+function atan2_fast{T<:FloatTypes}(x::T, y::T)
+    r = atan2k_fast(abs(x), y)
+    r = flipsign(r,y)
+    if isinf(y) || y == 0
+        r = T(MPI2) - (isinf(y) ? _sign(y)*T(MPI2) : T(0))
+    end
+    if isinf(x)
+        r = T(MPI2) - (isinf(y) ? _sign(y)*T(MPI4) : T(0))
+    end
+    if x == 0
+        r = _sign(y) == -1 ? T(MPI) : T(0)
+    end
+    return isnan(y) || isnan(x) ? T(NaN) : flipsign(r,x)
+end
+
+
+function atan2{T<:FloatTypes}(x::T, y::T)
+    r = T(atan2k(Double(abs(x)), Double(y)))
+    r = flipsign(r,y)
+    if isinf(y) || y == 0
+        r = T(MPI2) - (isinf(y) ? _sign(y)*T(MPI2) : T(0))
+    end
+    if isinf(x)
+        r = T(MPI2) - (isinf(y) ? _sign(y)*T(MPI4) : T(0))
+    end
+    if x == 0
+        r = _sign(y) == -1 ? T(MPI) : T(0)
+    end
+    return isnan(y) || isnan(x) ? T(NaN) : flipsign(r,x)
+end
+
+
+function asin_fast{T<:FloatTypes}(x::T)
+    flipsign(atan2k_fast(abs(x), _sqrt((1+x)*(1-x))), x)
+end
+
+
+function asin{T<:FloatTypes}(x::T)
+    d = atan2k(Double(abs(x)), dsqrt(dmul(dadd(T(1), x), dadd(T(1),-x))))
+    u = T(d)
+    abs(x) == 1 && (u = T(MPI2))
+    flipsign(u,x)
+end
+
+
+function acos_fast{T<:FloatTypes}(x::T)
+    flipsign(atan2k_fast(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
+end
 
 
 function acos{T<:FloatTypes}(x::T)
-    x2 = atan2k(dsqrt(dmul(dadd(T(1), x), dsub(T(1), x))), Double(abs(x)))
-    x2 = flipsign(x2,x)
-    abs(x) == 1 && (x2 = Double(T(0)))
-    x < 0       && (x2 = dadd(MDPI(T), x2))
-    return T(x2)
+    d = atan2k(dsqrt(dmul(dadd(T(1), x), dsub(T(1), x))), Double(abs(x)))
+    d = flipsign(d,x)
+    abs(x) == 1 && (d = Double(T(0)))
+    x < 0 && (d = dadd(MDPI(T), d))
+    return T(d)
 end

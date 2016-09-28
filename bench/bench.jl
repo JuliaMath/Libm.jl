@@ -58,26 +58,26 @@ for f in (:atanh,)
 end
 
 const micros = OrderedDict(
-    # "sin"   => x_trig,
-    # "cos"   => x_trig,
-    # "tan"   => x_trig,
-    # "asin"  => x_atrig,
+    "sin"   => x_trig,
+    "cos"   => x_trig,
+    "tan"   => x_trig,
+    "asin"  => x_atrig,
     "acos"  => x_atrig,
-    # "atan"  => x_atan,
-    # "exp"   => x_exp,
-    # "exp2"  => x_exp2,
-    # "exp10" => x_exp10,
-    # "expm1" => x_expm1,
-    # "log"   => x_log,
-    # "log10" => x_log10,
-    # "log1p" => x_log1p,
-    # "sinh"  => x_trigh,
-    # "cosh"  => x_trigh,
-    # "tanh"  => x_trigh,
-    # "asinh" => x_asinhatanh,
-    # "acosh" => x_acosh,
-    # "atanh" => x_asinhatanh,
-    # "cbrt"  => x_cbrt
+    "atan"  => x_atan,
+    "exp"   => x_exp,
+    "exp2"  => x_exp2,
+    "exp10" => x_exp10,
+    "expm1" => x_expm1,
+    "log"   => x_log,
+    "log10" => x_log10,
+    "log1p" => x_log1p,
+    "sinh"  => x_trigh,
+    "cosh"  => x_trigh,
+    "tanh"  => x_trigh,
+    "asinh" => x_asinhatanh,
+    "acosh" => x_acosh,
+    "atanh" => x_asinhatanh,
+    "cbrt"  => x_cbrt
     )
 
 for n in ("Base","Libm")
