@@ -5,7 +5,7 @@ include("Musl/Musl.jl")
 using .Musl
 
 export sin, cos, tan, asin, acos, atan, atan2, sincos, sinh, cosh, tanh,
-        asinh, acosh, atanh, log, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
+        asinh, acosh, atanh, log, log2, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
 
 # fast variants (within 3 ulp)
 export sin_fast, cos_fast, tan_fast, sincos_fast, asin_fast, acos_fast, atan_fast, atan2_fast, log_fast, cbrt_fast
@@ -36,6 +36,9 @@ const M2P23 = 1.5874010519681994747517056392723082603914933278998530098082857618
 
 MDLN10E(::Type{Float64}) = Double(0.4342944819032518, 1.098319650216765e-17) # log10(e)
 MDLN10E(::Type{Float32}) = Double(0.4342945f0, -1.010305f-8)
+
+MDLN2E(::Type{Float64}) = Double(1.4426950408889634, 2.0355273740931033e-17) # log2(e)
+MDLN2E(::Type{Float32}) = Double(1.442695f0, 1.925963f-8)
 
 MDLN10(::Type{Float64}) = Double(2.302585092994046, -2.1707562233822494e-16) # log(10)
 MDLN10(::Type{Float32}) = Double(2.3025851f0, -3.1975436f-8)

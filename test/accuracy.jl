@@ -88,7 +88,7 @@ IntF(::Type{Float32}) = Int32
 
 
     xx = map(T, vcat(0.0001:0.0001:10, 0.0001:0.1:10000))
-    fun_table = Dict(Libm.log10 => Base.log10)
+    fun_table = Dict(Libm.log10 => Base.log10, Libm.log2 => Base.log2)
     tol = 1
     test_acc(T, fun_table, xx, tol)
 

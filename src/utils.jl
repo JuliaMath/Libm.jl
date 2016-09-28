@@ -25,10 +25,10 @@ is_fma_fast() = is_fma_fast(Float64) && is_fma_fast(Float32)
 # sqrt without the domain checks which we don't need since we handle the checks ourselves
 _sqrt{T<:FloatTypes}(x::T) = Base.box(T, Base.sqrt_llvm_fast(Base.unbox(T,x)))
 
-@inline ispinf{T<:FloatTypes}(x::T) = x == typemax(T)
-@inline isninf{T<:FloatTypes}(x::T) = x == typemin(T)
+@inline ispinf{T<:FloatTypes}(x::T) = x == T(Inf)
+@inline isninf{T<:FloatTypes}(x::T) = x == T(-Inf)
 
-macro horner_fast(x,p...)
+macro horner_split(x,p...)
     t1 = gensym("x1")
     t2 = gensym("x2")
     blk = quote

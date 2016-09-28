@@ -1,73 +1,78 @@
-# overflow argument value
-_over_sinhcosh(::Type{Float64}) = 710.0
-_over_sinhcosh(::Type{Float32}) = 89f0
+
+
+over_sch(::Type{Float64}) = 710.0
+over_sch(::Type{Float32}) = 89f0
 
 function sinh{T<:FloatTypes}(x::T)
-    y = abs(x)
-    d = expk2(Double(y))
-    d = ddsub(d, ddrec(d))
-    y = T(d) * T(0.5)
-    y = abs(x) > _over_sinhcosh(T) ? typemax(T) : y
-    y = isnan(y) ? typemax(T) : y
-    y = flipsign(y, x)
-    y = isnan(x) ? T(NaN)     : y
-    return y
+    u = abs(x)
+    d = expk2(Double(u))
+    d = dsub(d, ddrec(d))
+    u = T(d)*T(0.5)
+    u = abs(x) > over_sch(T) ? T(Inf) : u
+    u = isnan(u) ? T(Inf) : u
+    u = flipsign(u,x)
+    u = isnan(x) ? T(NaN) : u
+    return u
 end
+
 
 function cosh{T<:FloatTypes}(x::T)
-    y = abs(x)
-    d = expk2(Double(y))
-    d = ddadd(d, ddrec(d))
-    y = T(d) * T(0.5)
-    y = abs(x) > _over_sinhcosh(T) ? typemax(T) : y
-    y = isnan(y) ? typemax(T) : y
-    y = isnan(x) ? T(NaN)     : y
-    return y
+    u = abs(x)
+    d = expk2(Double(u))
+    d = dadd(d, ddrec(d))
+    u = T(d)*T(0.5)
+    u = abs(x) > over_sch(T) ? T(Inf) : u
+    u = isnan(u) ? T(Inf) : u
+    u = isnan(x) ? T(NaN) : u
+    return u
 end
 
-# overflow argument value
-_over_tanh(::Type{Float64}) = 18.714973875
-_over_tanh(::Type{Float32}) = 8.664339742f0
+
+over_th(::Type{Float64}) = 18.714973875
+over_th(::Type{Float32}) = 8.664339742f0
 
 function tanh{T<:FloatTypes}(x::T)
-    y = abs(x)
-    d = expk2(Double(y))
+    u = abs(x)
+    d = expk2(Double(u))
     e = ddrec(d)
-    d = dddiv(ddsub(d, e), ddadd(d, e))
-    y = T(d)
-    y = abs(x) > _over_tanh(T) ? T(1) : y
-    y = isnan(y) ? T(1) : y
-    y = flipsign(y, x)
-    y = isnan(x) ? T(NaN) : y
-    return y
+    d = ddiv(dsub(d, e), dadd(d, e))
+    u = T(d)
+    u = abs(x) > over_th(T) ? T(1) : u
+    u = isnan(u) ? T(1) : u
+    u = flipsign(u, x)
+    u = isnan(x) ? T(NaN) : u
+    return u
 end
+
 
 function asinh{T<:FloatTypes}(x::T)
-    y = abs(x)
-    d = logk2(ddadd(ddsqrt(ddadd2(ddsqu(y),  T(1))), y))
-    y = T(d)
-    y = isinf(x) || isnan(y) ? typemax(T) : y
-    y = flipsign(y, x)
-    y = isnan(x) ? T(NaN) : y
-    return y
+    u = abs(x)
+    d = logk2(dadd(dsqrt(dadd2(ddsqu(u),  T(1))), u))
+    u = T(d)
+    u = isinf(x) || isnan(u) ? T(Inf) : u
+    u = flipsign(u,x)
+    u = isnan(x) ? T(NaN) : u
+    return u
 end
+
 
 function acosh{T<:FloatTypes}(x::T)
-    d = logk2(ddadd2(ddsqrt(ddadd2(ddsqu(x), -T(1))), x))
-    y = T(d)
-    y = isinf(x) || isnan(y) ? typemax(T) : y
-    y = x == T(1) ? T(0) : y
-    y = x < T(1)  ? T(NaN)  : y
-    y = isnan(x)  ? T(NaN)  : y
-    return y
+    d = logk2(dadd2(dsqrt(dsub2(ddsqu(x), T(1))), x))
+    u = T(d)
+    u = isinf(x) || isnan(u) ? T(Inf) : u
+    u = x == T(1) ? T(0) : u
+    u = x < T(1)  ? T(NaN) : u
+    u = isnan(x)  ? T(NaN) : u
+    return u
 end
 
+
 function atanh{T<:FloatTypes}(x::T)
-    y = abs(x)
-    d = logk2(dddiv(ddadd2(T(1), y), ddadd2(T(1), -y)))
-    y = y > T(1) ? T(NaN) : (y == T(1) ? typemax(T) : T(d) * T(0.5))
-    y = isinf(x) || isnan(y) ? T(NaN) : y
-    y = flipsign(y, x)
-    y = isnan(x) ? T(NaN) : y
-    return y
+    u = abs(x)
+    d = logk2(ddiv(dadd2(T(1), u), dsub2(T(1), u)))
+    u = u > T(1) ? T(NaN) : (u == T(1) ? T(Inf) : T(d)*T(0.5))
+    u = isinf(x) || isnan(u) ? T(NaN) : u
+    u = flipsign(u,x)
+    u = isnan(x) ? T(NaN) : u
+    return u
 end

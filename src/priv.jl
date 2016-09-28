@@ -21,7 +21,7 @@ exponent amount back in.
     m = q >> v
     m = (((m + q) >> n) - m) << (n-offset)
     q = q - (m << offset)
-    return m, q
+    m, q
 end
 @inline split_exponent(::Type{Float64}, q::Int) = _split_exponent(q, UInt(9), UInt(31), UInt(2))
 @inline split_exponent(::Type{Float32}, q::Int) = _split_exponent(q, UInt(6), UInt(31), UInt(2))
@@ -42,8 +42,9 @@ Computes `a × 2^n`
     u = integer2float(T, m)
     x = x*u*u*u*u
     u = integer2float(T, q)
-    return x*u
+    x*u
 end
+
 
 # The following define threshold values for `ilog2k`
 real_cut_offset(::Type{Float64}) = 300
@@ -126,27 +127,29 @@ global @inline function atan2k_fast{T<:FloatTypes}(y::T, x::T)
     q*T(MPI2) + t
 end
 
+
 global @inline _atan2k(x::Double{Float64}) = @horner x.hi c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d c20d
-global @inline _atan2k(x::Double{Float32}) = ddadd(c1f, x.hi*(@horner x.hi c2f c3f c4f c5f c6f c7f c8f c9f))
+global @inline _atan2k(x::Double{Float32}) = dadd(c1f, x.hi*(@horner x.hi c2f c3f c4f c5f c6f c7f c8f c9f))
 
 global @inline function atan2k{T<:FloatTypes}(y::Double{T}, x::Double{T})
     q = 0
-    if x.hi < 0
+    if x < 0
         x = -x
         q = -2
     end
-    if y.hi > x.hi
+    if y > x
         t = x; x = y
         y = -t
         q += 1
     end
-    s = dddiv(y, x)
+    s = ddiv(y, x)
     t = ddsqu(s)
     u =_atan2k(t)
-    t = ddmul(s, ddadd(T(1), ddmul(t, u)))
-    ddadd(ddmul(T(q), MDPI2(T)), t)
+    t = dmul(s, dadd(T(1), dmul(t, u)))
+    dadd(dmul(T(q), MDPI2(T)), t)
 end
 end
+
 
 let
 const c10d = 2.51069683420950419527139e-08
@@ -154,41 +157,43 @@ const c9d  = 2.76286166770270649116855e-07
 const c8d  = 2.75572496725023574143864e-06
 const c7d  = 2.48014973989819794114153e-05
 const c6d  = 0.000198412698809069797676111
-const c5d  = 0.001388888893997712896052900
-const c4d  = 0.008333333333323714176010810
-const c3d  = 0.041666666666540952412844900
-const c2d  = 0.166666666666666740681535000
-const c1d  = 0.500000000000000999200722000
+const c5d  = 0.0013888888939977128960529
+const c4d  = 0.00833333333332371417601081
+const c3d  = 0.0416666666665409524128449
+const c2d  = 0.166666666666666740681535
+const c1d  = 0.500000000000000999200722
 
 const c5f = 0.00136324646882712841033936f0
 const c4f = 0.00836596917361021041870117f0
-const c3f = 0.04167108237743377685546880f0
-const c2f = 0.16666552424430847167968800f0
-const c1f = 0.49999985098838806152343800f0
+const c3f = 0.0416710823774337768554688f0
+const c2f = 0.166665524244308471679688f0
+const c1f = 0.499999850988388061523438f0
 
-global @inline _expk(x::Float64) = @horner_fast x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d
+global @inline _expk(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d
 global @inline _expk(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 global @inline function expk{T<:FloatTypes}(d::Double{T})
     q = rint(T(d)*T(MLN2E))
-    s = ddadd(d, q * -LN2U(T))
-    s = ddadd(s, q * -LN2L(T))
+    s = dadd(d, q * -LN2U(T))
+    s = dadd(s, q * -LN2L(T))
     u =_expk(T(s))
-    t = ddadd(s, ddmul(ddsqu(s), u))
-    t = ddadd(T(1), t)
+    t = dadd(s, dmul(ddsqu(s), u))
+    t = dadd(T(1), t)
     ldexpk(T(t), q)
 end
 
+
 global @inline function expk2{T<:FloatTypes}(d::Double{T})
     q = rint(T(d)*T(MLN2E))
-    s = ddadd(d, q * -LN2U(T))
-    s = ddadd(s, q * -LN2L(T))
+    s = dadd(d, q * -LN2U(T))
+    s = dadd(s, q * -LN2L(T))
     u =_expk(s.hi)
-    t = ddadd(s, ddmul(ddsqu(s), u))
-    t = ddadd(T(1), t)
+    t = dadd(s, dmul(ddsqu(s), u))
+    t = dadd(T(1), t)
     scale(t, pow2i(T, q))
 end
 end
+
 
 let
 const c8d = 0.134601987501262130076155
@@ -200,29 +205,30 @@ const c3d = 0.285714285651261412873718
 const c2d = 0.400000000000222439910458
 const c1d = 0.666666666666666371239645
 
-const c4f = 0.237159967422485351562500f0
+const c4f = 0.2371599674224853515625f0
 const c3f = 0.285279005765914916992188f0
 const c2f = 0.400005519390106201171875f0
 const c1f = 0.666666567325592041015625f0
 
-global @inline _logk(x::Float64) = @horner_fast x c1d c2d c3d c4d c5d c6d c7d c8d
+global @inline _logk(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d
 global @inline _logk(x::Float32) = @horner x c1f c2f c3f c4f
 
 global @inline function logk{T<:FloatTypes}(d::T)
     e  = ilog2k(d * T(M1SQRT2))
     m  = ldexpk(d,-e)
-    x  = dddiv(ddadd2(-T(1), m), ddadd2(T(1), m))
+    x  = ddiv(dadd2(-T(1), m), dadd2(T(1), m))
     x2 = ddsqu(x)
     t  =_logk(x2.hi)
-    ddadd(ddmul(MDLN2(T), T(e)), ddadd(scale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
+    dadd(dmul(MDLN2(T), T(e)), dadd(scale(x, T(2.0)), dmul(dmul(x2, x), t)))
 end
+
 
 global @inline function logk2{T<:FloatTypes}(d::Double{T})
     e  = ilog2k(d.hi * T(M1SQRT2))
     m  = scale(d, pow2i(T,-e))
-    x  = dddiv(ddadd2(m, -T(1)), ddadd2(m, T(1)))
+    x  = ddiv(dadd2(m, -T(1)), dadd2(m, T(1)))
     x2 = ddsqu(x)
     t  =_logk(x2.hi)
-    ddadd(ddmul(MDLN2(T), T(e)), ddadd(scale(x, T(2.0)), ddmul(ddmul(x2, x), t)))
+    dadd(dmul(MDLN2(T), T(e)), dadd(scale(x, T(2.0)), dmul(dmul(x2, x), t)))
 end
 end

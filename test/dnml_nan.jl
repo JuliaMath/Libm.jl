@@ -295,16 +295,7 @@ end
 end
 
 
-
-@testset "denormal/nonnumber $xlog" for xlog in (Libm.log, Libm.log_fast)
-    xa = T[NaN, Inf, -Inf, 0, -1]
-    for x in xa
-        @test cmpdenorm(xlog(x), Base.log(BigFloat(x)))
-    end
-end
-
-
-@testset "denormal/nonnumber xexp" begin
+@testset "denormal/nonnumber exp" begin
     xa = T[NaN, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(Libm.exp(x), Base.exp(BigFloat(x)))
@@ -312,7 +303,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xsinh" begin
+@testset "denormal/nonnumber sinh" begin
     xa = T[NaN, 0.0, -0.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(Libm.sinh(x), Base.sinh(BigFloat(x)))
@@ -320,7 +311,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xcosh" begin
+@testset "denormal/nonnumber cosh" begin
     xa = T[NaN, 0.0, -0.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(Libm.cosh(x),  Base.cosh(BigFloat(x)))
@@ -328,7 +319,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xtanh" begin
+@testset "denormal/nonnumber tanh" begin
     xa = T[NaN, 0.0, -0.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(Libm.tanh(x),  Base.tanh(BigFloat(x)))
@@ -336,7 +327,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xasinh" begin
+@testset "denormal/nonnumber asinh" begin
     xa = T[NaN, 0.0, -0.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(Libm.asinh(x), Base.asinh(BigFloat(x)))
@@ -344,7 +335,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xacosh" begin
+@testset "denormal/nonnumber acosh" begin
     xa = T[NaN, 0.0, -0.0, 1.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(Libm.acosh(x), Base.acosh(BigFloat(x)))
@@ -352,7 +343,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xatanh" begin
+@testset "denormal/nonnumber atanh" begin
     xa = T[NaN, 0.0, -0.0, 1.0, -1.0, Inf, -Inf, 10000, -10000]
     for x in xa
         @test cmpdenorm(Libm.atanh(x), Base.atanh(BigFloat(x)))
@@ -368,7 +359,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xexp2" begin
+@testset "denormal/nonnumber exp2" begin
     xa = T[NaN, Inf, -Inf]
     for x in xa
         @test cmpdenorm(Libm.exp2(x), Base.exp2(BigFloat(x)))
@@ -376,7 +367,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xexp10" begin
+@testset "denormal/nonnumber exp10" begin
     xa = T[NaN, Inf, -Inf]
     for x in xa
         @test cmpdenorm(Libm.exp10(x), Base.exp10(BigFloat(x)))
@@ -384,7 +375,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xexpm1" begin
+@testset "denormal/nonnumber expm1" begin
     xa = T[NaN, Inf, -Inf]
     for x in xa
         @test cmpdenorm(Libm.expm1(x), Base.expm1(BigFloat(x)))
@@ -392,15 +383,32 @@ end
 end
 
 
-@testset "denormal/nonnumber xlog10" begin
-    xa = T[NaN, Inf, -Inf, 0.0, -1.0]
+
+@testset "denormal/nonnumber $xlog" for xlog in (Libm.log, Libm.log_fast)
+    xa = T[NaN, Inf, -Inf, 0, -1]
+    for x in xa
+        @test cmpdenorm(xlog(x), Base.log(BigFloat(x)))
+    end
+end
+
+
+@testset "denormal/nonnumber log10" begin
+    xa = T[NaN, Inf, -Inf, 0, -1]
     for x in xa
         @test cmpdenorm(Libm.log10(x), Base.log10(BigFloat(x)))
     end
 end
 
 
-@testset "denormal/nonnumber xlog1p" begin
+@testset "denormal/nonnumber log2" begin
+    xa = T[NaN, Inf, -Inf, 0, -1]
+    for x in xa
+        @test cmpdenorm(Libm.log2(x), Base.log2(BigFloat(x)))
+    end
+end
+
+
+@testset "denormal/nonnumber log1p" begin
     xa = T[NaN, Inf, -Inf, 0.0, -0.0, -1.0, -2.0]
     for x in xa
         @test cmpdenorm(Libm.log1p(x), Base.log1p(BigFloat(x)))
@@ -408,7 +416,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xldexp" begin
+@testset "denormal/nonnumber ldexp" begin
     for i = -10000:10000
         a = Libm.ldexp(T(1.0), i)
         b = Base.ldexp(BigFloat(1.0), i)
@@ -417,7 +425,7 @@ end
 end
 
 
-@testset "denormal/nonnumber xilog2" begin
+@testset "denormal/nonnumber ilog2" begin
     @test Libm.ilog2(+T(Inf)) == typemax(Int)
     @test Libm.ilog2(-T(Inf)) == typemax(Int)
     @test Libm.ilog2(+T(0.0)) == typemin(Int)
