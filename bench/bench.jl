@@ -84,7 +84,8 @@ for n in ("Base","Libm")
     for (f,x) in micros
         suite[n][f] = BenchmarkGroup([f])
         for T in test_types
-            suite[n][f][string(T)] = @benchmarkable bench_reduce(eval(Expr(:.,Symbol($n),QuoteNode(Symbol($f)))), $(x(T)))
+            funex = Expr(:.,Symbol(n),QuoteNode(Symbol(f)))
+            suite[n][f][string(T)] = @benchmarkable bench_reduce($funex, $(x(T)))
         end
     end
 end
@@ -92,7 +93,7 @@ end
 
 tune_params = joinpath(dirname(@__FILE__), "params.jld")
 if !isfile(tune_params) || RETUNE
-    tune!(suite; verbose=VERBOSE)
+    tune!(suite; verbose=VERBOSE, seconds = 1)
     save(tune_params, "suite", params(suite))
     println("Saving tuned parameters.")
 else
@@ -101,7 +102,7 @@ else
 end
 
 println("Running micro benchmarks...")
-results = run(suite; verbose=VERBOSE)
+results = run(suite; verbose=VERBOSE, seconds = 1)
 
 print_with_color(:blue, "Benchmarks: median ratio Libm/Base\n")
 for f in keys(micros)
@@ -110,7 +111,7 @@ for f in keys(micros)
         println()
         print("time: ", )
         tratio = ratio(median(results["Libm"][f][string(T)]), median(results["Base"][f][string(T)])).time
-        tcolor = tratio > 2.5 ? :red : tratio < 1 ? :green : :blue
+        tcolor = tratio > 2.5 ? :red : tratio < 1.5 ? :green : :blue
         print_with_color(tcolor, @sprintf("%.2f",tratio), " ", string(T))
         if DETAILS
             print_with_color(:blue, "details Libm/Base\n")

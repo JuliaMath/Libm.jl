@@ -13,7 +13,6 @@ is_fma_fast() = is_fma_fast(Float64) && is_fma_fast(Float32)
 @inline _sign{T<:FloatTypes}(d::T) =  flipsign(T(1), d)
 
 @inline rint{T<:FloatTypes}(x::T) = unsafe_trunc(Int, ifelse(x < 0, x - T(0.5), x + T(0.5)))
-# @inline rintf{T<:FloatTypes}(x::T) = trunc(ifelse(x < 0, x - T(0.5), x + T(0.5)))
 
 @inline integer2float(::Type{Float64}, m::Int) = reinterpret(Float64, (m % Int64) << significand_bits(Float64))
 @inline integer2float(::Type{Float32}, m::Int) = reinterpret(Float32, (m % Int32) << significand_bits(Float32))
@@ -28,3 +27,35 @@ _sqrt{T<:FloatTypes}(x::T) = Base.box(T, Base.sqrt_llvm_fast(Base.unbox(T,x)))
 
 @inline ispinf{T<:FloatTypes}(x::T) = x == typemax(T)
 @inline isninf{T<:FloatTypes}(x::T) = x == typemin(T)
+
+macro horner_fast(x,p...)
+    t1 = gensym("x1")
+    t2 = gensym("x2")
+    blk = quote
+        $t1 = $(esc(x))
+        $t2 = $(esc(x)) * $(esc(x))
+    end
+    n = length(p)
+    p0 = esc(p[1])
+    if isodd(n)
+        ex_o = esc(p[end-1])
+        ex_e = esc(p[end])
+        for i = n-3:-2:2
+            ex_o = :(muladd($(t2), $ex_o, $(esc(p[i]))))
+        end
+        for i = n-2:-2:2
+            ex_e = :(muladd($(t2), $ex_e, $(esc(p[i]))))
+        end
+    elseif iseven(n)
+        ex_o = esc(p[end])
+        ex_e = esc(p[end-1])
+        for i = n-2:-2:2
+            ex_o = :(muladd($(t2), $ex_o, $(esc(p[i]))))
+        end
+        for i = n-3:-2:2
+            ex_e = :(muladd($(t2), $ex_e, $(esc(p[i]))))
+        end
+    end
+    push!(blk.args,:($(p0) + $(t1)*$(ex_o) + $(t2)*$(ex_e)) )    
+    return blk
+end

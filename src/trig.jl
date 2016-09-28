@@ -222,7 +222,7 @@ const c3f =  0.0540687143802642822265625f0
 const c2f =  0.133325666189193725585938f0
 const c1f =  0.33333361148834228515625f0
 
-global @inline _tan_fast(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d
+global @inline _tan_fast(x::Float64) = @horner_fast x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d
 global @inline _tan_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f
 
 function tan_fast{T<:FloatTypes}(d::T)
@@ -240,7 +240,7 @@ function tan_fast{T<:FloatTypes}(d::T)
     return u
 end
 
-global @inline _tan(x::Double{Float64}) = ddadd(c1d, x.hi*(@horner x.hi c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d))
+global @inline _tan(x::Double{Float64}) = ddadd(c1d, x.hi*(@horner_fast x.hi c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d))
 global @inline _tan(x::Double{Float32}) = ddadd(c1f, ddmul(x, @horner x.hi c2f c3f c4f c5f c6f c7f))
 # global @inline _tan(x::Double{Float32}) = ddadd(c1f, ddmul(x.hi, ddadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
 
@@ -291,7 +291,7 @@ const c3f = -0.14202736318111419677734400f0
 const c2f =  0.19992695748805999755859400f0
 const c1f = -0.33333101868629455566406200f0
 
-global @inline _atan_fast(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d
+global @inline _atan_fast(x::Float64) = @horner_fast x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d
 global @inline _atan_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f c8f
 
 function atan_fast{T<:FloatTypes}(x::T)
