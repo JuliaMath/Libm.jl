@@ -69,6 +69,7 @@ const micros = OrderedDict(
     "exp10" => x_exp10,
     "expm1" => x_expm1,
     "log"   => x_log,
+    "log2"  => x_log10,
     "log10" => x_log10,
     "log1p" => x_log1p,
     "sinh"  => x_trigh,
@@ -93,7 +94,7 @@ end
 
 tune_params = joinpath(dirname(@__FILE__), "params.jld")
 if !isfile(tune_params) || RETUNE
-    tune!(suite; verbose=VERBOSE, seconds = 1)
+    tune!(suite; verbose=VERBOSE, seconds = 2)
     save(tune_params, "suite", params(suite))
     println("Saving tuned parameters.")
 else
@@ -102,7 +103,7 @@ else
 end
 
 println("Running micro benchmarks...")
-results = run(suite; verbose=VERBOSE, seconds = 5)
+results = run(suite; verbose=VERBOSE, seconds = 2)
 
 print_with_color(:blue, "Benchmarks: median ratio Libm/Base\n")
 for f in keys(micros)

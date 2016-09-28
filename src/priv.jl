@@ -29,15 +29,15 @@ end
 """
     ldexpk(a::FloatTypes, n::Int) -> FloatTypes
 
-Computes `a × 2^n`
+Computes `a × 2^n`.
 """
 @inline function ldexpk{T<:FloatTypes}(x::T, q::Int)
     bias = exponent_bias(T)
     emax = exponent_max(T)
     m, q = split_exponent(T,q)
     m += bias
-    m = m < 0 ? 0 : m
-    m = m > emax ? emax : m
+    m = ifelse(m < 0, 0, m)
+    m = ifelse(m > emax, emax, m)
     q += bias
     u = integer2float(T, m)
     x = x*u*u*u*u
@@ -63,14 +63,16 @@ real_cut_max(::Type{Float32}) = 1.8446744073709552f19
 
 Returns the integral part of the logarithm of `|x|`, using 2 as base for the logarithm; in other
 words this returns the binary exponent of `x` so that
-    x = significand \times 2^exponenet
-where `significand \in [0.5, 1)`
+
+    x = significand \times 2^exponent
+
+where `significand \in [0.5, 1)`.
 """
 @inline function ilog2k{T<:FloatTypes}(d::T)
     m = d < real_cut_min(T)
-    d = m ? real_cut_max(T) * d : d
+    d = ifelse(m, real_cut_max(T)*d, d)
     q = float2integer(d) & exponent_max(T)
-    q = m ? q - (real_cut_offset(T) + exponent_bias(T) - 1) : q - (exponent_bias(T) - 1) # we subtract 1 since we want 2^q
+    q = ifelse(m, q - (real_cut_offset(T) + exponent_bias(T) - 1), q - (exponent_bias(T) - 1)) # subtract 1 since we want 2^q
 end
 
 
