@@ -1,4 +1,4 @@
-import Base: -, flipsign, normalize, scale, convert, <
+import Base: -, flipsign, normalize, scale, convert, <, copysign
 
 immutable Double{T<:FloatTypes} <: Number
     hi::T
@@ -25,6 +25,7 @@ end
 @inline flipsign{T<:FloatTypes}(x::Double{T}, y::T) = Double(flipsign(x.hi, y), flipsign(x.lo, y))
 
 @inline scale{T<:FloatTypes}(x::Double{T}, s::T) = Double(s*x.hi, s*x.lo)
+
 
 @inline -{T}(x::Double{T}) = Double(-x.hi,-x.lo)
 

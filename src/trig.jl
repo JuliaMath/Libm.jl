@@ -367,9 +367,9 @@ asin_fast{T<:FloatTypes}(x::T) = flipsign(atan2k_fast(abs(x), _sqrt((1+x)*(1-x))
 
 function asin{T<:FloatTypes}(x::T)
     x2 = atan2k(Double(abs(x)), dsqrt(dmul(dadd(T(1), x), dadd(T(1),-x))))
-    r = T(x2)
-    abs(x) == 1 && (r = T(MPI2))
-    return flipsign(r,x)
+    u = T(x2)
+    abs(x) == 1 && (u = T(MPI2))
+    return flipsign(u,x)
 end
 
 
@@ -377,8 +377,8 @@ acos_fast{T<:FloatTypes}(x::T) = flipsign(atan2k_fast(_sqrt((1+x)*(1-x)), abs(x)
 
 
 function acos{T<:FloatTypes}(x::T)
-    x2 = atan2k(dsqrt(dmul(dadd(T(1), x), dadd(T(1),-x))), Double(abs(x)))
-    x2 = scale(x2, _sign(x))
+    x2 = atan2k(dsqrt(dmul(dadd(T(1), x), dsub(T(1), x))), Double(abs(x)))
+    x2 = flipsign(x2,x)
     abs(x) == 1 && (x2 = Double(T(0)))
     x < 0       && (x2 = dadd(MDPI(T), x2))
     return T(x2)
