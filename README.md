@@ -43,7 +43,7 @@ julia> Libm.exp(3f0)
 The exported functions include (within 1 ulp)
 ```julia
 sin, cos, tan, asin, acos, atan, atan2, sincos, sinh, cosh, tanh,
-    asinh, acosh, atanh, log, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
+    asinh, acosh, atanh, log, log2, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
  ```
  Faster variants include (within 3 ulp)
 
@@ -62,7 +62,7 @@ include(joinpath(Pkg.dir("Libm"), "bench", "bench.jl"))
 Note this will take some time to run for the first time (subsequent runs will be much faster). Please ensure you run the benchmarks under `-O3` and that you are not concurrently running other cpu intensive tasks.
 **Feel free to post your benchmark results at https://github.com/JuliaMath/Libm.jl/issues/34**
 
-Sample benchmark results (commit 1074d479c469e2afcf0d7608ebcbbad7e8aa0a77)
+Sample benchmark results (commit 053528ab9b9e673bca99d1dc7db5445e39ad0d77)
 ```julia
 julia> versioninfo()
 Julia Version 0.5.0
@@ -76,85 +76,90 @@ Platform Info:
   LIBM: libopenlibm
   LLVM: libLLVM-3.7.1 (ORCJIT, haswell)
 
-sin
-time: 0.75 Float64
-time: 2.00 Float32
-
-cos
-time: 0.82 Float64
-time: 2.18 Float32
-
-tan
-time: 1.01 Float64
-time: 1.94 Float32
-
-asin
-time: 2.32 Float64
-time: 2.80 Float32
-
-acos
-time: 2.96 Float64
-time: 3.74 Float32
-
-atan
-time: 2.05 Float64
-time: 2.30 Float32
-
-exp
-time: 1.26 Float64
-time: 1.57 Float32
-
-exp2
-time: 3.26 Float64
-time: 5.69 Float32
-
-exp10
-time: 0.25 Float64
-time: 0.41 Float32
-
-expm1
-time: 2.34 Float64
-time: 3.70 Float32
-
-log
-time: 1.86 Float64
-time: 2.22 Float32
-
-log10
-time: 1.61 Float64
-time: 1.98 Float32
-
-log1p
-time: 1.50 Float64
-time: 1.52 Float32
-
-sinh
-time: 0.96 Float64
-time: 1.02 Float32
-
-cosh
-time: 1.30 Float64
-time: 1.46 Float32
-
-tanh
-time: 1.84 Float64
-time: 1.14 Float32
-
-asinh
-time: 1.15 Float64
-time: 1.27 Float32
-
-acosh
-time: 1.09 Float64
-time: 1.09 Float32
-
-atanh
-time: 2.11 Float64
-time: 2.37 Float32
-
-cbrt
-time: 2.38 Float64
-time: 3.79 Float32
+Benchmarks: median ratio Libm/Base
+sin                
+time: 0.63 Float64 
+time: 1.69 Float32 
+                   
+cos                
+time: 0.71 Float64 
+time: 1.73 Float32 
+                   
+tan                
+time: 0.44 Float64 
+time: 1.53 Float32 
+                   
+asin               
+time: 1.82 Float64 
+time: 2.38 Float32 
+                   
+acos               
+time: 2.82 Float64 
+time: 2.66 Float32 
+                   
+atan               
+time: 1.59 Float64 
+time: 1.91 Float32 
+                   
+exp                
+time: 0.67 Float64 
+time: 0.96 Float32 
+                   
+exp2               
+time: 1.77 Float64 
+time: 4.80 Float32 
+                   
+exp10              
+time: 0.21 Float64 
+time: 0.30 Float32 
+                   
+expm1              
+time: 1.95 Float64 
+time: 2.27 Float32 
+                   
+log                
+time: 1.66 Float64 
+time: 2.01 Float32 
+                   
+log2               
+time: 1.37 Float64 
+time: 2.04 Float32 
+                   
+log10              
+time: 0.82 Float64 
+time: 1.22 Float32 
+                   
+log1p              
+time: 1.07 Float64 
+time: 1.21 Float32 
+                   
+sinh               
+time: 0.67 Float64 
+time: 0.86 Float32 
+                   
+cosh               
+time: 0.78 Float64 
+time: 0.85 Float32 
+                   
+tanh               
+time: 0.93 Float64 
+time: 0.98 Float32 
+                   
+asinh              
+time: 1.08 Float64 
+time: 1.06 Float32 
+                   
+acosh              
+time: 0.62 Float64 
+time: 0.95 Float32 
+                   
+atanh              
+time: 1.54 Float64 
+time: 1.92 Float32 
+                   
+cbrt               
+time: 2.49 Float64 
+time: 3.75 Float32 
 
 ```
 
