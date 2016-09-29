@@ -32,7 +32,7 @@ const c1f = -0.166666597127914428710938f0
 global @inline _sincos_fast(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d
 global @inline _sincos_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
-function sin_fast{T<:FloatTypes}(x::T)
+function sin_fast{T<:Float}(x::T)
     d = abs(x)
     q = roundi(d*T(M1PI))
     d = muladd(q, -PI4A(T)*4, d)
@@ -47,7 +47,7 @@ function sin_fast{T<:FloatTypes}(x::T)
 end
 
 
-function cos_fast{T<:FloatTypes}(x::T)
+function cos_fast{T<:Float}(x::T)
     q = muladd(2, roundi(x*T(M1PI)-T(0.5)), 1)
     x = muladd(q, -PI4A(T)*2, x)
     x = muladd(q, -PI4B(T)*2, x)
@@ -82,7 +82,7 @@ const c1f = -0.166666597127914428710938f0
 global @inline _sincos(x::Double{Float64}) = dadd(c1d, x.hi*(@horner x.hi c2d c3d c4d c5d c6d c7d c8d))
 global @inline _sincos(x::Double{Float32}) = dadd(c1f, x.hi*(@horner x.hi c2f c3f c4f))
 
-function sin{T<:FloatTypes}(x::T)
+function sin{T<:Float}(x::T)
     d = abs(x)
     q = roundi(d*T(M1PI))
     s = dadd2(d, q * -PI4A(T)*4)
@@ -99,7 +99,7 @@ function sin{T<:FloatTypes}(x::T)
 end
 
 
-function cos{T<:FloatTypes}(x::T)
+function cos{T<:Float}(x::T)
     x = abs(x)
     q = muladd(2, roundi(x*T(M1PI) - T(0.5)), 1)
     s = dadd2(x, q * -PI4A(T)*2)
@@ -151,7 +151,7 @@ global @inline _sincos_a(x::Float32) = @horner x a1f a2f a3f
 global @inline _sincos_b(x::Float64) = @horner x b1d b2d b3d b4d b5d b6d b7d
 global @inline _sincos_b(x::Float32) = @horner x b1f b2f b3f b4f b5f
 
-function sincos_fast{T<:FloatTypes}(x::T)
+function sincos_fast{T<:Float}(x::T)
     d  = abs(x)
     q  = roundi(d*T(M2PI))
     s  = d
@@ -174,7 +174,7 @@ function sincos_fast{T<:FloatTypes}(x::T)
 end
 
 
-function sincos{T<:FloatTypes}(x::T)
+function sincos{T<:Float}(x::T)
     d  = abs(x)
     q  = roundi(d*2*T(M1PI))
     s  = dadd2(d, q * -PI4A(T)*2)
@@ -231,7 +231,7 @@ const c1f =  0.33333361148834228515625f0
 global @inline _tan_fast(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d
 global @inline _tan_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f
 
-function tan_fast{T<:FloatTypes}(d::T)
+function tan_fast{T<:Float}(d::T)
     q = roundi(d*T(M2PI))
     x = muladd(q, -PI4A(T)*2, d)
     x = muladd(q, -PI4B(T)*2, x)
@@ -250,7 +250,7 @@ global @inline _tan(x::Double{Float64}) = dadd(c1d, x.hi*(@horner_split x.hi c2d
 global @inline _tan(x::Double{Float32}) = dadd(c1f, dmul(x, @horner x.hi c2f c3f c4f c5f c6f c7f))
 # global @inline _tan(x::Double{Float32}) = dadd(c1f, dmul(x.hi, dadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
 
-function tan{T<:FloatTypes}(d::T)
+function tan{T<:Float}(d::T)
     q = roundi(d*T(M2PI))
     x = dadd2(d, q * -PI4A(T)*2)
     x = dadd2(x, q * -PI4B(T)*2)
@@ -301,7 +301,7 @@ const c1f = -0.333331018686294555664062f0
 global @inline _atan_fast(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d
 global @inline _atan_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f c8f
 
-function atan_fast{T<:FloatTypes}(x::T)
+function atan_fast{T<:Float}(x::T)
     q = 0
     if x < 0
         x = -x
@@ -321,14 +321,14 @@ end
 end
 
 
-function atan{T<:FloatTypes}(x::T)
+function atan{T<:Float}(x::T)
     u = T(atan2k(Double(abs(x)), Double(T(1))))
     isinf(x) && (u = T(MPI2))
     return flipsign(u,x)
 end
 
 
-function atan2_fast{T<:FloatTypes}(x::T, y::T)
+function atan2_fast{T<:Float}(x::T, y::T)
     r = atan2k_fast(abs(x), y)
     r = flipsign(r,y)
     if isinf(y) || y == 0
@@ -344,7 +344,7 @@ function atan2_fast{T<:FloatTypes}(x::T, y::T)
 end
 
 
-function atan2{T<:FloatTypes}(x::T, y::T)
+function atan2{T<:Float}(x::T, y::T)
     r = T(atan2k(Double(abs(x)), Double(y)))
     r = flipsign(r,y)
     if isinf(y) || y == 0
@@ -360,12 +360,12 @@ function atan2{T<:FloatTypes}(x::T, y::T)
 end
 
 
-function asin_fast{T<:FloatTypes}(x::T)
+function asin_fast{T<:Float}(x::T)
     flipsign(atan2k_fast(abs(x), _sqrt((1+x)*(1-x))), x)
 end
 
 
-function asin{T<:FloatTypes}(x::T)
+function asin{T<:Float}(x::T)
     d = atan2k(Double(abs(x)), dsqrt(dmul(dadd(T(1), x), dadd(T(1),-x))))
     u = T(d)
     abs(x) == 1 && (u = T(MPI2))
@@ -373,12 +373,12 @@ function asin{T<:FloatTypes}(x::T)
 end
 
 
-function acos_fast{T<:FloatTypes}(x::T)
+function acos_fast{T<:Float}(x::T)
     flipsign(atan2k_fast(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
 end
 
 
-function acos{T<:FloatTypes}(x::T)
+function acos{T<:Float}(x::T)
     d = atan2k(dsqrt(dmul(dadd(T(1), x), dsub(T(1), x))), Double(abs(x)))
     d = flipsign(d,x)
     abs(x) == 1 && (d = Double(T(0)))

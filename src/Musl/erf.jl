@@ -70,14 +70,14 @@ const sb5  =  2.55305040643316442583e+03 # 0x40A3F219, 0xCEDF3BE6
 const sb6  =  4.74528541206955367215e+02 # 0x407DA874, 0xE79FE763
 const sb7  = -2.24409524465858183362e+01 # 0xC03670E2, 0x42712D62
     
-function erfc1{T<:FloatTypes}(x::T)
+function erfc1{T<:Float}(x::T)
     s = abs(x) - 1
     P = @horner_oftype s pa0 pa1 pa2 pa3 pa4 pa5 pa6
     Q = @horner_oftype s 1.0 qa1 qa2 qa3 qa4 qa5 qa6
     return 1 - T(erx) - P/Q
 end
 
-function erfc2{T<:FloatTypes}(ix::UInt32, x::T)
+function erfc2{T<:Float}(ix::UInt32, x::T)
     if ix < highword(T(1.25))
         # 0.84375 <= |x| < 1.25
         return erfc1(x)
@@ -98,7 +98,7 @@ function erfc2{T<:FloatTypes}(ix::UInt32, x::T)
     return exp(-z*z-T(0.5625))*exp((z-x)*(z+x)+R/S)/x
 end
 
-function erf{T<:FloatTypes}(x::T)
+function erf{T<:Float}(x::T)
     ix = highword(x)
     sign = (ix>>31) % Bool
     ix &= 0x7fffffff
@@ -123,7 +123,7 @@ function erf{T<:FloatTypes}(x::T)
     return sign ? -y : y
 end
 
-function erfc{T<:FloatTypes}(x::T)
+function erfc{T<:Float}(x::T)
     ix = highword(x)
     sign = (ix>>31) % Bool
     ix &= 0x7fffffff

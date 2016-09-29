@@ -1,19 +1,19 @@
 import Base: -, <, copysign, flipsign, normalize, scale, convert
 
-immutable Double{T<:FloatTypes} <: Number
+immutable Double{T<:Float} <: Number
     hi::T
     lo::T
 end
 Double{T}(x::T) = Double(x, zero(T))
 
-convert{T<:FloatTypes}(::Type{T}, x::Double) = x.hi + x.lo
-convert{T<:FloatTypes}(::Type{Tuple{T,T}}, x::Double{T}) = (x.hi, x.lo)
+convert{T<:Float}(::Type{T}, x::Double) = x.hi + x.lo
+convert{T<:Float}(::Type{Tuple{T,T}}, x::Double{T}) = (x.hi, x.lo)
 
 
 @inline trunclo(x::Float64) = reinterpret(Float64, reinterpret(UInt64, x) & 0xffff_ffff_f800_0000) # clear lower 27 bits (leave upper 26 bits)
 @inline trunclo(x::Float32) = reinterpret(Float32, reinterpret(UInt32, x) & 0xffff_f000) # clear lowest 12 bits (leave upper 12 bits)
 
-@inline function splitprec(x::FloatTypes)
+@inline function splitprec(x::Float)
     hx = trunclo(x)
     hx, x-hx
 end
@@ -23,9 +23,9 @@ end
     Double(r, (x.hi - r) + x.lo)
 end
 
-@inline flipsign{T<:FloatTypes}(x::Double{T}, y::T) = Double(flipsign(x.hi, y), flipsign(x.lo, y))
+@inline flipsign{T<:Float}(x::Double{T}, y::T) = Double(flipsign(x.hi, y), flipsign(x.lo, y))
 
-@inline scale{T<:FloatTypes}(x::Double{T}, s::T) = Double(s*x.hi, s*x.lo)
+@inline scale{T<:Float}(x::Double{T}, s::T) = Double(s*x.hi, s*x.lo)
 
 
 @inline -{T}(x::Double{T}) = Double(-x.hi,-x.lo)
@@ -43,17 +43,17 @@ end
 end
 
 # quick-two-sum x+y
-@inline function dadd{T<:FloatTypes}(x::T, y::T) #WARNING |x| >= |y|
+@inline function dadd{T<:Float}(x::T, y::T) #WARNING |x| >= |y|
     s = x + y
     Double(s, (x - s) + y)
 end
 
-@inline function dadd{T<:FloatTypes}(x::T, y::Double{T}) #WARNING |x| >= |y|
+@inline function dadd{T<:Float}(x::T, y::Double{T}) #WARNING |x| >= |y|
     s = x + y.hi
     Double(s, (x - s) + y.hi + y.lo)
 end
 
-@inline function dadd{T<:FloatTypes}(x::Double{T}, y::T) #WARNING |x| >= |y|
+@inline function dadd{T<:Float}(x::Double{T}, y::T) #WARNING |x| >= |y|
     s = x.hi + y
     Double(s, (x.hi - s) + y + x.lo)
 end
@@ -85,19 +85,19 @@ end
 
 
 # two-sum x+y  NO BRANCH
-@inline function dadd2{T<:FloatTypes}(x::T, y::T)
+@inline function dadd2{T<:Float}(x::T, y::T)
     s = x + y
     v = s - x
     Double(s, (x - (s - v)) + (y - v))
 end
 
-@inline function dadd2{T<:FloatTypes}(x::T, y::Double{T})
+@inline function dadd2{T<:Float}(x::T, y::Double{T})
     s = x + y.hi
     v = s - x
     Double(s, (x - (s - v)) + (y.hi - v) + y.lo)
 end
 
-@inline dadd2{T<:FloatTypes}(x::Double{T}, y::T) = dadd2(y,x)
+@inline dadd2{T<:Float}(x::Double{T}, y::T) = dadd2(y,x)
 
 @inline function dadd2{T}(x::Double{T}, y::Double{T})
     s = x.hi + y.hi
@@ -105,19 +105,19 @@ end
     Double(s,(x.hi - (s - v)) + (y.hi - v) + x.lo + y.lo)
 end
 
-@inline function dsub2{T<:FloatTypes}(x::T, y::T)
+@inline function dsub2{T<:Float}(x::T, y::T)
     s = x - y
     v = s - x
     Double(s, (x - (s - v)) + (-y - v))
 end
 
-@inline function dsub2{T<:FloatTypes}(x::T, y::Double{T})
+@inline function dsub2{T<:Float}(x::T, y::Double{T})
     s = x - y.hi
     v = s - x
     Double(s, (x - (s - v)) + (-y.hi - v) - y.lo)
 end
 
-@inline function dsub2{T<:FloatTypes}(x::Double{T}, y::T)
+@inline function dsub2{T<:Float}(x::Double{T}, y::T)
     s = x.hi - y
     v = s - x.hi
     Double(s,(x.hi - (s - v)) + (-y - v) + x.lo)
@@ -134,17 +134,17 @@ end
 if is_fma_fast()
 
     # two-prod-fma
-    @inline function dmul{T<:FloatTypes}(x::T, y::T)
+    @inline function dmul{T<:Float}(x::T, y::T)
         z = x*y
         Double(z, fma(x, y, -z))
     end
 
-    @inline function dmul{T<:FloatTypes}(x::Double{T}, y::T)
+    @inline function dmul{T<:Float}(x::Double{T}, y::T)
         z = x.hi*y
         Double(z, fma(x.hi, y, -z) + x.lo*y)
     end
 
-    @inline dmul{T<:FloatTypes}(x::T, y::Double{T}) = dmul(y,x)
+    @inline dmul{T<:Float}(x::T, y::Double{T}) = dmul(y,x)
 
     @inline function dmul{T}(x::Double{T}, y::Double{T})
         z = x.hi*y.hi
@@ -152,7 +152,7 @@ if is_fma_fast()
     end
 
     # x^2
-    @inline function dsqu{T<:FloatTypes}(x::T)
+    @inline function dsqu{T<:Float}(x::T)
         z = x*x
         Double(z, fma(x,x,-z))
     end
@@ -175,14 +175,14 @@ if is_fma_fast()
         Double(zhi, (fma(-zhi, y.hi, x.hi) + fma(-zhi, y.lo, x.lo))*invy)
     end
 
-    @inline function ddiv{T<:FloatTypes}(x::T, y::T)
+    @inline function ddiv{T<:Float}(x::T, y::T)
         ry = 1/y
         r = x*ry
         Double(r, fma(-r,y,x)*ry)
     end
 
     # 1/x
-    @inline function ddrec{T<:FloatTypes}(x::T)
+    @inline function ddrec{T<:Float}(x::T)
         zhi = 1/x
         Double(zhi, fma(-zhi, x, one(T))*zhi)
     end
@@ -195,21 +195,21 @@ if is_fma_fast()
 else
 
     #two-prod x*y
-    @inline function dmul{T<:FloatTypes}(x::T, y::T)
+    @inline function dmul{T<:Float}(x::T, y::T)
         hx, lx = splitprec(x)
         hy, ly = splitprec(y)
         z = x*y
         Double(z, ((hx*hy-z) + lx*hy + hx*ly) + lx*ly)
     end
 
-    @inline function dmul{T<:FloatTypes}(x::Double{T}, y::T)
+    @inline function dmul{T<:Float}(x::Double{T}, y::T)
         hx, lx = splitprec(x.hi)
         hy, ly = splitprec(y)
         z = x.hi*y
         Double(z, (hx*hy-z) + lx*hy + hx*ly + lx*ly + x.lo*y)
     end
 
-    @inline dmul{T<:FloatTypes}(x::T, y::Double{T}) = dmul(y,x)
+    @inline dmul{T<:Float}(x::T, y::Double{T}) = dmul(y,x)
 
     @inline function dmul{T}(x::Double{T}, y::Double{T})
         hx, lx = splitprec(x.hi)
@@ -219,7 +219,7 @@ else
     end
 
     # x^2
-    @inline function dsqu{T<:FloatTypes}(x::T)
+    @inline function dsqu{T<:Float}(x::T)
         hx, lx = splitprec(x)
         z = x*x
         Double(z, (hx*hx-z) + lx*(hx + hx) + lx*lx)
@@ -246,7 +246,7 @@ else
         Double(c,((((x.hi - u.hi) - u.lo) + x.lo) - c*y.lo)*invy)
     end
 
-    @inline function ddiv{T<:FloatTypes}(x::T, y::T)
+    @inline function ddiv{T<:Float}(x::T, y::T)
         ry = 1/y
         r = x*ry
         hx, lx = splitprec(r)
@@ -256,7 +256,7 @@ else
 
 
     # 1/x
-    @inline function ddrec{T<:FloatTypes}(x::T)
+    @inline function ddrec{T<:Float}(x::T)
         c = 1/x
         u = dmul(c,x)
         Double(c, (one(T) - u.hi - u.lo)*c)

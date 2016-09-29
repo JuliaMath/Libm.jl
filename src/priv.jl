@@ -27,11 +27,11 @@ end
 @inline split_exponent(::Type{Float32}, q::Int) = _split_exponent(q, UInt(6), UInt(31), UInt(2))
 
 """
-    ldexpk(a::FloatTypes, n::Int) -> FloatTypes
+    ldexpk(a::Float, n::Int) -> Float
 
 Computes `a × 2^n`.
 """
-@inline function ldexpk{T<:FloatTypes}(x::T, q::Int)
+@inline function ldexpk{T<:Float}(x::T, q::Int)
     bias = exponent_bias(T)
     emax = exponent_max(T)
     m, q = split_exponent(T,q)
@@ -59,7 +59,7 @@ real_cut_max(::Type{Float64}) = 2.037035976334486e90
 real_cut_max(::Type{Float32}) = 1.8446744073709552f19
 
 """
-    ilog2k(x::FloatTypes) -> Int
+    ilog2k(x::Float) -> Int
 
 Returns the integral part of the logarithm of `|x|`, using 2 as base for the logarithm; in other
 words this returns the binary exponent of `x` so that
@@ -68,7 +68,7 @@ words this returns the binary exponent of `x` so that
 
 where `significand \in [0.5, 1)`.
 """
-@inline function ilog2k{T<:FloatTypes}(d::T)
+@inline function ilog2k{T<:Float}(d::T)
     m = d < real_cut_min(T)
     d = ifelse(m, real_cut_max(T)*d, d)
     q = float2integer(d) & exponent_max(T)
@@ -111,7 +111,7 @@ const c1f = -0.333332866430282592773438f0
 global @inline _atan2k_fast(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d c20d
 global @inline _atan2k_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f c8f c9f
 
-global @inline function atan2k_fast{T<:FloatTypes}(y::T, x::T)
+global @inline function atan2k_fast{T<:Float}(y::T, x::T)
     q = 0
     if x < 0
         x = -x
@@ -133,7 +133,7 @@ end
 global @inline _atan2k(x::Double{Float64}) = @horner x.hi c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d c20d
 global @inline _atan2k(x::Double{Float32}) = dadd(c1f, x.hi*(@horner x.hi c2f c3f c4f c5f c6f c7f c8f c9f))
 
-global @inline function atan2k{T<:FloatTypes}(y::Double{T}, x::Double{T})
+global @inline function atan2k{T<:Float}(y::Double{T}, x::Double{T})
     q = 0
     if x < 0
         x = -x
@@ -174,7 +174,7 @@ const c1f = 0.499999850988388061523438f0
 global @inline _expk(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d
 global @inline _expk(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
-global @inline function expk{T<:FloatTypes}(d::Double{T})
+global @inline function expk{T<:Float}(d::Double{T})
     q = roundi(T(d)*T(MLN2E))
     s = dadd(d, q * -LN2U(T))
     s = dadd(s, q * -LN2L(T))
@@ -185,7 +185,7 @@ global @inline function expk{T<:FloatTypes}(d::Double{T})
 end
 
 
-global @inline function expk2{T<:FloatTypes}(d::Double{T})
+global @inline function expk2{T<:Float}(d::Double{T})
     q = roundi(T(d)*T(MLN2E))
     s = dadd(d, q * -LN2U(T))
     s = dadd(s, q * -LN2L(T))
@@ -215,7 +215,7 @@ const c1f = 0.666666567325592041015625f0
 global @inline _logk(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d
 global @inline _logk(x::Float32) = @horner x c1f c2f c3f c4f
 
-global @inline function logk{T<:FloatTypes}(d::T)
+global @inline function logk{T<:Float}(d::T)
     e  = ilog2k(d*T(M1SQRT2))
     m  = ldexpk(d,-e)
     x  = ddiv(dadd2(-T(1), m), dadd2(T(1), m))
@@ -225,7 +225,7 @@ global @inline function logk{T<:FloatTypes}(d::T)
 end
 
 
-global @inline function logk2{T<:FloatTypes}(d::Double{T})
+global @inline function logk2{T<:Float}(d::Double{T})
     e  = ilog2k(d.hi*T(M1SQRT2))
     m  = scale(d, pow2i(T,-e))
     x  = ddiv(dadd2(m, -T(1)), dadd2(m, T(1)))

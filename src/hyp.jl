@@ -8,7 +8,7 @@ over_sch(::Type{Float32}) = 89f0
 
 Compute hyperbolic sine of `x`.
 """
-function sinh{T<:FloatTypes}(x::T)
+function sinh{T<:Float}(x::T)
     u = abs(x)
     d = expk2(Double(u))
     d = dsub(d, ddrec(d))
@@ -26,7 +26,7 @@ end
 
 Compute hyperbolic cosine of `x`.
 """
-function cosh{T<:FloatTypes}(x::T)
+function cosh{T<:Float}(x::T)
     u = abs(x)
     d = expk2(Double(u))
     d = dadd(d, ddrec(d))
@@ -46,7 +46,7 @@ over_th(::Type{Float32}) = 8.664339742f0
 
 Compute hyperbolic tangent of `x`.
 """
-function tanh{T<:FloatTypes}(x::T)
+function tanh{T<:Float}(x::T)
     u = abs(x)
     d = expk2(Double(u))
     e = ddrec(d)
@@ -65,7 +65,7 @@ end
 
 Compute the inverse hyperbolic sine of `x`.
 """
-function asinh{T<:FloatTypes}(x::T)
+function asinh{T<:Float}(x::T)
     u = abs(x)
     d = logk2(dadd(dsqrt(dadd2(dsqu(u),  T(1))), u))
     u = T(d)
@@ -81,7 +81,7 @@ end
 
 Compute the inverse hyperbolic cosine of `x`.
 """
-function acosh{T<:FloatTypes}(x::T)
+function acosh{T<:Float}(x::T)
     d = logk2(dadd2(dsqrt(dsub2(dsqu(x), T(1))), x))
     u = T(d)
     u = isinf(x) || isnan(u) ? T(Inf) : u
@@ -97,7 +97,7 @@ end
 
 Compute the inverse hyperbolic tangent of `x`.
 """
-function atanh{T<:FloatTypes}(x::T)
+function atanh{T<:Float}(x::T)
     u = abs(x)
     d = logk2(ddiv(dadd2(T(1), u), dsub2(T(1), u)))
     u = u > T(1) ? T(NaN) : (u == T(1) ? T(Inf) : T(d)*T(0.5))

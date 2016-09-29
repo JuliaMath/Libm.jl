@@ -1,11 +1,11 @@
 
 
 """
-    ldexp(a, n::Int) -> FloatTypes
+    ldexp(a, n::Int) -> Float
 
 Computes `a × 2^n`
 """
-ldexp(x::FloatTypes, q::Int) = ldexpk(x,q)
+ldexp(x::Float, q::Int) = ldexpk(x,q)
 
 
 over_e2(::Type{Float64}) = 1024
@@ -16,7 +16,7 @@ over_e2(::Type{Float32}) = 128f0
 
 Compute the base-`2` exponential of `x`, that is `2ˣ`.
 """
-function exp2{T<:FloatTypes}(x::T)
+function exp2{T<:Float}(x::T)
     u = expk(dmul(MDLN2(T), x))
     x > over_e2(T) && (u = T(Inf))
     isninf(x) && (u = T(0))
@@ -32,7 +32,7 @@ over_e10(::Type{Float32}) = 38f0
 
 Compute the base-`10` exponential of `x`, that is `10ˣ`.
 """
-function exp10{T<:FloatTypes}(x::T)
+function exp10{T<:Float}(x::T)
     u = expk(dmul(MDLN10(T), x))
     x > over_e10(T) && (u = T(Inf))
     isninf(x) && (u = T(0))
@@ -50,7 +50,7 @@ under_em1(::Type{Float32}) = -0.159423851528787421165963387935380610657399256201
 
 Compute `eˣ- 1` accurately for small values of `x`.
 """
-function expm1{T<:FloatTypes}(x::T)
+function expm1{T<:Float}(x::T)
     u = T(dadd2(expk2(Double(x)), -T(1)))
     x > over_em1(T) && (u = T(Inf))
     x < under_em1(T) && (u = -T(1))
@@ -87,7 +87,7 @@ global @inline _exp(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 Compute the base-`e` exponential of `x`, that is `eˣ`.
 """
-function exp{T<:FloatTypes}(x::T)
+function exp{T<:Float}(x::T)
     q = roundi(T(MLN2E)*x)
     s = muladd(q, -LN2U(T), x)
     s = muladd(q, -LN2L(T), s)
