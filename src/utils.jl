@@ -10,9 +10,9 @@ is_fma_fast() = is_fma_fast(Float64) && is_fma_fast(Float32)
 @inline exponent_max{T<:FloatTypes}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
 
 # _sign emits better native code than sign but does not properly handle the Inf/NaN cases
-@inline _sign{T<:FloatTypes}(d::T) =  flipsign(T(1), d)
+@inline _sign{T<:FloatTypes}(d::T) = flipsign(one(T), d)
 
-@inline rint{T<:FloatTypes}(x::T) = unsafe_trunc(Int, ifelse(x < 0, x - T(0.5), x + T(0.5)))
+@inline roundi{T<:FloatTypes}(x::T) = unsafe_trunc(Int, round(x))
 
 @inline integer2float(::Type{Float64}, m::Int) = reinterpret(Float64, (m % Int64) << significand_bits(Float64))
 @inline integer2float(::Type{Float32}, m::Int) = reinterpret(Float32, (m % Int32) << significand_bits(Float32))
@@ -25,8 +25,8 @@ is_fma_fast() = is_fma_fast(Float64) && is_fma_fast(Float32)
 # sqrt without the domain checks which we don't need since we handle the checks ourselves
 _sqrt{T<:FloatTypes}(x::T) = Base.box(T, Base.sqrt_llvm_fast(Base.unbox(T,x)))
 
-@inline ispinf{T<:FloatTypes}(x::T) = x == T(Inf)
-@inline isninf{T<:FloatTypes}(x::T) = x == T(-Inf)
+@inline ispinf{T<:FloatTypes}(x::T) = x ==  T(Inf)
+@inline isninf{T<:FloatTypes}(x::T) = x == -T(Inf)
 
 macro horner_split(x,p...)
     t1 = gensym("x1")

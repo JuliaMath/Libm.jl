@@ -34,7 +34,7 @@ global @inline _sincos_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 function sin_fast{T<:FloatTypes}(x::T)
     d = abs(x)
-    q = rint(d*T(M1PI))
+    q = roundi(d*T(M1PI))
     d = muladd(q, -PI4A(T)*4, d)
     d = muladd(q, -PI4B(T)*4, d)
     d = muladd(q, -PI4C(T)*4, d)
@@ -48,7 +48,7 @@ end
 
 
 function cos_fast{T<:FloatTypes}(x::T)
-    q = muladd(2, rint(x*T(M1PI)-T(0.5)), 1)
+    q = muladd(2, roundi(x*T(M1PI)-T(0.5)), 1)
     x = muladd(q, -PI4A(T)*2, x)
     x = muladd(q, -PI4B(T)*2, x)
     x = muladd(q, -PI4C(T)*2, x)
@@ -84,7 +84,7 @@ global @inline _sincos(x::Double{Float32}) = dadd(c1f, x.hi*(@horner x.hi c2f c3
 
 function sin{T<:FloatTypes}(x::T)
     d = abs(x)
-    q = rint(d*T(M1PI))
+    q = roundi(d*T(M1PI))
     s = dadd2(d, q * -PI4A(T)*4)
     s = dadd2(s, q * -PI4B(T)*4)
     s = dadd2(s, q * -PI4C(T)*4)
@@ -101,7 +101,7 @@ end
 
 function cos{T<:FloatTypes}(x::T)
     x = abs(x)
-    q = muladd(2, rint(x*T(M1PI) - T(0.5)), 1)
+    q = muladd(2, roundi(x*T(M1PI) - T(0.5)), 1)
     s = dadd2(x, q * -PI4A(T)*2)
     s = dadd2(s, q * -PI4B(T)*2)
     s = dadd2(s, q * -PI4C(T)*2)
@@ -153,7 +153,7 @@ global @inline _sincos_b(x::Float32) = @horner x b1f b2f b3f b4f b5f
 
 function sincos_fast{T<:FloatTypes}(x::T)
     d  = abs(x)
-    q  = rint(d*T(M2PI))
+    q  = roundi(d*T(M2PI))
     s  = d
     s  = muladd(q, -PI4A(T)*2, s)
     s  = muladd(q, -PI4B(T)*2, s)
@@ -176,7 +176,7 @@ end
 
 function sincos{T<:FloatTypes}(x::T)
     d  = abs(x)
-    q  = rint(d*2*T(M1PI))
+    q  = roundi(d*2*T(M1PI))
     s  = dadd2(d, q * -PI4A(T)*2)
     s  = dadd2(s, q * -PI4B(T)*2)
     s  = dadd2(s, q * -PI4C(T)*2)
@@ -232,7 +232,7 @@ global @inline _tan_fast(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c
 global @inline _tan_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f
 
 function tan_fast{T<:FloatTypes}(d::T)
-    q = rint(d*T(M2PI))
+    q = roundi(d*T(M2PI))
     x = muladd(q, -PI4A(T)*2, d)
     x = muladd(q, -PI4B(T)*2, x)
     x = muladd(q, -PI4C(T)*2, x)
@@ -251,7 +251,7 @@ global @inline _tan(x::Double{Float32}) = dadd(c1f, dmul(x, @horner x.hi c2f c3f
 # global @inline _tan(x::Double{Float32}) = dadd(c1f, dmul(x.hi, dadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
 
 function tan{T<:FloatTypes}(d::T)
-    q = rint(d*T(M2PI))
+    q = roundi(d*T(M2PI))
     x = dadd2(d, q * -PI4A(T)*2)
     x = dadd2(x, q * -PI4B(T)*2)
     x = dadd2(x, q * -PI4C(T)*2)
