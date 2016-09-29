@@ -1,12 +1,13 @@
-import Base: -, flipsign, normalize, scale, convert
+import Base: -, <, copysign, flipsign, normalize, scale, convert
 
-immutable Double{T<:FloatTypes}
+immutable Double{T<:FloatTypes} <: Number
     hi::T
     lo::T
 end
 Double{T}(x::T) = Double(x, zero(T))
 
 convert{T<:FloatTypes}(::Type{T}, x::Double) = x.hi + x.lo
+convert{T<:FloatTypes}(::Type{Tuple{T,T}}, x::Double{T}) = (x.hi, x.lo)
 
 
 @inline trunclo(x::Float64) = reinterpret(Float64, reinterpret(UInt64, x) & 0xffff_ffff_f800_0000) # clear lower 27 bits (leave upper 26 bits)
@@ -26,97 +27,158 @@ end
 
 @inline scale{T<:FloatTypes}(x::Double{T}, s::T) = Double(s*x.hi, s*x.lo)
 
+
 @inline -{T}(x::Double{T}) = Double(-x.hi,-x.lo)
 
+@inline function <{T}(x::Double{T}, y::Double{T})
+    x.hi < y.hi
+end
+
+@inline function <{T}(x::Double{T}, y::Number)
+    x.hi < y
+end
+
+@inline function <{T}(x::Number, y::Double{T})
+    x < y.hi
+end
+
 # quick-two-sum x+y
-@inline function ddadd{T<:FloatTypes}(x::T, y::T) #WARNING |x| >= |y|
+@inline function dadd{T<:FloatTypes}(x::T, y::T) #WARNING |x| >= |y|
     s = x + y
     Double(s, (x - s) + y)
 end
 
-@inline function ddadd{T<:FloatTypes}(x::T, y::Double{T}) #WARNING |x| >= |y|
+@inline function dadd{T<:FloatTypes}(x::T, y::Double{T}) #WARNING |x| >= |y|
     s = x + y.hi
     Double(s, (x - s) + y.hi + y.lo)
 end
 
-@inline function ddadd{T<:FloatTypes}(x::Double{T}, y::T) #WARNING |x| >= |y|
+@inline function dadd{T<:FloatTypes}(x::Double{T}, y::T) #WARNING |x| >= |y|
     s = x.hi + y
     Double(s, (x.hi - s) + y + x.lo)
 end
 
-@inline function ddadd{T}(x::Double{T}, y::Double{T}) #WARNING |x| >= |y|
+@inline function dadd{T}(x::Double{T}, y::Double{T}) #WARNING |x| >= |y|
     s = x.hi + y.hi
     Double(s, (x.hi - s) + y.hi + y.lo + x.lo)
 end
 
-@inline function ddsub{T}(x::Double{T}, y::Double{T}) #WARNING |x| >= |y|
+@inline function dsub{T}(x::Double{T}, y::Double{T}) #WARNING |x| >= |y|
     s = x.hi - y.hi
     Double(s, (x.hi - s) - y.hi - y.lo + x.lo)
 end
 
+@inline function dsub{T}(x::Double{T}, y::T) #WARNING |x| >= |y|
+    s = x.hi - y
+    Double(s, (x.hi - s) - y + x.lo)
+end
+
+@inline function dsub{T}(x::T, y::Double{T}) #WARNING |x| >= |y|
+    s = x - y.hi
+    Double(s, (x - s) - y.hi - y.lo)
+end
+
+@inline function dsub{T}(x::T, y::T) #WARNING |x| >= |y|
+    s = x - y
+    Double(s, (x - s) - y)
+end
+
+
 # two-sum x+y  NO BRANCH
-@inline function ddadd2{T<:FloatTypes}(x::T, y::T)
+@inline function dadd2{T<:FloatTypes}(x::T, y::T)
     s = x + y
     v = s - x
     Double(s, (x - (s - v)) + (y - v))
 end
 
-@inline function ddadd2{T<:FloatTypes}(x::T, y::Double{T})
+@inline function dadd2{T<:FloatTypes}(x::T, y::Double{T})
     s = x + y.hi
     v = s - x
     Double(s, (x - (s - v)) + (y.hi - v) + y.lo)
 end
 
-@inline ddadd2{T<:FloatTypes}(x::Double{T}, y::T) = ddadd2(y,x)
+@inline dadd2{T<:FloatTypes}(x::Double{T}, y::T) = dadd2(y,x)
 
-@inline function ddadd2{T}(x::Double{T}, y::Double{T})
+@inline function dadd2{T}(x::Double{T}, y::Double{T})
     s = x.hi + y.hi
     v = s - x.hi
     Double(s,(x.hi - (s - v)) + (y.hi - v) + x.lo + y.lo)
 end
 
+@inline function dsub2{T<:FloatTypes}(x::T, y::T)
+    s = x - y
+    v = s - x
+    Double(s, (x - (s - v)) + (-y - v))
+end
+
+@inline function dsub2{T<:FloatTypes}(x::T, y::Double{T})
+    s = x - y.hi
+    v = s - x
+    Double(s, (x - (s - v)) + (-y.hi - v) - y.lo)
+end
+
+@inline function dsub2{T<:FloatTypes}(x::Double{T}, y::T)
+    s = x.hi - y
+    v = s - x.hi
+    Double(s,(x.hi - (s - v)) + (-y - v) + x.lo)
+end
+
+@inline function dsub2{T}(x::Double{T}, y::Double{T})
+    s = x.hi - y.hi
+    v = s - x.hi
+    Double(s,(x.hi - (s - v)) + (-y.hi - v) + x.lo - y.lo)
+end
+
+
+
 if is_fma_fast()
 
     # two-prod-fma
-    @inline function ddmul{T<:FloatTypes}(x::T, y::T)
+    @inline function dmul{T<:FloatTypes}(x::T, y::T)
         z = x*y
         Double(z, fma(x, y, -z))
     end
 
-    @inline function ddmul{T<:FloatTypes}(x::Double{T}, y::T)
+    @inline function dmul{T<:FloatTypes}(x::Double{T}, y::T)
         z = x.hi*y
         Double(z, fma(x.hi, y, -z) + x.lo*y)
     end
 
-    @inline ddmul{T<:FloatTypes}(x::T, y::Double{T}) = ddmul(y,x)
+    @inline dmul{T<:FloatTypes}(x::T, y::Double{T}) = dmul(y,x)
 
-    @inline function ddmul{T}(x::Double{T}, y::Double{T})
+    @inline function dmul{T}(x::Double{T}, y::Double{T})
         z = x.hi*y.hi
         Double(z, fma(x.hi, y.hi, -z) + x.hi*y.lo + x.lo*y.hi)
     end
 
     # x^2
-    @inline function ddsqu{T<:FloatTypes}(x::T)
+    @inline function dsqu{T<:FloatTypes}(x::T)
         z = x*x
         Double(z, fma(x,x,-z))
     end
 
-    @inline function ddsqu{T}(x::Double{T})
+    @inline function dsqu{T}(x::Double{T})
         z = x.hi*x.hi
         Double(z, fma(x.hi, x.hi, -z) + x.hi*(x.lo+x.lo))
     end
 
     # sqrt(x)
-    @inline function ddsqrt{T}(x::Double{T})
+    @inline function dsqrt{T}(x::Double{T})
         zhi = _sqrt(x.hi)
         Double(zhi, (x.lo + fma(-zhi, zhi, x.hi))/(zhi+zhi))
     end
 
     # x/y
-    @inline function dddiv{T}(x::Double{T}, y::Double{T})
+    @inline function ddiv{T}(x::Double{T}, y::Double{T})
         invy = 1/y.hi
         zhi = x.hi*invy
         Double(zhi, (fma(-zhi, y.hi, x.hi) + fma(-zhi, y.lo, x.lo))*invy)
+    end
+
+    @inline function ddiv{T<:FloatTypes}(x::T, y::T)
+        ry = 1/y
+        r = x*ry
+        Double(r, fma(-r,y,x)*ry)
     end
 
     # 1/x
@@ -133,23 +195,23 @@ if is_fma_fast()
 else
 
     #two-prod x*y
-    @inline function ddmul{T<:FloatTypes}(x::T, y::T)
+    @inline function dmul{T<:FloatTypes}(x::T, y::T)
         hx, lx = splitprec(x)
         hy, ly = splitprec(y)
         z = x*y
         Double(z, ((hx*hy-z) + lx*hy + hx*ly) + lx*ly)
     end
 
-    @inline function ddmul{T<:FloatTypes}(x::Double{T}, y::T)
+    @inline function dmul{T<:FloatTypes}(x::Double{T}, y::T)
         hx, lx = splitprec(x.hi)
         hy, ly = splitprec(y)
         z = x.hi*y
         Double(z, (hx*hy-z) + lx*hy + hx*ly + lx*ly + x.lo*y)
     end
 
-    @inline ddmul{T<:FloatTypes}(x::T, y::Double{T}) = ddmul(y,x)
+    @inline dmul{T<:FloatTypes}(x::T, y::Double{T}) = dmul(y,x)
 
-    @inline function ddmul{T}(x::Double{T}, y::Double{T})
+    @inline function dmul{T}(x::Double{T}, y::Double{T})
         hx, lx = splitprec(x.hi)
         hy, ly = splitprec(y.hi)
         z = x.hi*y.hi
@@ -157,43 +219,52 @@ else
     end
 
     # x^2
-    @inline function ddsqu{T<:FloatTypes}(x::T)
+    @inline function dsqu{T<:FloatTypes}(x::T)
         hx, lx = splitprec(x)
         z = x*x
         Double(z, (hx*hx-z) + lx*(hx + hx) + lx*lx)
     end
 
-    @inline function ddsqu{T}(x::Double{T})
+    @inline function dsqu{T}(x::Double{T})
         hx, lx = splitprec(x.hi)
         z = x.hi*x.hi
         Double(z, (hx*hx-z) + lx*(hx+hx) + lx*lx + x.hi*(x.lo+x.lo))
     end
 
     # sqrt(x)
-    @inline function ddsqrt{T}(x::Double{T})
+    @inline function dsqrt{T}(x::Double{T})
         c = _sqrt(x.hi)
-        u = ddsqu(c)
+        u = dsqu(c)
         Double(c, (x.hi - u.hi - u.lo + x.lo)/(c+c))
     end
 
     # x/y
-    @inline function dddiv{T}(x::Double{T}, y::Double{T})
+    @inline function ddiv{T}(x::Double{T}, y::Double{T})
         invy = 1/y.hi
         c = x.hi*invy
-        u = ddmul(c, y.hi)
+        u = dmul(c, y.hi)
         Double(c,((((x.hi - u.hi) - u.lo) + x.lo) - c*y.lo)*invy)
     end
+
+    @inline function ddiv{T<:FloatTypes}(x::T, y::T)
+        ry = 1/y
+        r = x*ry
+        hx, lx = splitprec(r)
+        hy, ly = splitprec(y)
+        Double(r, (((-hx*hy+r*y) - lx*hy - hx*ly) - lx*ly)*ry)
+    end
+
 
     # 1/x
     @inline function ddrec{T<:FloatTypes}(x::T)
         c = 1/x
-        u = ddmul(c,x)
+        u = dmul(c,x)
         Double(c, (one(T) - u.hi - u.lo)*c)
     end
 
     @inline function ddrec{T}(x::Double{T})
         c = 1/x.hi
-        u = ddmul(c,x.hi)
+        u = dmul(c,x.hi)
         Double(c, (one(T) - u.hi - u.lo - c*x.lo)*c)
     end
 

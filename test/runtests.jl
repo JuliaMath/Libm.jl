@@ -61,7 +61,7 @@ end
 
 # overide domain checking that base adheres to
 using Base.MPFR.ROUNDING_MODE
-for f in (:sin, :cos, :tan, :asin, :acos, :atan, :asinh, :acosh, :atanh, :log, :log10, :log1p)
+for f in (:sin, :cos, :tan, :asin, :acos, :atan, :asinh, :acosh, :atanh, :log, :log10, :log2, :log1p)
     @eval begin
         import Base.$f
         @nowarn function ($f)(x::BigFloat)
