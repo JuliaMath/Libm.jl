@@ -1,4 +1,4 @@
-
+# exported logarithmic functions
 
 """
     ilog2(x)
@@ -95,6 +95,13 @@ end
 # That being said, since this converges faster when the argument is close to
 # 1, we multiply  `m` by `2` and subtract 1 for the exponent `e` when `m` is
 # less than `sqrt(2)/2`
+"""
+    log_fast(x)
+
+Compute the natural logarithm of `x`. The inverse of the natural logarithm is
+the natural expoenential function `exp(x)`
+"""
+function log_fast end
 
 let
 global log_fast

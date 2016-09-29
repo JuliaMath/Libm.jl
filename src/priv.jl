@@ -167,24 +167,24 @@ global @inline _expk(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c
 global @inline _expk(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 global @inline function expk{T<:Float}(d::Double{T})
-    q = roundi(T(d)*T(MLN2E))
+    q = round(T(d)*T(MLN2E))
     s = dadd(d, -q*LN2U(T))
     s = dadd(s, -q*LN2L(T))
     u =_expk(T(s))
     t = dadd(s, dmul(dsqu(s), u))
     t = dadd(T(1), t)
-    ldexpk(T(t), q)
+    ldexpk(T(t), unsafe_trunc(Int,q))
 end
 
 
 global @inline function expk2{T<:Float}(d::Double{T})
-    q = roundi(T(d)*T(MLN2E))
+    q = round(T(d)*T(MLN2E))
     s = dadd(d, -q*LN2U(T))
     s = dadd(s, -q*LN2L(T))
     u =_expk(s.hi)
     t = dadd(s, dmul(dsqu(s), u))
     t = dadd(T(1), t)
-    scale(t, pow2i(T, q))
+    scale(t, pow2i(T, unsafe_trunc(Int,q)))
 end
 end
 

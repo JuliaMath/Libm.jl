@@ -1,4 +1,4 @@
-
+# exported hyperbolic functions
 
 over_sch(::Type{Float64}) = 710.0
 over_sch(::Type{Float32}) = 89f0
@@ -21,6 +21,7 @@ function sinh{T<:Float}(x::T)
 end
 
 
+
 """
     cosh(x)
 
@@ -36,6 +37,7 @@ function cosh{T<:Float}(x::T)
     u = isnan(x) ? T(NaN) : u
     return u
 end
+
 
 
 over_th(::Type{Float64}) = 18.714973875
@@ -60,6 +62,7 @@ function tanh{T<:Float}(x::T)
 end
 
 
+
 """
     asinh(x)
 
@@ -76,6 +79,7 @@ function asinh{T<:Float}(x::T)
 end
 
 
+
 """
     acosh(x)
 
@@ -90,6 +94,7 @@ function acosh{T<:Float}(x::T)
     u = isnan(x) ? T(NaN) : u
     return u
 end
+
 
 
 """

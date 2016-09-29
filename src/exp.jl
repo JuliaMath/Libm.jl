@@ -1,4 +1,4 @@
-
+# exported exponential functions
 
 """
     ldexp(a, n::Int) -> Float
@@ -6,6 +6,7 @@
 Computes `a × 2^n`
 """
 ldexp(x::Float, q::Int) = ldexpk(x,q)
+
 
 
 over_e2(::Type{Float64}) = 1024
@@ -24,6 +25,7 @@ function exp2{T<:Float}(x::T)
 end
 
 
+
 over_e10(::Type{Float64}) = 308
 over_e10(::Type{Float32}) = 38f0
 
@@ -38,6 +40,7 @@ function exp10{T<:Float}(x::T)
     isninf(x) && (u = T(0))
     return u
 end
+
 
 
 over_em1(::Type{Float64}) = 700.0
@@ -57,6 +60,14 @@ function expm1{T<:Float}(x::T)
     return u
 end
 
+
+
+"""
+    exp(x)
+
+Compute the base-`e` exponential of `x`, that is `eˣ`.
+"""
+function exp end
 
 let
 global exp
@@ -79,21 +90,16 @@ const c3f = 0.0416710823774337768554688f0
 const c2f = 0.166665524244308471679688f0
 const c1f = 0.499999850988388061523438f0
 
-global @inline _exp(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d  
+global @inline _exp(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d  
 global @inline _exp(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
-"""
-    exp(x)
-
-Compute the base-`e` exponential of `x`, that is `eˣ`.
-"""
 function exp{T<:Float}(x::T)
     q = roundi(T(MLN2E)*x)
     s = muladd(q, -LN2U(T), x)
     s = muladd(q, -LN2L(T), s)
     u =_exp(s)
     u = s*s*u + s + 1
-    u = ldexpk(u, q)
+    u = ldexpk(u,q)
     isninf(x) && (u = T(0))
     return u
 end

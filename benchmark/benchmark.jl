@@ -119,7 +119,7 @@ for f in keys(micros)
         println()
         print("time: ", )
         tratio = ratio(median(results["Libm"][f][string(T)]), median(results["Base"][f][string(T)])).time
-        tcolor = tratio > 2.5 ? :red : tratio < 1.5 ? :green : :blue
+        tcolor = tratio > 3 ? :red : tratio < 1.5 ? :green : :blue
         print_with_color(tcolor, @sprintf("%.2f",tratio), " ", string(T))
         if DETAILS
             print_with_color(:blue, "details Libm/Base\n")

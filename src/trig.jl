@@ -1,6 +1,89 @@
+# exported trigonometric functions
 
+"""
+    sin(x)
+
+Compute the sine of `x`, where the output is in radians.
+"""
+function sin end
+
+"""
+    cos(x)
+
+Compute the cosine of `x`, where the output is in radians.
+"""
+function cos end
 
 let
+global sin
+global cos
+
+const c8d =  2.72052416138529567917983e-15
+const c7d = -7.64292594113954471900203e-13
+const c6d =  1.60589370117277896211623e-10
+const c5d = -2.5052106814843123359368e-08
+const c4d =  2.75573192104428224777379e-06
+const c3d = -0.000198412698412046454654947
+const c2d =  0.00833333333333318056201922
+const c1d = -0.166666666666666657414808
+
+const c4f =  2.6083159809786593541503f-06
+const c3f = -0.0001981069071916863322258f0
+const c2f =  0.00833307858556509017944336f0
+const c1f = -0.166666597127914428710938f0
+
+global @inline _sincos(x::Double{Float64}) = dadd(c1d, x.hi*(@horner x.hi c2d c3d c4d c5d c6d c7d c8d))
+global @inline _sincos(x::Double{Float32}) = dadd(c1f, x.hi*(@horner x.hi c2f c3f c4f))
+
+function sin{T<:Float}(x::T)
+    d = abs(x)
+    q = roundi(d*T(M1PI))
+    s = dsub2(d, q*PI4A(T)*4)
+    s = dsub2(s, q*PI4B(T)*4)
+    s = dsub2(s, q*PI4C(T)*4)
+    s = dsub2(s, q*PI4D(T)*4)
+    t = s
+    s = dsqu(s)
+    w =_sincos(s)
+    v = dmul(t, dadd(T(1), dmul(w,s)))
+    u = T(v)
+    q & 1 != 0 && (u = -u)
+    return flipsign(u,x)
+end
+
+function cos{T<:Float}(x::T)
+    x = abs(x)
+    q = muladd(2, roundi(x*T(M1PI) - T(0.5)), 1)
+    s = dsub2(x, q*PI4A(T)*2)
+    s = dsub2(s, q*PI4B(T)*2)
+    s = dsub2(s, q*PI4C(T)*2)
+    s = dsub2(s, q*PI4D(T)*2)
+    t = s
+    s = dsqu(s)
+    w =_sincos(s)
+    v = dmul(t, dadd(T(1), dmul(w,s)))
+    u = T(v)
+    q & 2 == 0 && (u = -u)
+    return u
+end
+end
+
+
+"""
+    sin_fast(x)
+
+Compute the sine of `x`, where the output is in radians.
+"""
+function sin_fast end
+
+"""
+    cos_fast(x)
+
+Compute the cosine of `x`, where the output is in radians.
+"""
+function cos_fast end
+
+let 
 global sin_fast
 global cos_fast
 
@@ -46,7 +129,6 @@ function sin_fast{T<:Float}(x::T)
     flipsign(u,x)
 end
 
-
 function cos_fast{T<:Float}(x::T)
     q = muladd(2, roundi(x*T(M1PI)-T(0.5)), 1)
     x = muladd(q, -PI4A(T)*2, x)
@@ -61,65 +143,26 @@ end
 end
 
 
-let
-global sin
-global cos
 
-const c8d =  2.72052416138529567917983e-15
-const c7d = -7.64292594113954471900203e-13
-const c6d =  1.60589370117277896211623e-10
-const c5d = -2.5052106814843123359368e-08
-const c4d =  2.75573192104428224777379e-06
-const c3d = -0.000198412698412046454654947
-const c2d =  0.00833333333333318056201922
-const c1d = -0.166666666666666657414808
+"""
+    sincos(x)
 
-const c4f =  2.6083159809786593541503f-06
-const c3f = -0.0001981069071916863322258f0
-const c2f =  0.00833307858556509017944336f0
-const c1f = -0.166666597127914428710938f0
+Compute the sin and cosine of `x` simultaneously, where the output is in
+radians, returning a tuple.
+"""
+function sincos end
 
-global @inline _sincos(x::Double{Float64}) = dadd(c1d, x.hi*(@horner x.hi c2d c3d c4d c5d c6d c7d c8d))
-global @inline _sincos(x::Double{Float32}) = dadd(c1f, x.hi*(@horner x.hi c2f c3f c4f))
+"""
+    sincos_fast(x)
 
-function sin{T<:Float}(x::T)
-    d = abs(x)
-    q = roundi(d*T(M1PI))
-    s = dsub2(d, q*PI4A(T)*4)
-    s = dsub2(s, q*PI4B(T)*4)
-    s = dsub2(s, q*PI4C(T)*4)
-    s = dsub2(s, q*PI4D(T)*4)
-    t = s
-    s = dsqu(s)
-    w =_sincos(s)
-    v = dmul(t, dadd(T(1), dmul(w,s)))
-    u = T(v)
-    q & 1 != 0 && (u = -u)
-    return flipsign(u,x)
-end
-
-
-function cos{T<:Float}(x::T)
-    x = abs(x)
-    q = muladd(2, roundi(x*T(M1PI) - T(0.5)), 1)
-    s = dsub2(x, q*PI4A(T)*2)
-    s = dsub2(s, q*PI4B(T)*2)
-    s = dsub2(s, q*PI4C(T)*2)
-    s = dsub2(s, q*PI4D(T)*2)
-    t = s
-    s = dsqu(s)
-    w =_sincos(s)
-    v = dmul(t, dadd(T(1), dmul(w,s)))
-    u = T(v)
-    q & 2 == 0 && (u = -u)
-    return u
-end
-end
-
+Compute the sin and cosine of `x` simultaneously, where the output is in
+radians, returning a tuple.
+"""
+function sincos_fast end
 
 let
-global sincos_fast
 global sincos
+global sincos_fast
 
 const a6d =  1.58938307283228937328511e-10
 const a5d = -2.50506943502539773349318e-08
@@ -173,7 +216,6 @@ function sincos_fast{T<:Float}(x::T)
     Tuple{T,T}(Double(flipsign(rx,x), ry))
 end
 
-
 function sincos{T<:Float}(x::T)
     d  = abs(x)
     q  = roundi(d*2*T(M1PI))
@@ -200,9 +242,23 @@ end
 end
 
 
+"""
+    tan(x)
+
+Compute the tangent of `x`, where the output is in radians.
+"""
+function tan end
+
+"""
+    tan_fast(x)
+
+Compute the tangent of `x`, where the output is in radians.
+"""
+function tan_fast end
+
 let
-global tan_fast
 global tan
+global tan_fast
 
 const c15d =  1.01419718511083373224408e-05
 const c14d = -2.59519791585924697698614e-05
@@ -266,7 +322,26 @@ end
 end
 
 
-let
+
+"""
+    atan(x)
+
+Compute the inverse tangent of `x`, where the output is in radians.
+"""
+function atan{T<:Float}(x::T)
+    u = T(atan2k(Double(abs(x)), Double(T(1))))
+    isinf(x) && (u = T(MPI2))
+    flipsign(u,x)
+end
+
+
+"""
+    atan_fast(x)
+
+Compute the inverse tangent of `x`, where the output is in radians.
+"""
+function atan_fast end
+let 
 global atan_fast
 
 const c19d = -1.88796008463073496563746e-05
@@ -321,15 +396,25 @@ end
 end
 
 
-"""
-    atan(x)
 
-Compute the inverse tangent of `x`, where the output is in radians.
 """
-function atan{T<:Float}(x::T)
-    u = T(atan2k(Double(abs(x)), Double(T(1))))
-    isinf(x) && (u = T(MPI2))
-    flipsign(u,x)
+    atan2(x, y)
+
+Compute the inverse tangent of `x/y`, using the signs of both `x` and `y` to determine the quadrant of the return value.
+"""
+function atan2{T<:Float}(x::T, y::T)
+    r = T(atan2k(Double(abs(x)), Double(y)))
+    r = flipsign(r,y)
+    if isinf(y) || y == 0
+        r = T(MPI2) - (isinf(y) ? _sign(y)*T(MPI2) : T(0))
+    end
+    if isinf(x)
+        r = T(MPI2) - (isinf(y) ? _sign(y)*T(MPI4) : T(0))
+    end
+    if x == 0
+        r = _sign(y) == -1 ? T(MPI) : T(0)
+    end
+    return isnan(y) || isnan(x) ? T(NaN) : flipsign(r,x)
 end
 
 
@@ -354,24 +439,17 @@ function atan2_fast{T<:Float}(x::T, y::T)
 end
 
 
-"""
-    atan2(x, y)
 
-Compute the inverse tangent of `x/y`, using the signs of both `x` and `y` to determine the quadrant of the return value.
 """
-function atan2{T<:Float}(x::T, y::T)
-    r = T(atan2k(Double(abs(x)), Double(y)))
-    r = flipsign(r,y)
-    if isinf(y) || y == 0
-        r = T(MPI2) - (isinf(y) ? _sign(y)*T(MPI2) : T(0))
-    end
-    if isinf(x)
-        r = T(MPI2) - (isinf(y) ? _sign(y)*T(MPI4) : T(0))
-    end
-    if x == 0
-        r = _sign(y) == -1 ? T(MPI) : T(0)
-    end
-    return isnan(y) || isnan(x) ? T(NaN) : flipsign(r,x)
+    asin(x)
+
+Compute the inverse sine of `x`, where the output is in radians.
+"""
+function asin{T<:Float}(x::T)
+    d = atan2k(Double(abs(x)), dsqrt(dmul(dadd(T(1), x), dsub(T(1), x))))
+    u = T(d)
+    abs(x) == 1 && (u = T(MPI2))
+    flipsign(u,x)
 end
 
 
@@ -385,28 +463,6 @@ function asin_fast{T<:Float}(x::T)
 end
 
 
-"""
-    asin(x)
-
-Compute the inverse sine of `x`, where the output is in radians.
-"""
-function asin{T<:Float}(x::T)
-    d = atan2k(Double(abs(x)), dsqrt(dmul(dadd(T(1), x), dadd(T(1),-x))))
-    u = T(d)
-    abs(x) == 1 && (u = T(MPI2))
-    flipsign(u,x)
-end
-
-
-"""
-    acos_fast(x)
-
-Compute the inverse cosine of `x`, where the output is in radians.
-"""
-function acos_fast{T<:Float}(x::T)
-    flipsign(atan2k_fast(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
-end
-
 
 """
     acos(x)
@@ -419,4 +475,14 @@ function acos{T<:Float}(x::T)
     abs(x) == 1 && (d = Double(T(0)))
     x < 0 && (d = dadd(MDPI(T), d))
     return T(d)
+end
+
+
+"""
+    acos_fast(x)
+
+Compute the inverse cosine of `x`, where the output is in radians.
+"""
+function acos_fast{T<:Float}(x::T)
+    flipsign(atan2k_fast(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
 end
