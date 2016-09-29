@@ -43,7 +43,7 @@ function sin_fast{T<:Float}(x::T)
     q & 1 != 0 && (d = -d)
     u =_sincos_fast(s)
     u = muladd(s, u*d, d)
-    return flipsign(u,x)
+    flipsign(u,x)
 end
 
 
@@ -56,7 +56,7 @@ function cos_fast{T<:Float}(x::T)
     s = x*x
     q & 2 == 0 && (x = -x)
     u =_sincos_fast(s)
-    return muladd(s, u*x, x)
+    muladd(s, u*x, x)
 end
 end
 
@@ -85,10 +85,10 @@ global @inline _sincos(x::Double{Float32}) = dadd(c1f, x.hi*(@horner x.hi c2f c3
 function sin{T<:Float}(x::T)
     d = abs(x)
     q = roundi(d*T(M1PI))
-    s = dadd2(d, q * -PI4A(T)*4)
-    s = dadd2(s, q * -PI4B(T)*4)
-    s = dadd2(s, q * -PI4C(T)*4)
-    s = dadd2(s, q * -PI4D(T)*4)
+    s = dsub2(d, q*PI4A(T)*4)
+    s = dsub2(s, q*PI4B(T)*4)
+    s = dsub2(s, q*PI4C(T)*4)
+    s = dsub2(s, q*PI4D(T)*4)
     t = s
     s = dsqu(s)
     w =_sincos(s)
@@ -102,10 +102,10 @@ end
 function cos{T<:Float}(x::T)
     x = abs(x)
     q = muladd(2, roundi(x*T(M1PI) - T(0.5)), 1)
-    s = dadd2(x, q * -PI4A(T)*2)
-    s = dadd2(s, q * -PI4B(T)*2)
-    s = dadd2(s, q * -PI4C(T)*2)
-    s = dadd2(s, q * -PI4D(T)*2)
+    s = dsub2(x, q*PI4A(T)*2)
+    s = dsub2(s, q*PI4B(T)*2)
+    s = dsub2(s, q*PI4C(T)*2)
+    s = dsub2(s, q*PI4D(T)*2)
     t = s
     s = dsqu(s)
     w =_sincos(s)
@@ -177,10 +177,10 @@ end
 function sincos{T<:Float}(x::T)
     d  = abs(x)
     q  = roundi(d*2*T(M1PI))
-    s  = dadd2(d, q * -PI4A(T)*2)
-    s  = dadd2(s, q * -PI4B(T)*2)
-    s  = dadd2(s, q * -PI4C(T)*2)
-    s  = dadd2(s, q * -PI4D(T)*2)
+    s  = dsub2(d, q*PI4A(T)*2)
+    s  = dsub2(s, q*PI4B(T)*2)
+    s  = dsub2(s, q*PI4C(T)*2)
+    s  = dsub2(s, q*PI4D(T)*2)
     t  = s
     s  = dsqu(s)
     sx = T(s)
@@ -191,10 +191,10 @@ function sincos{T<:Float}(x::T)
     u  =_sincos_b(sx)
     v  = dadd(T(1), dmul(sx, u))
     ry = T(v)
-    q & 1 != 0     && (u  =  ry; ry = rx; rx = u)
-    q & 2 != 0     && (rx = -rx)
+    q & 1 != 0 && (u = ry; ry = rx; rx = u)
+    q & 2 != 0 && (rx = -rx)
     (q+1) & 2 != 0 && (ry = -ry)
-    isinf(d)       && (rx =  ry = T(NaN))
+    isinf(d) && (rx = ry = T(NaN))
     Tuple{T,T}(Double(flipsign(rx, x), ry))
 end
 end
@@ -252,10 +252,10 @@ global @inline _tan(x::Double{Float32}) = dadd(c1f, dmul(x, @horner x.hi c2f c3f
 
 function tan{T<:Float}(d::T)
     q = roundi(d*T(M2PI))
-    x = dadd2(d, q * -PI4A(T)*2)
-    x = dadd2(x, q * -PI4B(T)*2)
-    x = dadd2(x, q * -PI4C(T)*2)
-    x = dadd2(x, q * -PI4D(T)*2)
+    x = dsub2(d, q*PI4A(T)*2)
+    x = dsub2(x, q*PI4B(T)*2)
+    x = dsub2(x, q*PI4C(T)*2)
+    x = dsub2(x, q*PI4D(T)*2)
     q & 1 != 0 && (x = -x)
     s = dsqu(x)
     u =_tan(s)
@@ -329,14 +329,14 @@ Compute the inverse tangent of `x`, where the output is in radians.
 function atan{T<:Float}(x::T)
     u = T(atan2k(Double(abs(x)), Double(T(1))))
     isinf(x) && (u = T(MPI2))
-    return flipsign(u,x)
+    flipsign(u,x)
 end
 
 
 """
     atan2_fast(x, y)
 
-Compute the inverse tangent of `x/y`, using the signs of both x and y to determine the quadrant of the return value.
+Compute the inverse tangent of `x/y`, using the signs of both `x` and `y` to determine the quadrant of the return value.
 """
 function atan2_fast{T<:Float}(x::T, y::T)
     r = atan2k_fast(abs(x), y)
@@ -357,7 +357,7 @@ end
 """
     atan2(x, y)
 
-Compute the inverse tangent of `x/y`, using the signs of both x and y to determine the quadrant of the return value.
+Compute the inverse tangent of `x/y`, using the signs of both `x` and `y` to determine the quadrant of the return value.
 """
 function atan2{T<:Float}(x::T, y::T)
     r = T(atan2k(Double(abs(x)), Double(y)))

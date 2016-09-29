@@ -56,6 +56,6 @@ macro horner_split(x,p...)
             ex_e = :(muladd($(t2), $ex_e, $(esc(p[i]))))
         end
     end
-    push!(blk.args,:($(p0) + $(t1)*$(ex_o) + $(t2)*$(ex_e)) )    
-    return blk
+    push!(blk.args,:($(p0) + $(t1)*$(ex_o) + $(t2)*$(ex_e)))
+    blk
 end

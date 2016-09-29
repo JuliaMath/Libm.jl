@@ -66,6 +66,7 @@ function cbrt_fast{T<:Float}(d::T)
     y  = (y - T(2/3)*y*(y*x - 1))*q
 end
 
+
 """
     cbrt(x)
 

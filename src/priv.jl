@@ -47,16 +47,8 @@ end
 
 
 # The following define threshold values for `ilog2k`
-real_cut_offset(::Type{Float64}) = 300
-real_cut_offset(::Type{Float32}) = 64
-
-# 2^-real_cut_offset
-real_cut_min(::Type{Float64}) = 4.9090934652977266e-91
-real_cut_min(::Type{Float32}) = 5.421010862427522f-20
-
-# 2^real_cut_offset
-real_cut_max(::Type{Float64}) = 2.037035976334486e90
-real_cut_max(::Type{Float32}) = 1.8446744073709552f19
+threshold_exponent(::Type{Float64}) = 300
+threshold_exponent(::Type{Float32}) = 64
 
 """
     ilog2k(x::Float) -> Int
@@ -64,15 +56,15 @@ real_cut_max(::Type{Float32}) = 1.8446744073709552f19
 Returns the integral part of the logarithm of `|x|`, using 2 as base for the logarithm; in other
 words this returns the binary exponent of `x` so that
 
-    x = significand \times 2^exponent
+    x = significand × 2^exponent
 
-where `significand \in [0.5, 1)`.
+where `significand ∈ [0.5, 1)`.
 """
 @inline function ilog2k{T<:Float}(d::T)
-    m = d < real_cut_min(T)
-    d = ifelse(m, real_cut_max(T)*d, d)
+    m = d < T(2)^-threshold_exponent(T)
+    d = ifelse(m, d*T(2)^threshold_exponent(T), d)
     q = float2integer(d) & exponent_max(T)
-    q = ifelse(m, q - (real_cut_offset(T) + exponent_bias(T) - 1), q - (exponent_bias(T) - 1)) # subtract 1 since we want 2^q
+    q = ifelse(m, q - (threshold_exponent(T) + exponent_bias(T) - 1), q - (exponent_bias(T) - 1)) # subtract 1 since we want 2^q
 end
 
 
@@ -176,8 +168,8 @@ global @inline _expk(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 global @inline function expk{T<:Float}(d::Double{T})
     q = roundi(T(d)*T(MLN2E))
-    s = dadd(d, q * -LN2U(T))
-    s = dadd(s, q * -LN2L(T))
+    s = dadd(d, -q*LN2U(T))
+    s = dadd(s, -q*LN2L(T))
     u =_expk(T(s))
     t = dadd(s, dmul(dsqu(s), u))
     t = dadd(T(1), t)
@@ -187,8 +179,8 @@ end
 
 global @inline function expk2{T<:Float}(d::Double{T})
     q = roundi(T(d)*T(MLN2E))
-    s = dadd(d, q * -LN2U(T))
-    s = dadd(s, q * -LN2L(T))
+    s = dadd(d, -q*LN2U(T))
+    s = dadd(s, -q*LN2L(T))
     u =_expk(s.hi)
     t = dadd(s, dmul(dsqu(s), u))
     t = dadd(T(1), t)
@@ -218,7 +210,7 @@ global @inline _logk(x::Float32) = @horner x c1f c2f c3f c4f
 global @inline function logk{T<:Float}(d::T)
     e  = ilog2k(d*T(M1SQRT2))
     m  = ldexpk(d,-e)
-    x  = ddiv(dadd2(-T(1), m), dadd2(T(1), m))
+    x  = ddiv(dsub2(m, T(1)), dadd2(T(1), m))
     x2 = dsqu(x)
     t  =_logk(x2.hi)
     dadd(dmul(MDLN2(T), T(e)), dadd(scale(x, T(2)), dmul(dmul(x2, x), t)))
@@ -228,7 +220,7 @@ end
 global @inline function logk2{T<:Float}(d::Double{T})
     e  = ilog2k(d.hi*T(M1SQRT2))
     m  = scale(d, pow2i(T,-e))
-    x  = ddiv(dadd2(m, -T(1)), dadd2(m, T(1)))
+    x  = ddiv(dsub2(m, T(1)), dadd2(m, T(1)))
     x2 = dsqu(x)
     t  =_logk(x2.hi)
     dadd(dmul(MDLN2(T), T(e)), dadd(scale(x, T(2)), dmul(dmul(x2, x), t)))

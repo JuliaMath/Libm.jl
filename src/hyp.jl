@@ -67,7 +67,7 @@ Compute the inverse hyperbolic sine of `x`.
 """
 function asinh{T<:Float}(x::T)
     u = abs(x)
-    d = logk2(dadd(dsqrt(dadd2(dsqu(u),  T(1))), u))
+    d = logk2(dadd(dsqrt(dadd2(dsqu(u), T(1))), u))
     u = T(d)
     u = isinf(x) || isnan(u) ? T(Inf) : u
     u = flipsign(u,x)
