@@ -57,7 +57,7 @@ You can also access `Libm.Musl.log(x)`  for a different implementation of the lo
 
 You can benchmark the performance of the `Libm.jl` math library on your machine by running
 ```julia
-include(joinpath(Pkg.dir("Libm"), "bench", "bench.jl"))
+include(joinpath(Pkg.dir("Libm"), "benchmark", "benchmark.jl"))
 ```
 Note this will take some time to run for the first time (subsequent runs will be much faster). Please ensure you run the benchmarks under `-O3` and that you are not concurrently running other cpu intensive tasks.
 **Feel free to post your benchmark results at https://github.com/JuliaMath/Libm.jl/issues/34**

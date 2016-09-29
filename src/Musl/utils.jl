@@ -1,4 +1,4 @@
-typealias FloatTypes Union{Float32,Float64}
+typealias Float Union{Float32,Float64}
 
 # Useful utilities from Base
 using Base: sign_mask, exponent_mask, significand_mask, exponent_one, exponent_bias, significand_bits

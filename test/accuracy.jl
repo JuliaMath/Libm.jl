@@ -5,8 +5,15 @@ IntF(::Type{Float64}) = Int64
 IntF(::Type{Float32}) = Int32
 
 
-@testset "Accuracy (max error in ulp) for $T" for T in (Float32, Float64)
+@testset "Accuracy (max error in ulp) for $T" for T in (Float64, Float32)
     println("Accuracy tests for $T")
+
+
+    xx = map(T, vcat(-10:0.0002:10, -1000:0.1:1000))
+    fun_table = Dict(Libm.exp => Base.exp)
+    tol = 1
+    test_acc(T, fun_table, xx, tol)
+
 
 
     xx = map(T, vcat(-10:0.0002:10, -1000:0.02:1000))
@@ -131,11 +138,6 @@ IntF(::Type{Float32}) = Int32
     tol = 1
     test_acc(T, fun_table, xx, tol)
 
-
-    xx = map(T, vcat(-10:0.0002:10, -1000:0.1:1000))
-    fun_table = Dict(Libm.exp => Base.exp)
-    tol = 1
-    test_acc(T, fun_table, xx, tol)
 
 
     xx = map(T, vcat(-10:0.0002:10, -120:0.023:1000, -1000:0.02:2000))

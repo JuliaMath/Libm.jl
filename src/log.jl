@@ -1,4 +1,4 @@
-
+# exported logarithmic functions
 
 """
     ilog2(x)
@@ -15,11 +15,11 @@ where `significand ∈ [1, 2)`.
     * `x = Inf`  returns `typemax(Int)`
     * `x = NaN`  returns `typemax(Int)`
 """
-function ilog2{T<:FloatTypes}(x::T)
+function ilog2{T<:Float}(x::T)
     e = ilog2k(abs(x)) - 1
-    e = isnan(x) ? typemax(Int) : e
-    e = isinf(x) ? typemax(Int) : e
-    e = x == 0   ? typemin(Int) : e
+    isnan(x) && (e = typemax(Int))
+    isinf(x) && (e = typemax(Int))
+    x == 0 && (e = typemin(Int))
     return e
 end
 
@@ -29,11 +29,11 @@ end
 
 Returns the base `10` logarithm of `x`.
 """
-function log10{T<:FloatTypes}(x::T)
+function log10{T<:Float}(x::T)
     u = T(dmul(logk(x), MDLN10E(T)))
     isinf(x) && (u = T(Inf))
-    x < 0    && (u = T(NaN))
-    x == 0   && (u = T(-Inf))
+    x < 0  && (u = T(NaN))
+    x == 0 && (u = T(-Inf))
     return u
 end
 
@@ -43,11 +43,11 @@ end
 
 Returns the base `2` logarithm of `x`.
 """
-function log2{T<:FloatTypes}(x::T)
+function log2{T<:Float}(x::T)
     u = T(dmul(logk(x), MDLN2E(T)))
     isinf(x) && (u = T(Inf))
-    x < 0    && (u = T(NaN))
-    x == 0   && (u = T(-Inf))
+    x < 0  && (u = T(NaN))
+    x == 0 && (u = T(-Inf))
     return u
 end
 
@@ -57,11 +57,11 @@ end
 
 Accurately compute the natural logarithm of 1+x.
 """
-function log1p{T<:FloatTypes}(x::T)
+function log1p{T<:Float}(x::T)
     u = T(logk2(dadd2(x, T(1))))
     isinf(x) && (u = T(Inf))
-    x < -1   && (u = T(NaN))
-    x == -1  && (u = T(-Inf))
+    x < -1 && (u = T(NaN))
+    x == -1 && (u = -T(Inf))
     return copysign(u,x) # return correct sign for -0.0
 end
 
@@ -72,11 +72,11 @@ end
 Compute the natural logarithm of `x`. The inverse of the natural logarithm is
 the natural expoenential function `exp(x)`
 """
-function log{T<:FloatTypes}(x::T)
+function log{T<:Float}(x::T)
     u = T(logk(x))
     isinf(x) && (u = T(Inf))
-    x < 0    && (u = T(NaN))
-    x == 0   && (u = T(-Inf))
+    x < 0  && (u = T(NaN))
+    x == 0 && (u = -T(Inf))
     return u
 end
 
@@ -95,6 +95,13 @@ end
 # That being said, since this converges faster when the argument is close to
 # 1, we multiply  `m` by `2` and subtract 1 for the exponent `e` when `m` is
 # less than `sqrt(2)/2`
+"""
+    log_fast(x)
+
+Compute the natural logarithm of `x`. The inverse of the natural logarithm is
+the natural expoenential function `exp(x)`
+"""
+function log_fast end
 
 let
 global log_fast
@@ -117,7 +124,7 @@ const c1f = 2f0
 global @inline _log_fast(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
 global @inline _log_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
-function log_fast{T<:FloatTypes}(x::T)
+function log_fast{T<:Float}(x::T)
     e  = ilog2k(T(M1SQRT2)*x)
     m  = ldexpk(x,-e)
     u  = (m-1)/(m+1)
@@ -125,8 +132,8 @@ function log_fast{T<:FloatTypes}(x::T)
     t  =_log_fast(u2)
     u  = muladd(u, t, T(MLN2)*e)
     isinf(x) && (u = T(Inf))
-    x < 0    && (u = T(NaN))
-    x == 0   && (u = T(-Inf))
+    x < 0 && (u = T(NaN))
+    x == 0 && (u = -T(Inf))
     return u
 end
 end

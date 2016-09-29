@@ -242,7 +242,7 @@ global @inline function _log_proc2(f::Float32)
 end
 
 
-function log{T<:FloatTypes}(x::T)
+function log{T<:Float}(x::T)
     if x > 0
         x == T(Inf) && return x
 
@@ -282,7 +282,7 @@ function log{T<:FloatTypes}(x::T)
 end
 
 
-function log1p{T<:FloatTypes}(x::T)
+function log1p{T<:Float}(x::T)
     if x > -1
         x == T(Inf) && return x
         if -eps(T)/2 < x < eps(T)/2

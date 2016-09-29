@@ -1,1 +1,0 @@
-WARNING: Method definition log1p(Base.MPFR.BigFloat) in module MPFR at mpfr.jl:559 overwritten in module Main at C:\Users\Mustafa\.julia\v0.5\Libm\test\runtests.jl:68.

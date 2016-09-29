@@ -1,4 +1,4 @@
-
+# exported hyperbolic functions
 
 over_sch(::Type{Float64}) = 710.0
 over_sch(::Type{Float32}) = 89f0
@@ -8,7 +8,7 @@ over_sch(::Type{Float32}) = 89f0
 
 Compute hyperbolic sine of `x`.
 """
-function sinh{T<:FloatTypes}(x::T)
+function sinh{T<:Float}(x::T)
     u = abs(x)
     d = expk2(Double(u))
     d = dsub(d, ddrec(d))
@@ -21,12 +21,13 @@ function sinh{T<:FloatTypes}(x::T)
 end
 
 
+
 """
     cosh(x)
 
 Compute hyperbolic cosine of `x`.
 """
-function cosh{T<:FloatTypes}(x::T)
+function cosh{T<:Float}(x::T)
     u = abs(x)
     d = expk2(Double(u))
     d = dadd(d, ddrec(d))
@@ -38,6 +39,7 @@ function cosh{T<:FloatTypes}(x::T)
 end
 
 
+
 over_th(::Type{Float64}) = 18.714973875
 over_th(::Type{Float32}) = 8.664339742f0
 
@@ -46,7 +48,7 @@ over_th(::Type{Float32}) = 8.664339742f0
 
 Compute hyperbolic tangent of `x`.
 """
-function tanh{T<:FloatTypes}(x::T)
+function tanh{T<:Float}(x::T)
     u = abs(x)
     d = expk2(Double(u))
     e = ddrec(d)
@@ -60,14 +62,15 @@ function tanh{T<:FloatTypes}(x::T)
 end
 
 
+
 """
     asinh(x)
 
 Compute the inverse hyperbolic sine of `x`.
 """
-function asinh{T<:FloatTypes}(x::T)
+function asinh{T<:Float}(x::T)
     u = abs(x)
-    d = logk2(dadd(dsqrt(dadd2(dsqu(u),  T(1))), u))
+    d = logk2(dadd(dsqrt(dadd2(dsqu(u), T(1))), u))
     u = T(d)
     u = isinf(x) || isnan(u) ? T(Inf) : u
     u = flipsign(u,x)
@@ -76,12 +79,13 @@ function asinh{T<:FloatTypes}(x::T)
 end
 
 
+
 """
     acosh(x)
 
 Compute the inverse hyperbolic cosine of `x`.
 """
-function acosh{T<:FloatTypes}(x::T)
+function acosh{T<:Float}(x::T)
     d = logk2(dadd2(dsqrt(dsub2(dsqu(x), T(1))), x))
     u = T(d)
     u = isinf(x) || isnan(u) ? T(Inf) : u
@@ -92,12 +96,13 @@ function acosh{T<:FloatTypes}(x::T)
 end
 
 
+
 """
     atanh(x)
 
 Compute the inverse hyperbolic tangent of `x`.
 """
-function atanh{T<:FloatTypes}(x::T)
+function atanh{T<:Float}(x::T)
     u = abs(x)
     d = logk2(ddiv(dadd2(T(1), u), dsub2(T(1), u)))
     u = u > T(1) ? T(NaN) : (u == T(1) ? T(Inf) : T(d)*T(0.5))

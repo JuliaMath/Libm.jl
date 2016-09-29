@@ -5,7 +5,7 @@
 
 Exponentiation operator, returns `x` raised to the power `y`.
 """
-function pow{T<:FloatTypes}(x::T, y::T)
+function pow{T<:Float}(x::T, y::T)
     yi = unsafe_trunc(Int,y)
     yint = yi == y
     yodd = isodd(yi) && yint
@@ -49,7 +49,7 @@ global @inline _cbrt(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f
 
 Return `x^{1/3}`.
 """
-function cbrt_fast{T<:FloatTypes}(d::T)
+function cbrt_fast{T<:Float}(d::T)
     e  = ilog2k(d)
     d  = ldexpk(d,-e)
     r  = (e + 6144) % 3
@@ -66,12 +66,13 @@ function cbrt_fast{T<:FloatTypes}(d::T)
     y  = (y - T(2/3)*y*(y*x - 1))*q
 end
 
+
 """
     cbrt(x)
 
 Return `x^{1/3}`. The prefix operator `∛` is equivalent to `cbrt`.
 """
-function cbrt{T<:FloatTypes}(d::T)
+function cbrt{T<:Float}(d::T)
     e  = ilog2k(d)
     d  = ldexpk(d,-e)
     r  = (e + 6144) % 3
@@ -106,7 +107,7 @@ end
 
 Compute the hypotenuse `\sqrt{x^2+y^2}` avoiding overflow and underflow.
 """
-function hypot{T<:FloatTypes}(x::T, y::T)
+function hypot{T<:Float}(x::T, y::T)
     x = abs(x)
     y = abs(y)
     if x < y
