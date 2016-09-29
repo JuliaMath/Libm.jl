@@ -131,7 +131,7 @@ end
 
 
 
-if is_fma_fast()
+if FMA_FAST
 
     # two-prod-fma
     @inline function dmul{T<:Float}(x::T, y::T)

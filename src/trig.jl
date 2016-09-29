@@ -321,6 +321,11 @@ end
 end
 
 
+"""
+    atan(x)
+
+Compute the inverse tangent of `x`, where the output is in radians.
+"""
 function atan{T<:Float}(x::T)
     u = T(atan2k(Double(abs(x)), Double(T(1))))
     isinf(x) && (u = T(MPI2))
@@ -328,6 +333,11 @@ function atan{T<:Float}(x::T)
 end
 
 
+"""
+    atan2_fast(x, y)
+
+Compute the inverse tangent of `x/y`, using the signs of both x and y to determine the quadrant of the return value.
+"""
 function atan2_fast{T<:Float}(x::T, y::T)
     r = atan2k_fast(abs(x), y)
     r = flipsign(r,y)
@@ -344,6 +354,11 @@ function atan2_fast{T<:Float}(x::T, y::T)
 end
 
 
+"""
+    atan2(x, y)
+
+Compute the inverse tangent of `x/y`, using the signs of both x and y to determine the quadrant of the return value.
+"""
 function atan2{T<:Float}(x::T, y::T)
     r = T(atan2k(Double(abs(x)), Double(y)))
     r = flipsign(r,y)
@@ -360,11 +375,21 @@ function atan2{T<:Float}(x::T, y::T)
 end
 
 
+"""
+    asin_fast(x)
+
+Compute the inverse sine of `x`, where the output is in radians.
+"""
 function asin_fast{T<:Float}(x::T)
     flipsign(atan2k_fast(abs(x), _sqrt((1+x)*(1-x))), x)
 end
 
 
+"""
+    asin(x)
+
+Compute the inverse sine of `x`, where the output is in radians.
+"""
 function asin{T<:Float}(x::T)
     d = atan2k(Double(abs(x)), dsqrt(dmul(dadd(T(1), x), dadd(T(1),-x))))
     u = T(d)
@@ -373,11 +398,21 @@ function asin{T<:Float}(x::T)
 end
 
 
+"""
+    acos_fast(x)
+
+Compute the inverse cosine of `x`, where the output is in radians.
+"""
 function acos_fast{T<:Float}(x::T)
     flipsign(atan2k_fast(_sqrt((1+x)*(1-x)), abs(x)), x) + (x < 0 ? T(MPI) : T(0))
 end
 
 
+"""
+    acos(x)
+
+Compute the inverse cosine of `x`, where the output is in radians.
+"""
 function acos{T<:Float}(x::T)
     d = atan2k(dsqrt(dmul(dadd(T(1), x), dsub(T(1), x))), Double(abs(x)))
     d = flipsign(d,x)

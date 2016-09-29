@@ -4,7 +4,7 @@ function is_fma_fast end
 for T in (Float32, Float64)
     @eval is_fma_fast(::Type{$T}) = $(muladd(nextfloat(one(T)),nextfloat(one(T)),-nextfloat(one(T),2)) != zero(T))
 end
-is_fma_fast() = is_fma_fast(Float64) && is_fma_fast(Float32)
+const FMA_FAST = is_fma_fast(Float64) && is_fma_fast(Float32)
 
 
 @inline exponent_max{T<:Float}(::Type{T}) = Int(exponent_mask(T) >> significand_bits(T))
