@@ -1,5 +1,4 @@
 
-
 """
   pow(x, y)
 
@@ -11,7 +10,7 @@ function pow{T<:Float}(x::T, y::T)
     yodd = isodd(yi) && yint
     z = expk(dmul(logk(abs(x)), y))
     z = isnan(z) ? T(Inf) : z
-    z *= (x >= 0 ? 1 : (!yint ? T(NaN) : (yodd ? -1 : 1)));
+    z *= (x >= 0 ? T(1) : (!yint ? T(NaN) : (yodd ? -T(1) : T(1))))
     efx = flipsign(abs(x) - 1, y)
     isinf(y) && (z = efx < 0 ? T(0) : (efx == 0 ? T(1) : T(Inf)))
     if isinf(x) || x == 0
@@ -21,6 +20,7 @@ function pow{T<:Float}(x::T, y::T)
     (y == 0 || x == 1) && (z = T(1))
     return z
 end
+
 
 
 let
@@ -100,6 +100,7 @@ function cbrt{T<:Float}(d::T)
     return z
 end
 end
+
 
 
 """
