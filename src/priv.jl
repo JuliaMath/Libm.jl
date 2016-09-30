@@ -163,7 +163,7 @@ const c3f = 0.0416710823774337768554688f0
 const c2f = 0.166665524244308471679688f0
 const c1f = 0.499999850988388061523438f0
 
-global @inline _expk(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d
+global @inline _expk(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d
 global @inline _expk(x::Float32) = @horner x c1f c2f c3f c4f c5f
 
 global @inline function expk{T<:Float}(d::Double{T})
@@ -204,7 +204,7 @@ const c3f = 0.285279005765914916992188f0
 const c2f = 0.400005519390106201171875f0
 const c1f = 0.666666567325592041015625f0
 
-global @inline _logk(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d
+global @inline _logk(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d
 global @inline _logk(x::Float32) = @horner x c1f c2f c3f c4f
 
 global @inline function logk{T<:Float}(d::T)

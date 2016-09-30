@@ -28,6 +28,8 @@ _sqrt{T<:Float}(x::T) = Base.box(T, Base.sqrt_llvm_fast(Base.unbox(T,x)))
 @inline ispinf{T<:Float}(x::T) = x ==  T(Inf)
 @inline isninf{T<:Float}(x::T) = x == -T(Inf)
 
+# Similar to @horner, but split into even and odd coefficients. This is typically less
+# accurate, but faster due to out of order execution.
 macro horner_split(x,p...)
     t1 = gensym("x1")
     t2 = gensym("x2")

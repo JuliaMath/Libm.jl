@@ -22,7 +22,7 @@ Get the most significant 32 bits as a `UInt32` from `x`.
 Corresponds to `GET_HIGH_WORD` in musl
 """
 @inline highword(x::Float64) = UInt32(reinterpret(UInt64, x) >> 32)
-@inline highword(x::Float32) =  reinterpret(UInt32, x)
+@inline highword(x::Float32) = reinterpret(UInt32, x)
 
 
 """

@@ -37,7 +37,7 @@ global @inline _sincos(x::Double{Float32}) = dadd(c1f, x.hi*(@horner x.hi c2f c3
 
 function sin{T<:Float}(x::T)
     d = abs(x)
-    q = roundi(d*T(M1PI))
+    q = round(d*T(M1PI))
     s = dsub2(d, q*PI4A(T)*4)
     s = dsub2(s, q*PI4B(T)*4)
     s = dsub2(s, q*PI4C(T)*4)
@@ -47,13 +47,14 @@ function sin{T<:Float}(x::T)
     w =_sincos(s)
     v = dmul(t, dadd(T(1), dmul(w,s)))
     u = T(v)
-    q & 1 != 0 && (u = -u)
+    qi = unsafe_trunc(Int,q)
+    qi & 1 != 0 && (u = -u)
     return flipsign(u,x)
 end
 
 function cos{T<:Float}(x::T)
     x = abs(x)
-    q = muladd(2, roundi(x*T(M1PI) - T(0.5)), 1)
+    q = muladd(T(2), round(x*T(M1PI) - T(0.5)), T(1))
     s = dsub2(x, q*PI4A(T)*2)
     s = dsub2(s, q*PI4B(T)*2)
     s = dsub2(s, q*PI4C(T)*2)
@@ -63,7 +64,8 @@ function cos{T<:Float}(x::T)
     w =_sincos(s)
     v = dmul(t, dadd(T(1), dmul(w,s)))
     u = T(v)
-    q & 2 == 0 && (u = -u)
+    qi = unsafe_trunc(Int,q)
+    qi & 2 == 0 && (u = -u)
     return u
 end
 end
@@ -307,16 +309,17 @@ global @inline _tan(x::Double{Float32}) = dadd(c1f, dmul(x, @horner x.hi c2f c3f
 # global @inline _tan(x::Double{Float32}) = dadd(c1f, dmul(x.hi, dadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
 
 function tan{T<:Float}(d::T)
-    q = roundi(d*T(M2PI))
+    q = round(d*T(M2PI))
     x = dsub2(d, q*PI4A(T)*2)
     x = dsub2(x, q*PI4B(T)*2)
     x = dsub2(x, q*PI4C(T)*2)
     x = dsub2(x, q*PI4D(T)*2)
-    q & 1 != 0 && (x = -x)
+    qi = unsafe_trunc(Int,q)
+    qi & 1 != 0 && (x = -x)
     s = dsqu(x)
     u =_tan(s)
     u = dmul(x, dadd(T(1), dmul(u, s)))
-    q & 1 != 0 && (u = ddrec(u))
+    qi & 1 != 0 && (u = ddrec(u))
     return T(u)
 end
 end
