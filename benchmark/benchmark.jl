@@ -2,13 +2,14 @@ using Libm
 using BenchmarkTools
 using JLD, DataStructures
 
-RETUNE  = false
-VERBOSE = true
-DETAILS = false
+const RETUNE  = false
+const VERBOSE = true
+const DETAILS = false
 
-test_types = (Float64, Float32) # Which types do you want to bench?
+const bench = ("Base","Libm.Cephes")
+const test_types = (Float64, Float32, ) # Which types do you want to bench?
 
-const bench = ("Base","Libm")
+
 const suite = BenchmarkGroup()
 for n in bench
     suite[n] = BenchmarkGroup([n])
@@ -16,8 +17,9 @@ end
 
 
 bench_reduce(f::Function, X) = mapreduce(x -> reinterpret(Unsigned,x), |, f(x) for x in X)
+typealias Float Union{Float16,Float32,Float64}
 
-typealias Float Union{Float32,Float64}
+
 MRANGE(::Type{Float64}) = 10000000
 MRANGE(::Type{Float32}) = 10000
 IntF(::Type{Float64}) = Int64
@@ -65,52 +67,60 @@ for f in (:atanh,)
 end
 
 const micros = OrderedDict(
-    "sin"   => x_trig,
-    "cos"   => x_trig,
-    "tan"   => x_trig,
-    "asin"  => x_atrig,
-    "acos"  => x_atrig,
+    # "sin"   => x_trig,
+    # "cos"   => x_trig,
+    # "tan"   => x_trig,
+    # "asin"  => x_atrig,
+    # "acos"  => x_atrig,
     "atan"  => x_atan,
     "exp"   => x_exp,
-    "exp2"  => x_exp2,
-    "exp10" => x_exp10,
-    "expm1" => x_expm1,
-    "log"   => x_log,
-    "log2"  => x_log10,
-    "log10" => x_log10,
-    "log1p" => x_log1p,
-    "sinh"  => x_trigh,
-    "cosh"  => x_trigh,
-    "tanh"  => x_trigh,
-    "asinh" => x_asinhatanh,
-    "acosh" => x_acosh,
-    "atanh" => x_asinhatanh,
-    "cbrt"  => x_cbrt
+    # "exp2"  => x_exp2,
+    # "exp10" => x_exp10,
+    # "expm1" => x_expm1,
+    # "log"   => x_log,
+    # "log2"  => x_log10,
+    # "log10" => x_log10,
+    # "log1p" => x_log1p,
+    # "sinh"  => x_trigh,
+    # "cosh"  => x_trigh,
+    # "tanh"  => x_trigh,
+    # "asinh" => x_asinhatanh,
+    # "acosh" => x_acosh,
+    # "atanh" => x_asinhatanh,
+    # "cbrt"  => x_cbrt
     )
 
-for n in ("Base","Libm")
+function modulefunex(str) # convert e.g. "Libm.Cephes.exp" to an Expr you can actually call :P
+    g = split(str,".")
+    if length(g) > 1
+        return Expr(:., modulefunex(join(g[1:end-1],".")), QuoteNode(Symbol(g[end])))
+    end
+    return Symbol(str)
+end
+
+for n in bench
     for (f,x) in micros
         suite[n][f] = BenchmarkGroup([f])
         for T in test_types
-            fex = Expr(:., Symbol(n), QuoteNode(Symbol(f)))
+            fex = modulefunex(join([n,f],"."))
             suite[n][f][string(T)] = @benchmarkable bench_reduce($fex, $(x(T)))
         end
     end
 end
 
 
-tune_params = joinpath(dirname(@__FILE__), "params.jld")
-if !isfile(tune_params) || RETUNE
-    tune!(suite; verbose=VERBOSE, seconds = 2)
-    save(tune_params, "suite", params(suite))
-    println("Saving tuned parameters.")
-else
-    println("Loading pretuned parameters.")
-    loadparams!(suite, load(tune_params, "suite"), :evals, :samples)
-end
+# tune_params = joinpath(dirname(@__FILE__), "params.jld")
+# if !isfile(tune_params) || RETUNE
+#     tune!(suite; verbose=VERBOSE, seconds = 2)
+#     save(tune_params, "suite", params(suite))
+#     println("Saving tuned parameters.")
+# else
+#     println("Loading pretuned parameters.")
+#     loadparams!(suite, load(tune_params, "suite"), :evals, :samples)
+# end
 
 println("Running micro benchmarks...")
-results = run(suite; verbose=VERBOSE, seconds = 2)
+results = run(suite; verbose=VERBOSE, seconds = 4)
 
 print_with_color(:blue, "Benchmarks: median ratio Libm/Base\n")
 for f in keys(micros)
@@ -118,7 +128,7 @@ for f in keys(micros)
     for T in test_types
         println()
         print("time: ", )
-        tratio = ratio(median(results["Libm"][f][string(T)]), median(results["Base"][f][string(T)])).time
+        tratio = ratio(median(results["Libm.Cephes"][f][string(T)]), median(results["Base"][f][string(T)])).time
         tcolor = tratio > 3 ? :red : tratio < 1.5 ? :green : :blue
         print_with_color(tcolor, @sprintf("%.2f",tratio), " ", string(T))
         if DETAILS

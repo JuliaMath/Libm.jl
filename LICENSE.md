@@ -23,7 +23,10 @@ The Libm.jl package is licensed under the MIT "Expat" License:
 > SOFTWARE.
 > 
 
-Libm.jl includes code from the following projects, which have their own licenses:
+Libm.jl includes code that are based on the following projects, which have their own licenses:
 
 - [MUSL](http://git.musl-libc.org/cgit/musl/tree/COPYRIGHT) [MIT]
+
 - [sleef](https://github.com/shibatch/sleef) [public domain]
+
+- [Cephes](http://www.moshier.net/#Cephes) Copyright (C) Stephen L. Moshier. Permission graciously granted to distribute Julia implementations under an MIT license. 

@@ -1,70 +1,63 @@
 using Libm
 using Base.Test
 
-isnzero{T<:AbstractFloat}(x::T) = signbit(x)
-ispzero{T<:AbstractFloat}(x::T) = !signbit(x)
-
-function cmpdenorm{Tx<:AbstractFloat, Ty<:AbstractFloat}(x::Tx, y::Ty)
-    sizeof(Tx) < sizeof(Ty) ? y = Tx(y) : x = Ty(x) # cast larger type to smaller type
-    (isnan(x) && isnan(y)) && return true
-    (isnan(x) || isnan(y)) && return false
-    (isinf(x) != isinf(y)) && return false
-    (x == Tx(Inf)  && y == Ty(Inf))  && return true
-    (x == Tx(-Inf) && y == Ty(-Inf)) && return true
-    if y == 0
-        (ispzero(x) && ispzero(y)) && return true
-        (isnzero(x) && isnzero(y)) && return true
-        return false
-    end
-    (!isnan(x) && !isnan(y) && !isinf(x) && !isinf(y)) && return sign(x) == sign(y)
-    return false
-end
-
-# the following compares the ulp between x and y.
-# First it promotes them to the larger of the two types x,y
-infh(::Type{Float64}) = 1e+300
-infh(::Type{Float32}) = 1e+37
-function countulp(T, x::AbstractFloat, y::AbstractFloat)
-    X,Y = promote(x,y)
-    x, y = T(X), T(Y) # Cast to smaller type
+using Base: significand_bits
+function countulp(T,X::AbstractFloat,Y::AbstractFloat)
+    x,y = T(X),T(Y)
     (isnan(x) && isnan(y)) && return 0
     (isnan(x) || isnan(y)) && return 10000
-    if isinf(x)
-        (sign(x) == sign(y) && abs(y) > infh(T)) && return 0 # Relaxed infinity handling
-        return 10001
-    end
-    (x ==  Inf && y ==  Inf) && return 0
-    (x == -Inf && y == -Inf) && return 0
-    if y == 0
-        (x == 0) && return 0
-        return 10002
-    end
+    (isinf(x) && isinf(y)) && return (signbit(x) == signbit(y)) ? 0 : 10001
+    (x == 0 && y == 0) && return (signbit(x) == signbit(y)) ? 0 : 10002
     if isfinite(x) && isfinite(y)
-        return T(abs(X - Y)/eps(y))
+        d = abs(X - Y)
+        return T(d/eps(y))
+        # k = abs(frexp(Y)[2])
+        # return T(ldexp(d,significand_bits(T)-k+1))
     end
     return 10003
 end
-countulp{T<:AbstractFloat}(x::T, y::T) = countulp(T,x,y)
-
-# get rid off annoying warnings from overwritten function
-macro nowarn(expr)
-    quote
-        stderr = STDERR
-        stream = open("null", "w")
-        redirect_stderr(stream)
-        result = $(esc(expr))
-        redirect_stderr(stderr)
-        close(stream)
-        result
-    end
+function cmpdenorm{Tx<:AbstractFloat, Ty<:AbstractFloat}(x::Tx, y::Ty)
+    (isnan(x) && isnan(y)) && return signbit(x) == signbit(y)
+    (isinf(x) && isinf(y)) && return signbit(x) == signbit(y)
+    (isfinite(x) && isfinite(y)) && return signbit(x) == signbit(y)
+    return false
 end
+
+
+
+# # the following compares the ulp between x and y.
+# # First it promotes them to the larger of the two types x,y
+# infh(::Type{Float64}) = 1e+300
+# infh(::Type{Float32}) = 1e+37
+# function countulp(T, x::AbstractFloat, y::AbstractFloat)
+#     X,Y = promote(x,y)
+#     x, y = T(X), T(Y) # Cast to smaller type
+#     (isnan(x) && isnan(y)) && return 0
+#     (isnan(x) || isnan(y)) && return 10000
+#     if isinf(x)
+#         (sign(x) == sign(y) && abs(y) > infh(T)) && return 0 # Relaxed infinity handling
+#         return 10001
+#     end
+#     (x ==  Inf && y ==  Inf) && return 0
+#     (x == -Inf && y == -Inf) && return 0
+#     if y == 0
+#         (x == 0) && return 0
+#         return 10002
+#     end
+#     if isfinite(x) && isfinite(y)
+#         return T(abs(X - Y)/eps(y))
+#     end
+#     return 10003
+# end
+# countulp{T<:AbstractFloat}(x::T, y::T) = countulp(T,x,y)
+
 
 # overide domain checking that base adheres to
 using Base.MPFR.ROUNDING_MODE
 for f in (:sin, :cos, :tan, :asin, :acos, :atan, :asinh, :acosh, :atanh, :log, :log10, :log2, :log1p)
     @eval begin
         import Base.$f
-        @nowarn function ($f)(x::BigFloat)
+        function ($f)(x::BigFloat)
             z = BigFloat()
             ccall($(string(:mpfr_,f), :libmpfr), Int32, (Ptr{BigFloat}, Ptr{BigFloat}, Int32), &z, &x, ROUNDING_MODE[])
             return z
@@ -98,20 +91,15 @@ function test_acc(T, fun_table, xx, tol; debug=false, tol_debug=5)
 
         t = @test trunc(rmax,1) <= tol
 
-        fmtxloc = isa(xmax, Tuple) ? string('(', join((@sprintf("%.5f", x) for x in xmax), ", "), ')') : @sprintf("%.5f", xmax)
-        println(rpad(strip_module_name(xfun), 18, " "), ": max ", @sprintf("%f", rmax),
+        fmtxloc = isa(xmax, Tuple) ? string('(', join((@sprintf("%.5g", x) for x in xmax), ", "), ')') : @sprintf("%.5f", xmax)
+        println(rpad(strip_module_name(xfun), 18, " "), ": max ", @sprintf("%g", rmax),
             rpad(" at x = "*fmtxloc, 40, " "),
-            ": mean ", @sprintf("%f", rmean))
+            ": mean ", @sprintf("%g", rmean))
     end
 end
 
 function runtests()
-    @testset "Sleef" begin
-    include("accuracy.jl")
-    include("dnml_nan.jl")
-    end
-    include("log.jl")
-    include("erf.jl")
+    include("accuracy_test.jl")
 end
 
 runtests()

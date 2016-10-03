@@ -1,11 +1,14 @@
-# Libm.jl
+<div><img src="https://files.gitter.im/musm/CniM/blob" alt="Libm.jl Logo" width="350"></img> </div>
+
+A pure Julia math library. Implementations of the functions provided by the C math library (aka libm) in Julia.
+
 
 [![Travis Build Status](https://travis-ci.org/JuliaMath/Libm.jl.svg?branch=master)](https://travis-ci.org/JuliaMath/Libm.jl)
 [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/307l6b799amrpvks/branch/master?svg=true)](https://ci.appveyor.com/project/simonbyrne/libm-jl/branch/master)
 [![Coverage Status](https://coveralls.io/repos/JuliaMath/Libm.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaMath/Libm.jl?branch=master)
 [![codecov.io](http://codecov.io/github/JuliaMath/Libm.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaMath/Libm.jl?branch=master)
 
-A pure Julia math library (aka libm); implementation of the functions provided by the C math library in Julia.
+
 
 # Usage
 
@@ -23,7 +26,6 @@ To use  `Libm.jl`
 julia> Pkg.clone("https://github.com/JuliaMath/Libm.jl.git")
 ```
 
-Most of the useful math functions are accessed with the prefix `x`, for example:
 ```julia
 julia> using Libm
 
