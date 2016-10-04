@@ -290,7 +290,8 @@ global @inline _tan_fast(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c
 global @inline _tan_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f
 
 function tan_fast{T<:Float}(d::T)
-    q = roundi(d*T(M2PI))
+    w = abs(d)
+    q = roundi(w*T(M2PI))
     x = muladd(q, -PI4A(T)*2, d)
     x = muladd(q, -PI4B(T)*2, x)
     x = muladd(q, -PI4C(T)*2, x)
@@ -301,7 +302,7 @@ function tan_fast{T<:Float}(d::T)
     u = muladd(s, u*x, x)
     q & 1 != 0 && (u = 1/u)
     isinf(d) && (u = T(NaN))
-    return u
+    return flipsign(u,d)
 end
 
 global @inline _tan(x::Double{Float64}) = dadd(c1d, x.hi*(@horner_split x.hi c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d))
@@ -309,8 +310,9 @@ global @inline _tan(x::Double{Float32}) = dadd(c1f, dmul(x, @horner x.hi c2f c3f
 # global @inline _tan(x::Double{Float32}) = dadd(c1f, dmul(x.hi, dadd(c2f, x.hi*(@horner x.hi c3f c4f c5f c6f c7f))))
 
 function tan{T<:Float}(d::T)
-    q = round(d*T(M2PI))
-    x = dsub2(d, q*PI4A(T)*2)
+    w = abs(d)
+    q = round(w*T(M2PI))
+    x = dsub2(w, q*PI4A(T)*2)
     x = dsub2(x, q*PI4B(T)*2)
     x = dsub2(x, q*PI4C(T)*2)
     x = dsub2(x, q*PI4D(T)*2)
@@ -320,7 +322,7 @@ function tan{T<:Float}(d::T)
     u =_tan(s)
     u = dmul(x, dadd(T(1), dmul(u, s)))
     qi & 1 != 0 && (u = ddrec(u))
-    return T(u)
+    return flipsign(T(u),d)
 end
 end
 

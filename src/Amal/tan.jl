@@ -1,4 +1,3 @@
-
 # Split 4/pi into four parts (each is 26 bits)
 PI4A(::Type{Float64}) = 0.78539816290140151978 
 PI4B(::Type{Float64}) = 4.9604678871439933374e-10
@@ -38,7 +37,9 @@ const c1f =  0.33333361148834228515625
 global @inline _tan(x) = @horner_split_oftype x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d
 global @inline _tan(x::SFloat) = @horner_split_oftype x c1f c2f c3f c4f c5f c6f c7f
 
-global function tan{T}(d::T)
+# does not handle -0.0
+global function tan{T}(dd::T)
+    d = abs(dd)
     q = round(d*T(M2PI))
     x = muladd(q, -PI4A(T)*2, d)
     x = muladd(q, -PI4B(T)*2, x)
@@ -51,8 +52,8 @@ global function tan{T}(d::T)
     u =_tan(s)
     u = muladd(s,u*x,x)
 
-     #n & 1 != 0 && (u = 1/u), the following does the same with no branch
-     u = (1-(n & 1))*u + (n & 1)*(T(1.0)/(u+realmin(T))) # no branch, and add eps to prevent 1/0 exceptional case
-    return u
+     #n & 1 != 0 && (u = 1/u), the next line does the same with no branch
+     u = (1-(n & 1))*u + (n & 1)*(T(1.0)/(u+realmin(T))) # branchless version, add eps to prevent 1/0 exceptional case
+    return flipsign(u,dd)
 end
 end
