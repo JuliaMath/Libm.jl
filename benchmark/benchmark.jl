@@ -1,6 +1,7 @@
 using Libm
 using BenchmarkTools
-using JLD, DataStructures
+# using JLD 
+using DataStructures
 
 const RETUNE  = false
 const VERBOSE = true
@@ -69,12 +70,12 @@ end
 const micros = OrderedDict(
     # "sin"   => x_trig,
     # "cos"   => x_trig,
-    # "tan"   => x_trig,
+    "tan"   => x_trig,
     # "asin"  => x_atrig,
     # "acos"  => x_atrig,
-    "atan"  => x_atan,
-    "exp"   => x_exp,
-    "exp2"  => x_exp2,
+    # "atan"  => x_atan,
+    # "exp"   => x_exp,
+    # "exp2"  => x_exp2,
     # "exp10" => x_exp10,
     # "expm1" => x_expm1,
     # "log"   => x_log,
