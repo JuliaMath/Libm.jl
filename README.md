@@ -1,16 +1,19 @@
-<div><img src="https://files.gitter.im/musm/CniM/blob" alt="Libm.jl Logo" width="350"></img> </div>
+<div align="center"><img src="https://cloud.githubusercontent.com/assets/4319522/19087675/e8a6ea96-8a40-11e6-8f2e-450bef7c1ec9.png" alt="Amal Logo" width="550"></img> </div>
 
-A pure Julia math library. Implementations of the functions provided by the C math library (aka libm) in Julia.
+Amal, a pure Julia math library
 
+...with native support for `Float16`, `Float32`, `Float64` types. In the future we plan support for `Double` arithmetic types and `Float80`, `Float128` types.
+
+
+The Amal library principles include: avoid expensive branches, no table look ups, and avoid expensive division operations.
+We try to adhere to these principles throughout the library in addition to meeting strict accuracy constrains (max 1.5 ulp, but try to be less than < 1 ulp for most functions). To achieve these goals Amal borrows ideas from several open source math libraries.
 
 [![Travis Build Status](https://travis-ci.org/JuliaMath/Libm.jl.svg?branch=master)](https://travis-ci.org/JuliaMath/Libm.jl)
 [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/307l6b799amrpvks/branch/master?svg=true)](https://ci.appveyor.com/project/simonbyrne/libm-jl/branch/master)
 [![Coverage Status](https://coveralls.io/repos/JuliaMath/Libm.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaMath/Libm.jl?branch=master)
 [![codecov.io](http://codecov.io/github/JuliaMath/Libm.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaMath/Libm.jl?branch=master)
 
-
-
-# Usage
+## Installation
 
 We recommend running julia with `-O3` for maximal performance using `Libm.jl` and to also build a custom system image by running
 ```julia
@@ -20,29 +23,31 @@ julia> build_sysimg(force=true)
 ```
 and then to restart `julia`; this will ensure you are taking full advantage of hardware [FMA](https://en.wikipedia.org/wiki/FMA_instruction_set)  if your CPU supports it.
 
+## Usage
 
 To use  `Libm.jl`
 ```julia
 julia> Pkg.clone("https://github.com/JuliaMath/Libm.jl.git")
 ```
 
+Currently, the following functions are available in the Amal library: `exp, exp2, atan`
+
 ```julia
-julia> using Libm
+julia> using Libm.Amal
 
-julia> Libm.sin(2.3)
-0.7457052121767203
+julia> Amal.exp(2.0)
+7.38905609893065
 
-julia> Libm.sin(2.3f0)
-0.74570525f0
-
-julia> Libm.exp(3.0)
-20.085536923187668
-
-julia> Libm.exp(3f0)
-20.085537f0
+julia> Amal.atan(1.0)
+0.7853981633974483
 ```
 
-The exported functions include (within 1 ulp)
+
+## The Sleef submodule
+
+The `Sleef` submodule is a full feature complete port (including additional micro optimzations) of the sleef C library.
+
+The `Sleef` submodule functions include (within 1 ulp)
 ```julia
 sin, cos, tan, asin, acos, atan, atan2, sincos, sinh, cosh, tanh,
     asinh, acosh, atanh, log, log2, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
@@ -53,18 +58,27 @@ sin, cos, tan, asin, acos, atan, atan2, sincos, sinh, cosh, tanh,
 sin_fast, cos_fast, tan_fast, sincos_fast, asin_fast, acos_fast, atan_fast, atan2_fast, log_fast, cbrt_fast
 ```
 
-You can also access `Libm.Musl.log(x)`  for a different implementation of the logarithmic function and `Libm.Musl.erf(x)` and `Libm.Musl.erfc(x)` for the error function and the complementary error function. 
+These function can be accessed as follows
+```julia
+julia> using Libm.Sleef
 
-# Benchmarks
+julia> Sleef.exp(2.0)
+7.38905609893065
+```
 
-You can benchmark the performance of the `Libm.jl` math library on your machine by running
+
+### Benchmarks
+
+<!-- You can benchmark the performance of the `Libm.jl` math library on your machine by running
 ```julia
 include(joinpath(Pkg.dir("Libm"), "benchmark", "benchmark.jl"))
 ```
 Note this will take some time to run for the first time (subsequent runs will be much faster). Please ensure you run the benchmarks under `-O3` and that you are not concurrently running other cpu intensive tasks.
 **Feel free to post your benchmark results at https://github.com/JuliaMath/Libm.jl/issues/34**
+ -->
 
-Sample benchmark results (commit 053528ab9b9e673bca99d1dc7db5445e39ad0d77)
+Sample benchmark results (commit 053528ab9b9e673bca99d1dc7db5445e39ad0d77) of the Sleef submodule
+
 ```julia
 julia> versioninfo()
 Julia Version 0.5.0

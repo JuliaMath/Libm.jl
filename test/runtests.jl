@@ -1,4 +1,5 @@
 using Libm
+using Suppressor
 using Base.Test
 
 using Base: significand_bits
@@ -55,7 +56,7 @@ end
 # overide domain checking that base adheres to
 using Base.MPFR.ROUNDING_MODE
 for f in (:sin, :cos, :tan, :asin, :acos, :atan, :asinh, :acosh, :atanh, :log, :log10, :log2, :log1p)
-    @eval begin
+    @suppress @eval begin
         import Base.$f
         function ($f)(x::BigFloat)
             z = BigFloat()

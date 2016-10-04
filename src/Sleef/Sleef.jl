@@ -1,10 +1,10 @@
 module Sleef
 
-export sin, cos, tan, asin, acos, atan, atan2, sincos, sinh, cosh, tanh,
-        asinh, acosh, atanh, log, log2, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
+# export sin, cos, tan, asin, acos, atan, atan2, sincos, sinh, cosh, tanh,
+        # asinh, acosh, atanh, log, log2, log10, log1p, ilog2, exp, exp2, exp10, expm1, ldexp, cbrt, pow
 
 # fast variants (within 3 ulp)
-export sin_fast, cos_fast, tan_fast, sincos_fast, asin_fast, acos_fast, atan_fast, atan2_fast, log_fast, cbrt_fast
+# export sin_fast, cos_fast, tan_fast, sincos_fast, asin_fast, acos_fast, atan_fast, atan2_fast, log_fast, cbrt_fast
             
 # Alias for supported floating point types
 typealias Float Union{Float32,Float64}

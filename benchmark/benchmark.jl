@@ -6,7 +6,8 @@ const RETUNE  = false
 const VERBOSE = true
 const DETAILS = false
 
-const bench = ("Base","Libm.Cephes")
+const submodule = "Libm.Amal"
+const bench = ("Base",submodule)
 const test_types = (Float64, Float32, ) # Which types do you want to bench?
 
 
@@ -14,7 +15,6 @@ const suite = BenchmarkGroup()
 for n in bench
     suite[n] = BenchmarkGroup([n])
 end
-
 
 bench_reduce(f::Function, X) = mapreduce(x -> reinterpret(Unsigned,x), |, f(x) for x in X)
 typealias Float Union{Float16,Float32,Float64}
@@ -38,7 +38,7 @@ x_trig{T<:Float}(::Type{T}) = begin
     x_trig = append!(x_trig, -10:0.0002:10)
     x_trig = append!(x_trig, -MRANGE(T):200.1:MRANGE(T))
 end
-x_exp{T<:Float}(::Type{T})        = map(T, vcat(-10:0.0002:10, -1000:0.1:1000))
+x_exp{T<:Float}(::Type{T})        = map(T, vcat(-10:0.0002:10, -50:0.01:50))
 x_exp2{T<:Float}(::Type{T})       = map(T, vcat(-10:0.0002:10, -120:0.023:1000, -1000:0.02:2000))
 x_exp10{T<:Float}(::Type{T})      = map(T, vcat(-10:0.0002:10, -35:0.023:1000, -300:0.01:300))
 x_expm1{T<:Float}(::Type{T})      = map(T, vcat(-10:0.0002:10, -1000:0.021:1000, -1000:0.023:1000, 10.0.^-(0:0.02:300), -10.0.^-(0:0.02:300), 10.0.^(0:0.021:300), -10.0.^-(0:0.021:300)))
@@ -74,7 +74,7 @@ const micros = OrderedDict(
     # "acos"  => x_atrig,
     "atan"  => x_atan,
     "exp"   => x_exp,
-    # "exp2"  => x_exp2,
+    "exp2"  => x_exp2,
     # "exp10" => x_exp10,
     # "expm1" => x_expm1,
     # "log"   => x_log,
@@ -120,7 +120,7 @@ end
 # end
 
 println("Running micro benchmarks...")
-results = run(suite; verbose=VERBOSE, seconds = 4)
+results = run(suite; verbose=VERBOSE, seconds = 5)
 
 print_with_color(:blue, "Benchmarks: median ratio Libm/Base\n")
 for f in keys(micros)
@@ -128,7 +128,7 @@ for f in keys(micros)
     for T in test_types
         println()
         print("time: ", )
-        tratio = ratio(median(results["Libm.Cephes"][f][string(T)]), median(results["Base"][f][string(T)])).time
+        tratio = ratio(median(results[submodule][f][string(T)]), median(results["Base"][f][string(T)])).time
         tcolor = tratio > 3 ? :red : tratio < 1.5 ? :green : :blue
         print_with_color(tcolor, @sprintf("%.2f",tratio), " ", string(T))
         if DETAILS

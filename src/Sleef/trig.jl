@@ -376,7 +376,7 @@ const c3f = -0.142027363181114196777344f0
 const c2f =  0.199926957488059997558594f0
 const c1f = -0.333331018686294555664062f0
 
-global @inline _atan_fast(x::Float64) = @horner_split x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d
+global @inline _atan_fast(x::Float64) = @horner x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d c12d c13d c14d c15d c16d c17d c18d c19d
 global @inline _atan_fast(x::Float32) = @horner x c1f c2f c3f c4f c5f c6f c7f c8f
 
 function atan_fast{T<:Float}(x::T)

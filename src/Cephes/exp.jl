@@ -1,10 +1,15 @@
+
+
+
+
+
 # Float128
 # C1 + C2 = ln 2 
-C1{T<:Float}(::Type{T}) = T(6.93145751953125e-1)
-C2{T<:Float}(::Type{T}) = T(1.428606820309417232121458176568075500134e-6)
+C1{T<:Float}(::Type{T}) = T(-6.93145751953125e-1)
+C2{T<:Float}(::Type{T}) = T(-1.428606820309417232121458176568075500134e-6)
 
-C1{T<:SFloat}(::Type{T}) =  T(0.693359375)
-C2{T<:SFloat}(::Type{T}) =  T(-2.12194440e-4)
+C1{T<:SFloat}(::Type{T}) =  T(-0.693359375)
+C2{T<:SFloat}(::Type{T}) =  T(2.12194440e-4)
 
 let
 
@@ -38,16 +43,34 @@ global @inline function _exp{T<:SFloat}(xh::T,xl::T)
 end
 
 global function exp{T}(x::T)
-    isnan(x) && return x
-    x > MAXLOG(T) && return T(Inf)
-    x < MINLOG(T) && return T(0)
+    # isnan(x) && return x
+    # x > MAXLOG(T) && return T(Inf)
+    # x < MINLOG(T) && return T(0)
  
     px = round(T(LOG2E)*x)
     n = unsafe_trunc(Int,px)
     
-    xh = muladd(px,-C1(T),x)
-    xl = px*C2(T)
+    xh = muladd(px,C1(T),x)
+    xl = px*-C2(T)
+
     x = _exp(xh,xl)
-    return ldexp(x,n)
+    return ldexpk(x,n)
 end
+
+global function exp2{T}(x::T)
+    # isnan(x) && return x
+    # x > MAXLOG(T) && return T(Inf) #fixme
+    # x < MINLOG(T) && return T(0) #fixme
+ 
+    px = round(x)
+    n = unsafe_trunc(Int,px)
+
+    t = x - px
+    xh = -t*C1(T)
+    xl = t*C2(T)
+
+    x = _exp(xh,xl)
+    return ldexpk(x,n)
+end
+
 end
