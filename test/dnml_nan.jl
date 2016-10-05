@@ -271,7 +271,7 @@ end
 
 
 @testset "denormal/nonnumber $xtan" for xtan in (Libm.tan_fast, Libm.tan)
-    xa = T[NaN, Inf, -Inf, pi/2, -pi/2]
+    xa = T[NaN, Inf, -Inf, -0.0, 0.0, pi/2, -pi/2]
     for x in xa
         @test cmpdenorm(xtan(x), Base.tan(BigFloat(x)))
     end

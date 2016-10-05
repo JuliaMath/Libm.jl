@@ -107,8 +107,8 @@ end
 
 function runtests()
     @testset "Sleef" begin
-    include("accuracy.jl")
-    include("dnml_nan.jl")
+        include("dnml_nan.jl")
+        include("accuracy.jl")
     end
     include("log.jl")
     include("erf.jl")
