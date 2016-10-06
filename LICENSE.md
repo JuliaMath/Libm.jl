@@ -1,6 +1,6 @@
-The Libm.jl package is licensed under the MIT "Expat" License:
+The Amal.jl package is licensed under the MIT "Expat" License:
 
-> Copyright (c) 2016: Mustafa Mohamad, Simon Byrne, and other contributors:
+> Copyright (c) 2016: Mustafa Mohamad.
 > 
 > https://github.com/JuliaMath/Libm.jl/graphs/contributors
 > 
@@ -23,7 +23,11 @@ The Libm.jl package is licensed under the MIT "Expat" License:
 > SOFTWARE.
 > 
 
-Libm.jl includes code from the following projects, which have their own licenses:
+Amal.jl includes code that are based on the following projects, which have their own licenses:
 
 - [MUSL](http://git.musl-libc.org/cgit/musl/tree/COPYRIGHT) [MIT]
-- [sleef](https://github.com/shibatch/sleef) [public domain]
+
+- [sleef](https://github.com/shibatch/sleef) [public domain] Author: Naoki Shibata
+
+- [Cephes](http://www.moshier.net/#Cephes) Copyright (C) Stephen L. Moshier.
+Permission graciously granted to distribute Julia implementations under an MIT license. 
