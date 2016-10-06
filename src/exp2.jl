@@ -17,20 +17,21 @@ const c3f = 0.0416710823774337768554688
 const c2f = 0.166665524244308471679688
 const c1f = 0.499999850988388061523438
 
-global @inline _exp(x) = @horner_oftype x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d  
-global @inline _exp(x::SFloat) = @horner_oftype x c1f c2f c3f c4f c5f 
+global @inline _exp2(x) = @horner_oftype x c1d c2d c3d c4d c5d c6d c7d c8d c9d c10d c11d  
+global @inline _exp2(x::SFloat) = @horner_oftype x c1f c2f c3f c4f c5f 
 
-global function exp{T}(x::T)
-    q = _trunc(round(T(LOG2E)*x)) # truncation will give us automatic Inf handling
-    s::T = muladd(q,-C1(T),x) # for float16 bug on 0.5
-    s = muladd(q,-C2(T),s)
+global function exp2{T}(x::T)
+    q = _trunc(round(x)) # truncation will give us automatic Inf handling
+    t::T = x - q  # for float16 bug on 0.5
+    s = t*C1(T)
+    s = muladd(t,C2(T), s)
 
-    u =_exp(s)
-    u = muladd(s,s*u,s) + T(1.0) # remove fma here for better acc
+    u =_exp2(s)
+    u = muladd(s,s*u,s) + T(1.0)
     u = ldexpk(u,q)
     
     x == T(-Inf) && (u = T(0.0))
     return u
 end
-
 end
+
