@@ -7,9 +7,9 @@ const RETUNE  = false
 const VERBOSE = true
 const DETAILS = false
 
-const submodule = "Libm.Amal"
+const submodule = "Libm.Musl"
 const bench = ("Base",submodule)
-const test_types = (Float64, Float32, ) # Which types do you want to bench?
+const test_types = (Float64, ) # Which types do you want to bench?
 
 
 const suite = BenchmarkGroup()
@@ -70,11 +70,11 @@ end
 const micros = OrderedDict(
     # "sin"   => x_trig,
     # "cos"   => x_trig,
-    "tan"   => x_trig,
+    # "tan"   => x_trig,
     # "asin"  => x_atrig,
     # "acos"  => x_atrig,
     # "atan"  => x_atan,
-    # "exp"   => x_exp,
+    "exp"   => x_exp,
     # "exp2"  => x_exp2,
     # "exp10" => x_exp10,
     # "expm1" => x_expm1,
