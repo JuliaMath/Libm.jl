@@ -1,9 +1,16 @@
-<div align="center"><img src="https://cloud.githubusercontent.com/assets/4319522/19198797/ee730dec-8c8e-11e6-91f4-0720c391969e.jpg" alt="Amal"></img> </div>
+<div align="center"><img src="https://cloud.githubusercontent.com/assets/4319522/19199051/1ecffc38-8c90-11e6-8617-19208b61a07b.jpg" alt="Amal"></img> </div>
 
 
 Amal, a pure Julia math library *(a work in progress)*
 
-With full support for `Float16`, `Float32`, and `Float64` types. In the future we plan support for `Float80` and `Float128` types (when they become available in Julia).
+With support for `Float16`, `Float32`, and `Float64` types. In the future we plan support for `Float80` and `Float128` types (when they become available in Julia).
+
+
+[![Travis Build Status](https://travis-ci.org/JuliaMath/Amal.jl.svg?branch=master)](https://travis-ci.org/JuliaMath/Amal.jl)
+[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/307l6b799amrpvks/branch/master?svg=true)](https://ci.appveyor.com/project/musm/Amal-jl/branch/master)
+[![Coverage Status](https://coveralls.io/repos/JuliaMath/Amal.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaMath/Amal.jl?branch=master)
+[![codecov.io](http://codecov.io/github/JuliaMath/Amal.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaMath/Amal.jl?branch=master)
+
 
 
 
@@ -14,13 +21,8 @@ exp, exp2, tan, atan
 More function to come in the near future. 
 
 
-[![Travis Build Status](https://travis-ci.org/JuliaMath/Amal.jl.svg?branch=master)](https://travis-ci.org/JuliaMath/Amal.jl)
-[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/307l6b799amrpvks/branch/master?svg=true)](https://ci.appveyor.com/project/musm/Amal-jl/branch/master)
-[![Coverage Status](https://coveralls.io/repos/JuliaMath/Amal.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaMath/Amal.jl?branch=master)
-[![codecov.io](http://codecov.io/github/JuliaMath/Amal.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaMath/Amal.jl?branch=master)
 
-
-The Amal library principles include: avoid expensive branches and to avoid table look ups, and to prefer polynomial approximations over rational approximations if accuracy constrains can be  met.  To achieve these goals Amal borrows ideas from several open source math libraries, including SLEEF, Cephes, and Musl. As this library develops these guiding principles may adapt to meet different critera and needs that the Julia community cares for.
+The Amal library principles include: avoid expensive branches and to avoid table look ups, and to prefer polynomial approximations over rational approximations if accuracy constrains can be  met.  To achieve these goals Amal borrows ideas from several open source math libraries, including SLEEF, Cephes, and Musl. As this library develops these guiding principles may adapt to meet different critera and needs of the Julia community.
 
 
 
