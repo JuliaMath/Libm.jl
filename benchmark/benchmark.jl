@@ -1,14 +1,19 @@
-using Libm
+using Amal
+using Sleef
+using Cephes
 using BenchmarkTools
 # using JLD 
 using DataStructures
+
+const testlib = "Cephes"
+const reflib = "Base"
 
 const RETUNE  = false
 const VERBOSE = true
 const DETAILS = false
 
-const submodule = "Libm.Musl"
-const bench = ("Base",submodule)
+
+const bench = (testlib,reflib)
 const test_types = (Float64, ) # Which types do you want to bench?
 
 
@@ -73,8 +78,8 @@ const micros = OrderedDict(
     # "tan"   => x_trig,
     # "asin"  => x_atrig,
     # "acos"  => x_atrig,
-    # "atan"  => x_atan,
-    "exp"   => x_exp,
+    "atan"  => x_atan,
+    # "exp"   => x_exp,
     # "exp2"  => x_exp2,
     # "exp10" => x_exp10,
     # "expm1" => x_expm1,
@@ -123,17 +128,17 @@ end
 println("Running micro benchmarks...")
 results = run(suite; verbose=VERBOSE, seconds = 5)
 
-print_with_color(:blue, "Benchmarks: median ratio Libm/Base\n")
+print_with_color(:blue, "Benchmarks: median ratio $testlib/$reflib\n")
 for f in keys(micros)
     print_with_color(:magenta, string(f))
     for T in test_types
         println()
         print("time: ", )
-        tratio = ratio(median(results[submodule][f][string(T)]), median(results["Base"][f][string(T)])).time
+        tratio = ratio(median(results[testlib][f][string(T)]), median(results[reflib][f][string(T)])).time
         tcolor = tratio > 3 ? :red : tratio < 1.5 ? :green : :blue
         print_with_color(tcolor, @sprintf("%.2f",tratio), " ", string(T))
         if DETAILS
-            print_with_color(:blue, "details Libm/Base\n")
+            print_with_color(:blue, "details $testlib/$reflib\n")
             println(results["Libm"][f][string(T)])
             println(results["Base"][f][string(T)])
             println()
