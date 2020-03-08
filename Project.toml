@@ -1,0 +1,5 @@
+name = "Libm"
+uuid = "d7976c5c-3183-56bb-b0de-9f0d63d0e34d"
+
+[compat]
+julia = "≥ 1.0.0"
