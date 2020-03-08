@@ -1,6 +1,6 @@
 module Libm
 
-typealias FloatTypes Union{Float32,Float64}
+const FloatTypes=Union{Float32,Float64}
 
 include("utils.jl")
 include("erf.jl")

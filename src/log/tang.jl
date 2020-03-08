@@ -242,7 +242,8 @@ end
 end
 
 
-function log_tang{T<:Union{Float32,Float64}}(x::T)
+function log_tang(x::T) where T<:FloatTypes
+
     if x > 0
         x == T(Inf) && return x
 
@@ -282,13 +283,13 @@ function log_tang{T<:Union{Float32,Float64}}(x::T)
 end
 
 
-function log1p_tang{T<:Union{Float32,Float64}}(x::T)
+function log1p_tang(x::T) where T<:FloatTypes
     if x > -1
         x == Inf && return x
         if -eps(T)/2 < x < eps(T)/2
             return x # Inexact
         end
-        
+
         # Step 2
         # expm1(-1/16) < x < expm1(1/16)
         if T(-0.06058693718652422) < x < T(0.06449445891785943)
