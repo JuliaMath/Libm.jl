@@ -1,10 +1,9 @@
 
 # Useful utilities from Base
-using Base: sign_mask, exponent_mask, significand_mask, exponent_one, exponent_bias, significand_bits
-
-using Base.Math: @horner
+using Base.Math: sign_mask, exponent_mask, significand_mask, exponent_one, exponent_bias, significand_bits, @horner
 
 # Similar to @horner, but converts coefficients to same type as x
+# TODO this seems to be broken for certain type conversions
 macro horner_oftype(x, p...)
     ex = :(oftype($x,$(esc(p[end]))))
     for i = length(p)-1:-1:1
@@ -57,7 +56,7 @@ algorithm, it can lose the last bit of precision. For example the function:
         zz = p-z+q+tx*ty
         z, zz
     end
-    
+
 will give an incorrect result for the case `x = y = 0x1.800000e000001p+0`.
 """
 @inline trunclo(x::Float64) =

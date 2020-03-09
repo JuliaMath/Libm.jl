@@ -1,5 +1,5 @@
 using Libm
-using Base.Test
+using Test
 
 @testset "Libm" begin
 

@@ -7,7 +7,7 @@
 
 # Does not currently handle floating point flags (inexact, div-by-zero, etc).
 
-
+using Base.Math: DomainError
 
 # nested methods inside let blocks cause problems (#18201)
 # let
@@ -278,7 +278,7 @@ function log_tang(x::T) where T<:FloatTypes
     elseif isnan(x)
         T(NaN)
     else
-        throw(DomainError())
+        throw(DomainError("x must be greater or equal to zero, $x given"))
     end
 end
 
@@ -317,7 +317,6 @@ function log1p_tang(x::T) where T<:FloatTypes
     elseif isnan(x)
         T(NaN)
     else
-        throw(DomainError())
+        throw(DomainError("x must be greater or equal to -1, $x given"))
     end
 end
-#end
