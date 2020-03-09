@@ -6,4 +6,7 @@ include("utils.jl")
 include("erf.jl")
 include("log/tang.jl")
 
+export log_tang, erf, erfc
+
+
 end
