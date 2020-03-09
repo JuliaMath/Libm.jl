@@ -10,6 +10,7 @@ notifications:
   email: false
 before_install:
   - julia -e 'import Pkg; haskey(Pkg.installed(), "SpecialFunctions") || Pkg.add("SpecialFunctions")'
+  - julia -e 'import Pkg; haskey(Pkg.installed(), "Test") || Pkg.add("Test")'
 # uncomment the following lines to override the default test script
 #script:
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
